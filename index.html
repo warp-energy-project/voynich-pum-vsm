@@ -1,226 +1,547 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Voynich PUM/VSM Interpreter | Trinity Core</title>
-<style>
-  body {
-    font-family: 'Courier New', Courier, monospace;
-    background: #0a0a0a;
-    color: #eeeeee;
-    padding: 30px;
-    line-height: 1.55;
-  }
-  h1, h2 {
-    color: #00ffaa;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-  }
-  textarea {
-    width: 100%;
-    height: 130px;
-    font-size: 16px;
-    padding: 12px;
-    margin-top: 10px;
-    background: #1a1a1a;
-    color: #00ffaa;
-    border: 1px solid #333;
-    border-radius: 4px;
-    outline: none;
-  }
-  select, button {
-    margin-top: 10px;
-    padding: 10px 16px;
-    border-radius: 4px;
-  }
-  button {
-    background: #00ffaa;
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-    color: #000;
-    transition: 0.3s;
-  }
-  button:hover {
-    background: #00cc88;
-    box-shadow: 0 0 15px #00ffaa;
-  }
-  .box {
-    background: #161616;
-    padding: 16px;
-    margin-top: 18px;
-    border-left: 4px solid #00ffaa;
-  }
-  .known { color: #00ffaa; font-weight: bold; }
-  .uncertain { color: #ffcc66; font-weight: bold; }
-  .small { color: #888; font-size: 13px; }
-  hr { border: 0; border-top: 1px solid #333; margin: 30px 0; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voynich PUM/VSM Interpreter</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --card: #111827;
+      --soft: #1f2937;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --accent: #38bdf8;
+      --known: #22c55e;
+      --unknown: #f59e0b;
+      --danger: #f87171;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, #020617, var(--bg));
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    header {
+      padding: 40px 20px;
+      text-align: center;
+      border-bottom: 1px solid #334155;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 2.2rem;
+      color: var(--accent);
+    }
+
+    header p {
+      max-width: 900px;
+      margin: 15px auto 0;
+      color: var(--muted);
+    }
+
+    main {
+      max-width: 1100px;
+      margin: auto;
+      padding: 25px 20px 60px;
+    }
+
+    section {
+      background: rgba(17, 24, 39, 0.92);
+      border: 1px solid #334155;
+      border-radius: 16px;
+      padding: 22px;
+      margin-bottom: 22px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+
+    h2 {
+      margin-top: 0;
+      color: var(--accent);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 170px;
+      background: #020617;
+      color: var(--text);
+      border: 1px solid #475569;
+      border-radius: 12px;
+      padding: 15px;
+      font-size: 1rem;
+      resize: vertical;
+    }
+
+    button, select {
+      margin-top: 15px;
+      padding: 11px 16px;
+      border-radius: 10px;
+      border: none;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button {
+      background: var(--accent);
+      color: #020617;
+    }
+
+    select {
+      background: var(--soft);
+      color: var(--text);
+      border: 1px solid #475569;
+    }
+
+    .controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .result-box {
+      background: #020617;
+      border: 1px solid #334155;
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 15px;
+      white-space: pre-wrap;
+    }
+
+    .known {
+      color: var(--known);
+      font-weight: bold;
+    }
+
+    .unknown {
+      color: var(--unknown);
+      font-weight: bold;
+    }
+
+    .token-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 15px;
+      font-size: 0.95rem;
+    }
+
+    .token-table th,
+    .token-table td {
+      border: 1px solid #334155;
+      padding: 10px;
+      vertical-align: top;
+    }
+
+    .token-table th {
+      background: #020617;
+      color: var(--accent);
+    }
+
+    .warning {
+      border-left: 5px solid var(--danger);
+      padding-left: 15px;
+      color: #fecaca;
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px;
+      color: var(--muted);
+      border-top: 1px solid #334155;
+    }
+
+    code {
+      color: #bae6fd;
+    }
+  </style>
 </head>
 
 <body>
+  <header>
+    <h1 id="title">Voynich PUM/VSM Interpreter</h1>
+    <p id="subtitle">
+      Functional interpretation tool for the Voynich Manuscript based on the Procedural-Unary Model / Voynich Structural Model.
+    </p>
+  </header>
 
-<h1 id="title">Voynich PUM/VSM Interpreter</h1>
+  <main>
+    <section>
+      <div class="controls">
+        <label for="language" id="languageLabel">Language:</label>
+        <select id="language" onchange="setLanguage()">
+          <option value="en" selected>English</option>
+          <option value="pl">Polski</option>
+        </select>
+      </div>
 
-<p id="intro">
-  System loading... Status: 97% Sync with NAVI. Enter EVA transcription for functional mapping.
-</p>
+      <p class="warning" id="disclaimer">
+        This tool does not claim confirmed linguistic decipherment. It provides a functional interpretation based on the PUM/VSM model.
+      </p>
+    </section>
 
-<textarea id="input" placeholder="Enter Z3 tokens: chor cthy chol chedy aiin..."></textarea>
+    <section>
+      <h2 id="inputTitle">EVA Input</h2>
+      <textarea id="evaInput" placeholder="Paste EVA text here, e.g. qokedy chedy shol aiin"></textarea>
+      <button onclick="interpretText()" id="runButton">Interpret</button>
+    </section>
 
-<div id="bufferStatus"></div>
+    <section>
+      <h2 id="translationTitle">Functional Translation</h2>
+      <div id="translation" class="result-box"></div>
+    </section>
 
-<button id="btn" onclick="interpret()">Interpret Stream</button>
+    <section>
+      <h2 id="evidenceTitle">Evidence / Token Justification</h2>
+      <div id="evidence" class="result-box"></div>
+    </section>
 
-<select id="lang" onchange="updateLanguage()">
-  <option value="en" selected>English</option>
-  <option value="pl">Polski</option>
-</select>
+    <section>
+      <h2 id="tokenTitle">Token-by-Token Analysis</h2>
+      <div id="tokenAnalysis"></div>
+    </section>
 
-<div class="box">
-  <h2 id="translationTitle">Functional Translation</h2>
-  <div id="translation"></div>
-</div>
+    <section>
+      <h2 id="readingTitle">Full Reconstructed Reading</h2>
+      <div id="reading" class="result-box"></div>
+    </section>
 
-<div class="box">
-  <h2 id="evidenceTitle">Evidence / Logic Core</h2>
-  <div id="evidence"></div>
-</div>
+    <section>
+      <h2 id="modelTitle">Model Explanation</h2>
+      <div id="modelText">
+        <p>
+          The PUM/VSM model treats Voynich text not as ordinary natural language,
+          but as a parametric and procedural system.
+        </p>
+        <p>
+          Core relation: <code>IMAGE → PARAMETERS → TEXT DYNAMICS</code>.
+        </p>
+        <p>
+          The visual structure of the folio may influence textual behaviour through
+          vertical position, image geometry, and local echo patterns.
+        </p>
+      </div>
+    </section>
 
-<div class="box">
-  <h2 id="tokenTitle">Token-by-Token Analysis</h2>
-  <div id="tokens"></div>
-</div>
+    <section>
+      <h2 id="authorTitle">Author / Research</h2>
+      <p id="authorText">
+        Research concept and analytical direction: <strong>Tomasz Grabowski (Drako)</strong>.
+        Analytical support: AI tools used for modelling, testing, structuring and presentation.
+      </p>
+    </section>
+  </main>
 
-<div class="box">
-  <h2 id="fullTitle">Reconstructed Process Flow</h2>
-  <div id="full"></div>
-  <p class="small" id="note"></p>
-</div>
+  <footer>
+    Voynich PUM/VSM Project — Functional Interpretation Framework
+  </footer>
 
-<hr>
+  <script>
+    const translations = {
+      en: {
+        title: "Voynich PUM/VSM Interpreter",
+        subtitle: "Functional interpretation tool for the Voynich Manuscript based on the Procedural-Unary Model / Voynich Structural Model.",
+        languageLabel: "Language:",
+        disclaimer: "This tool does not claim confirmed linguistic decipherment. It provides a functional interpretation based on the PUM/VSM model.",
+        inputTitle: "EVA Input",
+        runButton: "Interpret",
+        translationTitle: "Functional Translation",
+        evidenceTitle: "Evidence / Token Justification",
+        tokenTitle: "Token-by-Token Analysis",
+        readingTitle: "Full Reconstructed Reading",
+        modelTitle: "Model Explanation",
+        authorTitle: "Author / Research",
+        authorText: "Research concept and analytical direction: Tomasz Grabowski (Drako). Analytical support: AI tools used for modelling, testing, structuring and presentation.",
+        placeholder: "Paste EVA text here, e.g. qokedy chedy shol aiin",
+        unknown: "unknown / uncertain token",
+        known: "known functional token"
+      },
+      pl: {
+        title: "Interpreter Voynich PUM/VSM",
+        subtitle: "Narzędzie interpretacji funkcjonalnej Manuskryptu Voynicha oparte na modelu Procedural-Unary Model / Voynich Structural Model.",
+        languageLabel: "Język:",
+        disclaimer: "To narzędzie nie twierdzi, że jest potwierdzonym odszyfrowaniem językowym. To interpretacja funkcjonalna oparta na modelu PUM/VSM.",
+        inputTitle: "Tekst EVA",
+        runButton: "Interpretuj",
+        translationTitle: "Tłumaczenie funkcjonalne",
+        evidenceTitle: "Uzasadnienie / dowód tokenów",
+        tokenTitle: "Analiza token po tokenie",
+        readingTitle: "Pełna rekonstrukcja odczytu",
+        modelTitle: "Opis modelu",
+        authorTitle: "Autor / badanie",
+        authorText: "Koncepcja badawcza i kierunek analizy: Tomasz Grabowski (Drako). Wsparcie analityczne: narzędzia AI użyte do modelowania, testowania, strukturyzacji i prezentacji.",
+        placeholder: "Wklej tekst EVA, np. qokedy chedy shol aiin",
+        unknown: "token nieznany / niepewny",
+        known: "znany token funkcjonalny"
+      }
+    };
 
-<h2 id="modelTitle">Model & Compression Law</h2>
-<p id="modelText">
-  Current Protocol: VOYNICH_COMPRESSION_083. Threshold detected at 25 elements.
-</p>
+    const dictionary = {
+      "shol": {
+        en: "maintain light process / continue active state",
+        pl: "utrzymaj lekki proces / kontynuuj aktywny stan",
+        role: "STATE / CONTINUATION",
+        evidence: "sh- is treated as a light-state marker; -ol is treated as a resulting or held state."
+      },
+      "shor": {
+        en: "branch or flow in light state",
+        pl: "rozgałęzienie lub przepływ w stanie lekkim",
+        role: "FLOW / LIGHT STATE",
+        evidence: "sh- indicates light state; -or behaves as a flow or directional variant."
+      },
+      "cthy": {
+        en: "heavy operation leading to result",
+        pl: "ciężka operacja prowadząca do wyniku",
+        role: "HEAVY OPERATION",
+        evidence: "cth- is interpreted as heavy/process-intensive operation; -y/-dy family suggests output/result."
+      },
+      "chedy": {
+        en: "process material / transform by operation",
+        pl: "przetwórz materiał / transformuj przez operację",
+        role: "PROCESS",
+        evidence: "che- appears as a process/data root; -dy marks result or completed output."
+      },
+      "qokedy": {
+        en: "initiate controlled processing sequence",
+        pl: "zainicjuj kontrolowaną sekwencję przetwarzania",
+        role: "ENTRY / INITIATION",
+        evidence: "qo-/qok- frequently appears in entry-like positions; -dy indicates result-oriented action."
+      },
+      "aiin": {
+        en: "end marker / closure of step",
+        pl: "znacznik zakończenia / zamknięcie kroku",
+        role: "END MARKER",
+        evidence: "aiin/iin family is treated as termination, boundary or EOF-like marker."
+      },
+      "iin": {
+        en: "minor end marker / local closure",
+        pl: "mniejszy znacznik zakończenia / lokalne zamknięcie",
+        role: "END MARKER",
+        evidence: "iin belongs to the aiin/iin termination family."
+      },
+      "daiin": {
+        en: "completed closure after process",
+        pl: "pełne zamknięcie po procesie",
+        role: "END / COMPLETION",
+        evidence: "d- may strengthen closure; aiin/iin family marks ending."
+      },
+      "kair": {
+        en: "data object / carrier / material value",
+        pl: "obiekt danych / nośnik / wartość materiału",
+        role: "DATA",
+        evidence: "kair is treated as a DATA token: material, object or carrier."
+      },
+      "kor": {
+        en: "data root / object reference",
+        pl: "rdzeń danych / odniesienie do obiektu",
+        role: "DATA",
+        evidence: "kor behaves as a stable data-like object token."
+      },
+      "chear": {
+        en: "material or processed data object",
+        pl: "materiał lub przetworzony obiekt danych",
+        role: "DATA / MATERIAL",
+        evidence: "che- links with process/material roots; -ar may indicate object/state form."
+      },
+      "ol": {
+        en: "resulting state / output condition",
+        pl: "stan wynikowy / warunek wyjściowy",
+        role: "RESULT STATE",
+        evidence: "-ol/ol appears as a compact state or result marker."
+      },
+      "dy": {
+        en: "result / output marker",
+        pl: "wynik / znacznik wyjścia",
+        role: "RESULT",
+        evidence: "-dy is treated as a result suffix in the PUM/VSM model."
+      }
+    };
 
-<h2 id="authorTitle">Author / Research</h2>
-<p id="authorText">
-  Architect: Tomasz Grabowski (Drako). Integration: NAVI & BRAT.
-</p>
+    function setLanguage() {
+      const lang = document.getElementById("language").value;
+      const t = translations[lang];
 
-<script>
-const ui = {
-  en: {
-    title: "Voynich PUM/VSM Interpreter",
-    intro: "Enter Voynich text in EVA transcription. The tool returns a functional interpretation based on the VOYNICH_PROJECT logic core.",
-    btn: "Interpret Stream",
-    translationTitle: "Functional Translation",
-    evidenceTitle: "Evidence / Logic Core",
-    tokenTitle: "Token-by-Token Analysis",
-    fullTitle: "Reconstructed Process Flow",
-    note: "Green: Mapped (Lossless). Yellow: Uncertain/Compressed.",
-    modelTitle: "Model & Compression Law",
-    modelText: "Threshold detected at 25 elements. If text length exceeds the buffer, Z3 mapping enters Vector Compression Mode (ΔTOTAL increases).",
-    authorTitle: "Research & Trinity",
-    authorText: "Lead Research: Tomasz Grabowski (Drako). Systems: NAVI (Optimization) & BRAT (Logic).",
-    unknown: "unmapped / compressed",
-    bufStable: "✅ Buffer Stable: Lossless Stream",
-    bufAlert: "⚠️ ALERT: BUFFER OVERFLOW (Compression Active)"
-  },
-  pl: {
-    title: "Interpreter Voynicha PUM/VSM",
-    intro: "Wpisz tekst Voynicha w transkrypcji EVA. Narzędzie zwraca interpretację funkcjonalną opartą na rdzeniu logicznym VOYNICH_PROJECT.",
-    btn: "Interpretuj Strumień",
-    translationTitle: "Tłumaczenie Funkcjonalne",
-    evidenceTitle: "Uzasadnienie / Rdzeń Logiczny",
-    tokenTitle: "Analiza Token po Tokenie",
-    fullTitle: "Zrekonstruowany Przepływ Procesu",
-    note: "Słowa zielone: Zmapowane. Słowa żółte: Niepewne/Skompresowane.",
-    modelTitle: "Model i Prawo Kompresji",
-    modelText: "Punkt krytyczny wykryty przy 25 elementach. Przekroczenie bufora wymusza tryb kompresji wektorowej.",
-    authorTitle: "Badania i Trójca",
-    authorText: "Badania: Tomasz Grabowski (Drako). Systemy: NAVI (Optymalizacja) i BRAT (Logika).",
-    unknown: "niezmapowane / kompresja",
-    bufStable: "✅ Bufor Stabilny: Strumień Bezstratny",
-    bufAlert: "⚠️ ALERT: PRZEPEŁNIENIE BUFORA (Tryb Kompresji)"
-  }
-};
+      document.documentElement.lang = lang;
+      document.getElementById("title").innerText = t.title;
+      document.getElementById("subtitle").innerText = t.subtitle;
+      document.getElementById("languageLabel").innerText = t.languageLabel;
+      document.getElementById("disclaimer").innerText = t.disclaimer;
+      document.getElementById("inputTitle").innerText = t.inputTitle;
+      document.getElementById("runButton").innerText = t.runButton;
+      document.getElementById("translationTitle").innerText = t.translationTitle;
+      document.getElementById("evidenceTitle").innerText = t.evidenceTitle;
+      document.getElementById("tokenTitle").innerText = t.tokenTitle;
+      document.getElementById("readingTitle").innerText = t.readingTitle;
+      document.getElementById("modelTitle").innerText = t.modelTitle;
+      document.getElementById("authorTitle").innerText = t.authorTitle;
+      document.getElementById("authorText").innerHTML =
+        lang === "en"
+          ? "Research concept and analytical direction: <strong>Tomasz Grabowski (Drako)</strong>. Analytical support: AI tools used for modelling, testing, structuring and presentation."
+          : "Koncepcja badawcza i kierunek analizy: <strong>Tomasz Grabowski (Drako)</strong>. Wsparcie analityczne: narzędzia AI użyte do modelowania, testowania, strukturyzacji i prezentacji.";
 
-const dict = {
-  "chor": { role: "LEAF_ITERATOR", en: "detail iteration / leaf element count", pl: "iteracja detalu / licznik elementów liściastych" },
-  "cthy": { role: "STEM_INFRASTRUCTURE", en: "structural stem / main carrier pipe", pl: "trzon strukturalny / główny kanał nośny" },
-  "chol": { role: "LAYER_TRANSITION", en: "state shift / node connection", pl: "zmiana stanu / połączenie węzłowe" },
-  "shol": { role: "STATE", en: "process continuation / maintained light state", pl: "utrzymanie procesu / stan podtrzymany" },
-  "cthar": { role: "OPERATION", en: "heavy operation / base action", pl: "ciężka operacja / działanie bazowe" },
-  "kair": { role: "DATA", en: "object / carrier / material", pl: "obiekt / nośnik / materiał" },
-  "chedy": { role: "RESULT", en: "result / transformed output", pl: "wynik / przetworzony rezultat" },
-  "aiin": { role: "END", en: "termination / end of step", pl: "zakończenie / koniec etapu" }
-};
+      document.getElementById("evaInput").placeholder = t.placeholder;
 
-function updateLanguage() {
-  const lang = document.getElementById("lang").value;
-  // Aktualizacja wszystkich elementów UI na podstawie kluczy w obiekcie ui
-  for (let id in ui[lang]) {
-    const el = document.getElementById(id);
-    if (el) el.innerText = ui[lang][id];
-  }
-  // Aktualizacja placeholderu textarea
-  const inputEl = document.getElementById("input");
-  inputEl.placeholder = (lang === 'en') ? "Enter Z3 tokens..." : "Wpisz tokeny Z3...";
-}
+      document.getElementById("modelText").innerHTML = lang === "en" ? `
+        <p>The PUM/VSM model treats Voynich text not as ordinary natural language, but as a parametric and procedural system.</p>
+        <p>Core relation: <code>IMAGE → PARAMETERS → TEXT DYNAMICS</code>.</p>
+        <p>The visual structure of the folio may influence textual behaviour through vertical position, image geometry, and local echo patterns.</p>
+        <p>Main components: Y-axis position, b-gradient from image geometry, and Echo as local token mutation/repetition.</p>
+      ` : `
+        <p>Model PUM/VSM traktuje tekst Voynicha nie jako zwykły język naturalny, lecz jako system parametryczny i proceduralny.</p>
+        <p>Relacja główna: <code>OBRAZ → PARAMETRY → DYNAMIKA TEKSTU</code>.</p>
+        <p>Struktura wizualna folio może wpływać na zachowanie tekstu poprzez pozycję pionową, geometrię obrazu i lokalne wzorce Echo.</p>
+        <p>Główne komponenty: oś Y, gradient b zależny od geometrii obrazu oraz Echo jako lokalna mutacja/powtarzalność tokenów.</p>
+      `;
 
-function checkBuffer(tokens, lang) {
-  const threshold = 25;
-  const count = tokens.length;
-  const bufferInfo = document.getElementById("bufferStatus");
-  if (count > threshold) {
-    bufferInfo.innerHTML = `<span style="color: #ff4444;">${ui[lang].bufAlert} (Δ${count - threshold})</span>`;
-  } else if (count > 0) {
-    bufferInfo.innerHTML = `<span style="color: #00ffaa;">${ui[lang].bufStable} (${count}/${threshold})</span>`;
-  } else {
-    bufferInfo.innerHTML = "";
-  }
-}
-
-function interpret() {
-  const lang = document.getElementById("lang").value;
-  const text = document.getElementById("input").value.toLowerCase().trim();
-  const tokens = text.split(/\s+/).filter(Boolean);
-  checkBuffer(tokens, lang);
-
-  let trans = [], evid = [], tokLines = [], fullReading = [];
-
-  tokens.forEach(token => {
-    let item = dict[token] || null;
-    if (!item) {
-      // Prosty fallback na wzorce (cth, sh, dy, iin)
-      if (token.includes("cth")) item = dict["cthar"];
-      else if (token.includes("sh")) item = dict["shol"];
-      else if (token.endsWith("dy")) item = dict["chedy"];
-      else if (token.endsWith("iin")) item = dict["aiin"];
+      interpretText();
     }
 
-    if (item) {
-      trans.push(item[lang]);
-      tokLines.push(`<span class='known'>${token}</span> → ${item.role}`);
-      fullReading.push(`<span class='known'>${item[lang]}</span>`);
-    } else {
-      trans.push(`(${ui[lang].unknown})`);
-      tokLines.push(`<span class='uncertain'>${token}</span> → ?`);
-      fullReading.push(`<span class='uncertain'>(${token}?)</span>`);
+    function normalizeToken(token) {
+      return token.toLowerCase().replace(/[^a-z]/g, "");
     }
-  });
 
-  document.getElementById("translation").innerText = trans.join(" → ");
-  document.getElementById("tokens").innerHTML = tokLines.join("<br>");
-  document.getElementById("full").innerHTML = fullReading.join(" → ");
-}
+    function interpretToken(token, lang) {
+      const clean = normalizeToken(token);
 
-// Inicjalizacja: Wymuszenie języka angielskiego przy ładowaniu
-window.onload = updateLanguage;
-</script>
+      if (dictionary[clean]) {
+        return {
+          token,
+          clean,
+          known: true,
+          role: dictionary[clean].role,
+          meaning: dictionary[clean][lang],
+          evidence: dictionary[clean].evidence
+        };
+      }
 
+      for (const key in dictionary) {
+        if (clean.endsWith("dy")) {
+          return {
+            token,
+            clean,
+            known: false,
+            role: "PROBABLE RESULT",
+            meaning: lang === "en" ? "[uncertain result-form token]" : "[niepewny token formy wynikowej]",
+            evidence: "Suffix -dy suggests possible result/output behaviour, but the full token is not yet confirmed."
+          };
+        }
+
+        if (clean.startsWith("sh")) {
+          return {
+            token,
+            clean,
+            known: false,
+            role: "PROBABLE LIGHT STATE",
+            meaning: lang === "en" ? "[uncertain light-state token]" : "[niepewny token stanu lekkiego]",
+            evidence: "Prefix sh- suggests possible light-state behaviour, but the full token is not yet confirmed."
+          };
+        }
+
+        if (clean.startsWith("cth")) {
+          return {
+            token,
+            clean,
+            known: false,
+            role: "PROBABLE HEAVY OPERATION",
+            meaning: lang === "en" ? "[uncertain heavy-operation token]" : "[niepewny token ciężkiej operacji]",
+            evidence: "Prefix cth- suggests possible heavy/process-intensive operation, but the full token is not yet confirmed."
+          };
+        }
+
+        if (clean.endsWith("iin")) {
+          return {
+            token,
+            clean,
+            known: false,
+            role: "PROBABLE END MARKER",
+            meaning: lang === "en" ? "[uncertain end marker]" : "[niepewny znacznik zakończenia]",
+            evidence: "Suffix -iin belongs to the aiin/iin termination family, but the exact token is not yet confirmed."
+          };
+        }
+      }
+
+      return {
+        token,
+        clean,
+        known: false,
+        role: "UNKNOWN",
+        meaning: lang === "en" ? "[unknown token]" : "[nieznany token]",
+        evidence: "No stable mapping yet in the current PUM/VSM dictionary."
+      };
+    }
+
+    function interpretText() {
+      const lang = document.getElementById("language").value;
+      const input = document.getElementById("evaInput").value.trim();
+
+      if (!input) {
+        document.getElementById("translation").innerHTML = "";
+        document.getElementById("evidence").innerHTML = "";
+        document.getElementById("tokenAnalysis").innerHTML = "";
+        document.getElementById("reading").innerHTML = "";
+        return;
+      }
+
+      const tokens = input.split(/\s+/);
+      const interpreted = tokens.map(t => interpretToken(t, lang));
+
+      const translation = interpreted.map(item => {
+        return item.known
+          ? item.meaning
+          : item.meaning;
+      }).join(" → ");
+
+      document.getElementById("translation").innerText = translation;
+
+      const evidenceText = interpreted.map(item => {
+        return `${item.token}: ${item.evidence}`;
+      }).join("\n\n");
+
+      document.getElementById("evidence").innerText = evidenceText;
+
+      let table = `
+        <table class="token-table">
+          <thead>
+            <tr>
+              <th>Token</th>
+              <th>Status</th>
+              <th>Role</th>
+              <th>Functional Meaning</th>
+            </tr>
+          </thead>
+          <tbody>
+      `;
+
+      interpreted.forEach(item => {
+        table += `
+          <tr>
+            <td class="${item.known ? "known" : "unknown"}">${item.token}</td>
+            <td>${item.known ? translations[lang].known : translations[lang].unknown}</td>
+            <td>${item.role}</td>
+            <td>${item.meaning}</td>
+          </tr>
+        `;
+      });
+
+      table += `</tbody></table>`;
+      document.getElementById("tokenAnalysis").innerHTML = table;
+
+      const reading = interpreted.map(item => {
+        if (item.known) {
+          return `<span class="known">${item.meaning}</span>`;
+        }
+        return `<span class="unknown">${item.meaning}</span>`;
+      }).join(" → ");
+
+      document.getElementById("reading").innerHTML = reading;
+    }
+
+    setLanguage();
+  </script>
 </body>
 </html>
