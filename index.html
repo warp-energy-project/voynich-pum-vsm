@@ -692,5 +692,67 @@ document.addEventListener("DOMContentLoaded",()=>{
 })();
 </script>
 <!-- NAVI PATCH ZONE END -->
+  <!-- NAVI PATCH: EVA PANEL UNDER IMAGE START -->
+<script>
+(function(){
+  function ready(fn){
+    if(document.readyState !== "loading") fn();
+    else document.addEventListener("DOMContentLoaded", fn);
+  }
+
+  ready(function(){
+    const lang = document.getElementById("language")?.value || "en";
+    const imageWrap = document.getElementById("imageWrap");
+    const evaInput = document.getElementById("evaInput");
+
+    if(!imageWrap || !evaInput) return;
+
+    if(document.getElementById("naviEvaPanel")) return;
+
+    const panel = document.createElement("div");
+    panel.id = "naviEvaPanel";
+    panel.className = "result-box";
+    panel.style.marginTop = "15px";
+
+    panel.innerHTML = `
+      <h3>${lang === "pl" ? "Tekst EVA z obrazu / transkrypcji" : "EVA text from image / transcription"}</h3>
+      <p class="small-note">
+        ${lang === "pl"
+          ? "Obraz jest tylko podglądem. Wklej tutaj tekst EVA z transkrypcji, potem kliknij przycisk poniżej."
+          : "The image is only a preview. Paste EVA transcription here, then click the button below."}
+      </p>
+      <textarea id="naviExtractedEva" style="min-height:120px;" placeholder="${lang === "pl" ? "Wklej tekst EVA tutaj..." : "Paste EVA text here..."}"></textarea>
+      <div class="controls">
+        <button type="button" id="naviCopyEvaBtn">${lang === "pl" ? "Przenieś EVA do tłumacza" : "Move EVA to translator"}</button>
+        <button type="button" id="naviClearEvaBtn">${lang === "pl" ? "Wyczyść" : "Clear"}</button>
+      </div>
+    `;
+
+    imageWrap.insertAdjacentElement("afterend", panel);
+
+    document.getElementById("naviCopyEvaBtn").addEventListener("click", function(){
+      const text = document.getElementById("naviExtractedEva").value.trim();
+
+      if(!text){
+        alert(lang === "pl"
+          ? "Najpierw wklej tekst EVA w polu pod obrazem."
+          : "First paste EVA text in the field under the image.");
+        return;
+      }
+
+      evaInput.value = text;
+
+      if(typeof interpretText === "function"){
+        interpretText();
+      }
+    });
+
+    document.getElementById("naviClearEvaBtn").addEventListener("click", function(){
+      document.getElementById("naviExtractedEva").value = "";
+    });
+  });
+})();
+</script>
+<!-- NAVI PATCH: EVA PANEL UNDER IMAGE END -->
 </body>
 </html>
