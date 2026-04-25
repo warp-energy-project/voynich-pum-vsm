@@ -6,41 +6,66 @@
 <title>Voynich PUM/VSM Interpreter</title>
 
 <style>
-:root {
-  --bg:#0f172a; --card:#111827; --soft:#1f2937; --text:#e5e7eb;
-  --muted:#9ca3af; --accent:#38bdf8; --danger:#f87171;
+:root{
+  --bg:#07111f;--card:#111827;--soft:#1f2937;--text:#e5e7eb;
+  --muted:#9ca3af;--accent:#38bdf8;--green:#00ffaa;--danger:#f87171;
 }
 *{box-sizing:border-box}
 body{
   margin:0;font-family:Arial,Helvetica,sans-serif;
-  background:linear-gradient(180deg,#020617,var(--bg));
+  background:radial-gradient(circle at top,#12324d 0,#020617 45%,#07111f 100%);
   color:var(--text);line-height:1.6;
 }
-header{padding:40px 20px;text-align:center;border-bottom:1px solid #334155}
-header h1{margin:0;font-size:2.2rem;color:var(--accent)}
-header p{max-width:900px;margin:15px auto 0;color:var(--muted)}
-main{max-width:1150px;margin:auto;padding:25px 20px 60px}
+header{padding:45px 20px 25px;text-align:center}
+header h1{margin:0;font-size:2.5rem;color:var(--accent)}
+header p{max-width:900px;margin:12px auto;color:var(--muted)}
+main{max-width:1250px;margin:auto;padding:20px}
 section{
   background:rgba(17,24,39,.94);border:1px solid #334155;
-  border-radius:16px;padding:22px;margin-bottom:22px;
+  border-radius:18px;padding:22px;margin-bottom:22px;box-shadow:0 12px 35px rgba(0,0,0,.28);
 }
 h2{margin-top:0;color:var(--accent)}
 textarea{
-  width:100%;min-height:170px;background:#020617;color:var(--text);
+  width:100%;min-height:180px;background:#020617;color:var(--text);
   border:1px solid #475569;border-radius:12px;padding:15px;font-size:1rem;
 }
-button,select{
-  margin-top:15px;padding:11px 16px;border-radius:10px;border:none;
+button,select,input[type=file]{
+  margin-top:10px;padding:11px 16px;border-radius:10px;border:none;
   font-weight:bold;cursor:pointer;
 }
 button{background:var(--accent);color:#020617}
-select{background:var(--soft);color:var(--text);border:1px solid #475569}
+select,input[type=file]{background:var(--soft);color:var(--text);border:1px solid #475569}
 .controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
 .result-box{
   background:#020617;border:1px solid #334155;border-radius:12px;
   padding:15px;margin-top:15px;white-space:pre-wrap;min-height:120px;
 }
 .warning{border-left:5px solid var(--danger);padding-left:15px;color:#fecaca}
+.hero-text{
+  background:rgba(0,255,170,.06);border-left:4px solid var(--green);
+  padding:18px 22px;border-radius:12px;font-size:1rem;
+}
+.source-card{
+  display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;
+}
+.source-button{
+  display:inline-block;background:var(--green);color:#021018;text-decoration:none;
+  padding:12px 18px;border-radius:12px;font-weight:bold;
+}
+.image-panel{
+  background:#020617;border:1px solid #334155;border-radius:14px;padding:15px;
+}
+.image-wrap{
+  width:100%;height:460px;overflow:auto;border:1px solid #334155;border-radius:12px;
+  background:#000;display:flex;align-items:center;justify-content:center;
+}
+#folioImage{
+  max-width:100%;transform-origin:center center;transition:transform .2s ease;
+}
+.placeholder{
+  color:var(--muted);text-align:center;padding:30px;
+}
 .probability-bar{
   width:100%;height:26px;background:#020617;border:1px solid #334155;
   border-radius:20px;overflow:hidden;margin:12px 0;
@@ -49,22 +74,24 @@ select{background:var(--soft);color:var(--text);border:1px solid #475569}
   height:100%;width:0%;background:linear-gradient(90deg,#f59e0b,#22c55e);
   transition:width .3s ease;
 }
-footer{text-align:center;padding:25px;color:var(--muted);border-top:1px solid #334155}
 .model-code{color:#bae6fd;font-weight:bold}
+footer{text-align:center;padding:25px;color:var(--muted);border-top:1px solid #334155}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.image-wrap{height:330px}}
 </style>
 </head>
 
 <body>
 <header>
-  <h1 id="title">Voynich PUM/VSM Interpreter</h1>
-  <p id="subtitle">Functional interpretation tool for the Voynich Manuscript.</p>
+  <h1 id="pageTitle">Voynich PUM/VSM Interpreter</h1>
+  <p id="pageSubtitle">Functional interpretation tool for the Voynich Manuscript.</p>
 </header>
 
 <main>
+
 <section>
   <div class="controls">
     <label id="languageLabel" for="language">Language:</label>
-    <select id="language" onchange="setLanguage()">
+    <select id="language">
       <option value="en" selected>English</option>
       <option value="pl">Polski</option>
     </select>
@@ -73,9 +100,59 @@ footer{text-align:center;padding:25px;color:var(--muted);border-top:1px solid #3
 </section>
 
 <section>
-  <h2 id="inputTitle">1. EVA Raw Input</h2>
-  <textarea id="evaInput"></textarea>
-  <button id="runButton" type="button">Translate</button>
+  <div class="hero-text" id="heroText"></div>
+</section>
+
+<section class="source-card">
+  <div>
+    <h2 id="sourceTitle">Original Manuscript Source</h2>
+    <p id="sourceText"></p>
+  </div>
+  <a class="source-button" href="https://collections.library.yale.edu/catalog/2002046" target="_blank" rel="noopener noreferrer" id="sourceButton">
+    Open Yale Original
+  </a>
+</section>
+
+<section>
+  <h2 id="workspaceTitle">Folio Workspace</h2>
+
+  <div class="grid">
+    <div class="image-panel">
+      <h3 id="imageTitle">Folio Image</h3>
+
+      <div class="controls">
+        <input type="file" id="imageUpload" accept="image/*" />
+        <button type="button" id="clearImageButton">Clear Image</button>
+      </div>
+
+      <p id="pasteHint" class="placeholder"></p>
+
+      <div class="controls">
+        <button type="button" id="zoomOut">- Zoom</button>
+        <button type="button" id="zoomIn">+ Zoom</button>
+        <button type="button" id="zoomReset">Reset</button>
+      </div>
+
+      <div class="image-wrap" id="imageWrap">
+        <div class="placeholder" id="imagePlaceholder">Upload or paste a folio image here.</div>
+        <img id="folioImage" alt="Folio preview" style="display:none;" />
+      </div>
+    </div>
+
+    <div>
+      <h3 id="contextTitle">Visual Context</h3>
+      <select id="visualContext">
+        <option value="plant">Plant / Roślina</option>
+        <option value="process">Process / Ludzie + rury + kąpiel</option>
+        <option value="jars">Jars / Słoiki / pojemniki</option>
+        <option value="astro">Astro / Diagram</option>
+      </select>
+
+      <h3 id="inputTitle">1. EVA Raw Input</h3>
+      <textarea id="evaInput"></textarea>
+      <button id="runButton" type="button">Translate</button>
+    </div>
+  </div>
 </section>
 
 <section>
@@ -103,14 +180,39 @@ footer{text-align:center;padding:25px;color:var(--muted);border-top:1px solid #3
   <h2 id="authorTitle">Author / Research</h2>
   <p id="authorText"></p>
 </section>
+
 </main>
 
 <footer>Voynich PUM/VSM Project — Functional Interpretation Framework</footer>
 
 <script>
+let zoomLevel = 1;
+
 const ui = {
   en:{
+    title:"Voynich PUM/VSM Interpreter",
+    subtitle:"Functional interpretation tool for the Voynich Manuscript.",
+    languageLabel:"Language:",
     disclaimer:"This tool does not claim confirmed linguistic decipherment. It provides a functional interpretation based on the PUM/VSM model.",
+    hero:`
+The Voynich Manuscript is not simply an unread book — it is a structured system where image, repetition and position converge into a functional code.
+
+The PUM/VSM Interpreter approaches the manuscript not as a hidden natural language, but as a framework:
+Visual Object → Parameters → Text Function.
+
+This project is led by Tomasz Grabowski (Drako), with analytical support from AI systems (Navi / ChatGPT + Gemini / Brat). It moves beyond traditional linguistic decoding toward structural and procedural interpretation.
+
+We do not claim a final decipherment. Instead, we present a research tool designed to test hypotheses, expose patterns, and make the internal logic of the manuscript visible.
+
+The goal is not only to read — but to understand how the system operates.
+`,
+    sourceTitle:"Original Manuscript Source",
+    sourceText:"Voynich Manuscript, Beinecke Rare Book and Manuscript Library, Yale University. Open the original digital record in a new browser tab.",
+    sourceButton:"Open Yale Original",
+    workspaceTitle:"Folio Workspace",
+    imageTitle:"Folio Image",
+    pasteHint:"You can upload an image file or paste a screenshot directly onto this page with Ctrl+V.",
+    contextTitle:"Visual Context",
     inputTitle:"1. EVA Raw Input",
     procedureTitle:"2. Translation Procedure",
     finalTitle:"3. Final Functional Reading",
@@ -118,16 +220,39 @@ const ui = {
     modelTitle:"Model Explanation",
     authorTitle:"Author / Research",
     runButton:"Translate",
+    clearImageButton:"Clear Image",
     placeholder:"Paste EVA text here",
     known:"KNOWN",
     unknown:"UNCERTAIN / UNKNOWN",
     modelText:`<p>The PUM/VSM model treats Voynich text as a parametric/procedural system.</p>
     <p><span class="model-code">VISUAL OBJECT → PARAMETERS → TEXT FUNCTION</span></p>
-    <p>The final reading links token proportions to the visual context: plant, jar, vessel, tube, bath, process scene or storage object.</p>`,
-    authorText:`Research concept and analytical direction: <strong>Tomasz Grabowski (Drako)</strong>. Analytical support: AI tools.`
+    <p>The final reading links token proportions to the visual context: plant, jar, vessel, tube, bath, process scene or diagram.</p>`,
+    authorText:`Research concept and analytical direction: <strong>Tomasz Grabowski (Drako)</strong>. Analytical support: Navi / ChatGPT + Gemini / Brat.`
   },
   pl:{
+    title:"Voynich PUM/VSM Interpreter",
+    subtitle:"Narzędzie interpretacji funkcjonalnej Manuskryptu Voynicha.",
+    languageLabel:"Język:",
     disclaimer:"To narzędzie nie twierdzi, że jest potwierdzonym odszyfrowaniem językowym. To interpretacja funkcjonalna oparta na modelu PUM/VSM.",
+    hero:`
+Manuskrypt Voynicha to nie tylko nieprzeczytana księga — to uporządkowany system, w którym obraz, powtarzalność i pozycja tworzą funkcjonalny kod.
+
+Interpreter PUM/VSM traktuje manuskrypt nie jako ukryty język naturalny, lecz jako strukturę:
+Obiekt Wizualny → Parametry → Funkcja Tekstu.
+
+Projekt prowadzony przez Tomasza Grabowskiego (Drako), wspierany przez analizę systemów AI (Navi / ChatGPT + Gemini / Brat), wychodzi poza klasyczne podejście lingwistyczne i skupia się na interpretacji strukturalnej i proceduralnej.
+
+Nie twierdzimy, że jest to pełne odszyfrowanie. To narzędzie badawcze do testowania hipotez, wykrywania wzorców i ujawniania wewnętrznej logiki manuskryptu.
+
+Celem nie jest tylko czytanie — lecz zrozumienie, jak ten system działa.
+`,
+    sourceTitle:"Oryginalne źródło manuskryptu",
+    sourceText:"Manuskrypt Voynicha, Beinecke Rare Book and Manuscript Library, Yale University. Otwórz oryginalny zapis cyfrowy w nowej karcie.",
+    sourceButton:"Otwórz oryginał Yale",
+    workspaceTitle:"Obszar pracy folio",
+    imageTitle:"Obraz folio",
+    pasteHint:"Możesz przesłać plik obrazu albo wkleić screenshot bezpośrednio na stronie przez Ctrl+V.",
+    contextTitle:"Kontekst wizualny",
     inputTitle:"1. Surowy tekst EVA",
     procedureTitle:"2. Procedura tłumaczenia",
     finalTitle:"3. Ostateczny odczyt funkcjonalny",
@@ -135,13 +260,14 @@ const ui = {
     modelTitle:"Opis modelu",
     authorTitle:"Autor / badanie",
     runButton:"Tłumacz",
+    clearImageButton:"Wyczyść obraz",
     placeholder:"Wklej tekst EVA",
     known:"ZNANY",
     unknown:"NIEPEWNY / NIEZNANY",
     modelText:`<p>Model PUM/VSM traktuje tekst Voynicha jako system parametryczny/proceduralny.</p>
     <p><span class="model-code">OBIEKT WIZUALNY → PARAMETRY → FUNKCJA TEKSTU</span></p>
-    <p>Ostateczny odczyt łączy proporcje tokenów z kontekstem wizualnym: roślina, słoik, naczynie, rurka, kąpiel, scena procesu albo obiekt przechowywania.</p>`,
-    authorText:`Koncepcja badawcza i kierunek analizy: <strong>Tomasz Grabowski (Drako)</strong>. Wsparcie analityczne: narzędzia AI.`
+    <p>Ostateczny odczyt łączy proporcje tokenów z kontekstem wizualnym: roślina, słoik, naczynie, rurka, kąpiel, scena procesu albo diagram.</p>`,
+    authorText:`Koncepcja badawcza i kierunek analizy: <strong>Tomasz Grabowski (Drako)</strong>. Wsparcie analityczne: Navi / ChatGPT + Gemini / Brat.`
   }
 };
 
@@ -163,18 +289,32 @@ const dictionary = {
 
 function setLanguage(){
   const lang=document.getElementById("language").value;
+  const t=ui[lang];
+
   document.documentElement.lang=lang;
-  document.getElementById("disclaimer").innerText=ui[lang].disclaimer;
-  document.getElementById("inputTitle").innerText=ui[lang].inputTitle;
-  document.getElementById("procedureTitle").innerText=ui[lang].procedureTitle;
-  document.getElementById("finalTitle").innerText=ui[lang].finalTitle;
-  document.getElementById("probabilityTitle").innerText=ui[lang].probabilityTitle;
-  document.getElementById("modelTitle").innerText=ui[lang].modelTitle;
-  document.getElementById("authorTitle").innerText=ui[lang].authorTitle;
-  document.getElementById("runButton").innerText=ui[lang].runButton;
-  document.getElementById("evaInput").placeholder=ui[lang].placeholder;
-  document.getElementById("modelText").innerHTML=ui[lang].modelText;
-  document.getElementById("authorText").innerHTML=ui[lang].authorText;
+  document.getElementById("pageTitle").innerText=t.title;
+  document.getElementById("pageSubtitle").innerText=t.subtitle;
+  document.getElementById("languageLabel").innerText=t.languageLabel;
+  document.getElementById("disclaimer").innerText=t.disclaimer;
+  document.getElementById("heroText").innerText=t.hero.trim();
+  document.getElementById("sourceTitle").innerText=t.sourceTitle;
+  document.getElementById("sourceText").innerText=t.sourceText;
+  document.getElementById("sourceButton").innerText=t.sourceButton;
+  document.getElementById("workspaceTitle").innerText=t.workspaceTitle;
+  document.getElementById("imageTitle").innerText=t.imageTitle;
+  document.getElementById("pasteHint").innerText=t.pasteHint;
+  document.getElementById("contextTitle").innerText=t.contextTitle;
+  document.getElementById("inputTitle").innerText=t.inputTitle;
+  document.getElementById("procedureTitle").innerText=t.procedureTitle;
+  document.getElementById("finalTitle").innerText=t.finalTitle;
+  document.getElementById("probabilityTitle").innerText=t.probabilityTitle;
+  document.getElementById("modelTitle").innerText=t.modelTitle;
+  document.getElementById("authorTitle").innerText=t.authorTitle;
+  document.getElementById("runButton").innerText=t.runButton;
+  document.getElementById("clearImageButton").innerText=t.clearImageButton;
+  document.getElementById("evaInput").placeholder=t.placeholder;
+  document.getElementById("modelText").innerHTML=t.modelText;
+  document.getElementById("authorText").innerHTML=t.authorText;
 }
 
 function cleanToken(t){return t.toLowerCase().replace(/[^a-z]/g,"");}
@@ -186,12 +326,8 @@ function interpretToken(raw,lang){
 
   if(dictionary[clean]){
     const d=dictionary[clean];
-    return {
-      raw, clean, role:d.role, known:!isUncertain, uncertain:isUncertain,
-      meaning:d[lang], probability:isUncertain?d.weight*.65:d.weight
-    };
+    return {raw,clean,role:d.role,known:!isUncertain,uncertain:isUncertain,meaning:d[lang],probability:isUncertain?d.weight*.65:d.weight};
   }
-
   if(clean.endsWith("dy")) return {raw,clean,role:"RESULT?",known:false,uncertain:true,meaning:lang==="pl"?"niepewny wynik":"uncertain result",probability:.42};
   if(clean.startsWith("sh")) return {raw,clean,role:"STATE?",known:false,uncertain:true,meaning:lang==="pl"?"niepewny stan":"uncertain state",probability:.40};
   if(clean.startsWith("cth")) return {raw,clean,role:"HEAVY_OPERATION?",known:false,uncertain:true,meaning:lang==="pl"?"niepewna ciężka operacja":"uncertain heavy operation",probability:.38};
@@ -217,30 +353,50 @@ function countRoles(items){
   return c;
 }
 
-function ratio(a,b){
-  if(!b) return "0";
-  return (a/b).toFixed(2);
+function ratio(a,b){return b ? (a/b).toFixed(2) : "0";}
+
+function contextText(context,lang){
+  const texts={
+    pl:{
+      plant:`Kontekst: folio roślinne. DATA może oznaczać części rośliny: korzeń, łodygę, liście, kwiat, materiał miękki, materiał twardy lub ekstrakt.`,
+      process:`Kontekst: scena procesu, ludzie, rury, kąpiel lub przepływ. DATA oznacza ciało, płyn, zbiornik albo nośnik; FLOW oznacza przejście między strefami; STATE oznacza utrzymanie warunku procesu.`,
+      jars:`Kontekst: słoiki, naczynia lub pojemniki. DATA oznacza materiał, nośnik, pojemnik albo zawartość; FLOW oznacza przeniesienie lub napełnianie; RESULT oznacza stan przechowywany.`,
+      astro:`Kontekst: diagram/astro. DATA oznacza punkt, sektor lub obiekt odniesienia; FLOW oznacza przejście cyklu; STATE oznacza fazę; RESULT oznacza przypisany stan końcowy.`
+    },
+    en:{
+      plant:`Context: botanical folio. DATA may refer to plant parts: root, stem, leaves, flower, soft material, hard material, or extract.`,
+      process:`Context: process scene, figures, tubes, bath or flow system. DATA means body, liquid, vessel or carrier; FLOW means transfer between zones; STATE means maintained process condition.`,
+      jars:`Context: jars, vessels or containers. DATA means material, carrier, container or content; FLOW means transfer or filling; RESULT means stored resulting state.`,
+      astro:`Context: diagram/astro. DATA means point, sector or reference object; FLOW means cycle transition; STATE means phase; RESULT means assigned final state.`
+    }
+  };
+  return texts[lang][context];
 }
 
 function buildFinalReading(items,lang){
+  const context=document.getElementById("visualContext").value;
   const total=items.length;
   const c=countRoles(items);
   const unknowns=[...new Set(items.filter(x=>!x.known).map(x=>x.clean))].filter(Boolean).join(", ") || (lang==="pl"?"brak":"none");
 
-  const processPerData=ratio(c.PROCESS+c.HEAVY, Math.max(1,c.DATA));
-  const statePerProcess=ratio(c.STATE, Math.max(1,c.PROCESS+c.HEAVY));
-  const flowPerData=ratio(c.FLOW, Math.max(1,c.DATA));
+  const processPerData=ratio(c.PROCESS+c.HEAVY,Math.max(1,c.DATA));
+  const statePerProcess=ratio(c.STATE,Math.max(1,c.PROCESS+c.HEAVY));
+  const flowPerData=ratio(c.FLOW,Math.max(1,c.DATA));
   const endDensity=ratio(c.END,total);
 
   if(lang==="pl"){
+    let reading="Tekst wygląda jak instrukcja etapowa. ";
+    if(context==="plant") reading+="Rozpocznij od materiału roślinnego widocznego na folio. Część miękką rozdrobnij, część twardą lub korzeniową ucieraj dłużej, a następnie doprowadź materiał do stanu wynikowego. ";
+    if(context==="process") reading+="Rozpocznij proces w punkcie wejścia. Skieruj płyn, ciało lub obiekt procesu przez kolejne strefy, utrzymuj warunek procesu i zamykaj etapy po osiągnięciu wyniku. ";
+    if(context==="jars") reading+="Rozpocznij od materiału lub zawartości naczynia. Przetwarzaj, przenoś do nośnika lub pojemnika, a stan wynikowy traktuj jako produkt do przechowania. ";
+    if(context==="astro") reading+="Rozpocznij od punktu lub sektora diagramu. Przejdź przez kolejne fazy, utrzymaj stan i zamknij cykl po osiągnięciu wyniku. ";
+
     return `
 KONTEKST WIZUALNY / POWIĄZANIE Z RYSUNKIEM:
-Ten odczyt zakłada, że tekst jest powiązany z obiektem widocznym na folio.
-Jeżeli folio pokazuje roślinę, tokeny DATA mogą odnosić się do części rośliny: korzenia, łodygi, liści, kwiatu, materiału miękkiego, materiału twardego albo ekstraktu.
-Jeżeli folio pokazuje słoiki, pojemniki, rurki, kąpiel lub scenę procesu, tokeny DATA/FLOW/RESULT mogą odnosić się do nośnika, naczynia, płynu, przeniesienia, przechowywania albo stanu procesu.
+${contextText(context,lang)}
 
 OSTATECZNY ODCZYT FUNKCJONALNY:
-Tekst wygląda jak instrukcja etapowego przygotowania materiału. Rozpocznij procedurę od pobrania materiału związanego z rysunkiem. Część miękką lub liściastą rozdrobnij i przetwarzaj wielokrotnie. Jeżeli rysunek wskazuje korzeń lub część twardą, traktuj ciężkie operacje jako ucieranie, zgniatanie albo długie rozdrabnianie. Utrzymuj materiał w stanie aktywnym przez czas wynikający z liczby tokenów STATE. Następnie skieruj część przetworzonego materiału do nośnika, naczynia albo stanu wynikowego. Każdy etap zamykaj tam, gdzie występują znaczniki END.
+${reading}
 
 PROPORCJE OPERACYJNE:
 - Materiał / DATA: ${c.DATA} jednostek
@@ -261,14 +417,18 @@ ${unknowns}
 `.trim();
   }
 
+  let reading="The text behaves like a staged instruction. ";
+  if(context==="plant") reading+="Begin with the plant material visible on the folio. Break down the soft material, grind the hard or root-like part longer, then bring the material toward a resulting state. ";
+  if(context==="process") reading+="Begin at the entry point of the process. Direct the liquid, body or process object through successive zones, maintain the condition, and close stages after reaching the result. ";
+  if(context==="jars") reading+="Begin with the material or vessel content. Process it, transfer it into a carrier or container, and treat the resulting state as a stored product. ";
+  if(context==="astro") reading+="Begin from a point or sector of the diagram. Move through successive phases, maintain the state, and close the cycle after reaching the result. ";
+
   return `
-VISUAL CONTEXT / LINK TO THE DRAWING:
-This reading assumes that the text is linked to the visual object on the folio.
-If the folio shows a plant, DATA tokens may refer to plant parts: root, stem, leaves, flower, soft material, hard material, or extract.
-If the folio shows jars, vessels, tubes, bathing/process imagery, DATA/FLOW/RESULT tokens may refer to carrier, vessel, liquid, transfer, storage, or process state.
+VISUAL CONTEXT / LINK TO DRAWING:
+${contextText(context,lang)}
 
 FINAL FUNCTIONAL READING:
-The text behaves like a staged preparation instruction. Begin by taking the material linked to the drawing. Cut or break down the soft or leafy part and process it repeatedly. If the drawing indicates a root or hard part, treat heavy operations as grinding, crushing, or long processing. Maintain the material in an active state according to the number of STATE tokens. Then direct part of the processed material into a carrier, vessel, or resulting state. Close each stage where END markers appear.
+${reading}
 
 OPERATIONAL PROPORTIONS:
 - Material / DATA: ${c.DATA} units
@@ -344,26 +504,85 @@ function interpretText(){
   const input=document.getElementById("evaInput").value.trim();
 
   if(!input){
-    document.getElementById("procedureOutput").innerText="";
-    document.getElementById("finalOutput").innerText="";
-    document.getElementById("probabilityOutput").innerText="";
-    document.getElementById("probabilityFill").style.width="0%";
+    procedureOutput.innerText="";
+    finalOutput.innerText="";
+    probabilityOutput.innerText="";
+    probabilityFill.style.width="0%";
     return;
   }
 
   const items=input.split(/\s+/).map(t=>interpretToken(t,lang));
   const prob=calculateProbability(items,lang);
 
-  document.getElementById("procedureOutput").innerText=buildProcedure(items,lang);
-  document.getElementById("finalOutput").innerText=buildFinalReading(items,lang);
-  document.getElementById("probabilityOutput").innerText=prob.text;
-  document.getElementById("probabilityFill").style.width=prob.percent+"%";
+  procedureOutput.innerText=buildProcedure(items,lang);
+  finalOutput.innerText=buildFinalReading(items,lang);
+  probabilityOutput.innerText=prob.text;
+  probabilityFill.style.width=prob.percent+"%";
 }
 
-document.addEventListener("DOMContentLoaded", function(){
+function showImage(src){
+  const img=document.getElementById("folioImage");
+  const ph=document.getElementById("imagePlaceholder");
+  img.src=src;
+  img.style.display="block";
+  ph.style.display="none";
+  zoomLevel=1;
+  img.style.transform="scale(1)";
+}
+
+function clearImage(){
+  const img=document.getElementById("folioImage");
+  img.src="";
+  img.style.display="none";
+  document.getElementById("imagePlaceholder").style.display="block";
+}
+
+function handleUpload(e){
+  const file=e.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>showImage(reader.result);
+  reader.readAsDataURL(file);
+}
+
+function handlePaste(e){
+  const items=e.clipboardData?.items || [];
+  for(const item of items){
+    if(item.type.indexOf("image")===0){
+      const file=item.getAsFile();
+      const reader=new FileReader();
+      reader.onload=()=>showImage(reader.result);
+      reader.readAsDataURL(file);
+      break;
+    }
+  }
+}
+
+function zoom(delta){
+  const img=document.getElementById("folioImage");
+  if(img.style.display==="none") return;
+  zoomLevel=Math.max(.5,Math.min(3,zoomLevel+delta));
+  img.style.transform=`scale(${zoomLevel})`;
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
   document.getElementById("language").value="en";
   setLanguage();
-  document.getElementById("runButton").addEventListener("click", interpretText);
+
+  document.getElementById("language").addEventListener("change",setLanguage);
+  document.getElementById("runButton").addEventListener("click",interpretText);
+  document.getElementById("visualContext").addEventListener("change",interpretText);
+
+  document.getElementById("imageUpload").addEventListener("change",handleUpload);
+  document.getElementById("clearImageButton").addEventListener("click",clearImage);
+  document.addEventListener("paste",handlePaste);
+
+  document.getElementById("zoomIn").addEventListener("click",()=>zoom(.2));
+  document.getElementById("zoomOut").addEventListener("click",()=>zoom(-.2));
+  document.getElementById("zoomReset").addEventListener("click",()=>{
+    zoomLevel=1;
+    document.getElementById("folioImage").style.transform="scale(1)";
+  });
 });
 </script>
 </body>
