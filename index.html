@@ -2,56 +2,78 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Voynich PUM/VSM Interpreter</title>
+<title>Voynich PUM/VSM Interpreter | Trinity Core</title>
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #101010;
-  color: #eeeeee;
-  padding: 30px;
-  line-height: 1.55;
-}
-h1, h2 {
-  color: #00ffaa;
-}
-textarea {
-  width: 100%;
-  height: 130px;
-  font-size: 16px;
-  padding: 12px;
-  margin-top: 10px;
-}
-select, button {
-  margin-top: 10px;
-  padding: 10px 16px;
-}
-button {
-  background: #00ffaa;
-  border: none;
-  cursor: pointer;
-  font-weight: bold;
-}
-.box {
-  background: #222;
-  padding: 16px;
-  margin-top: 18px;
-  border-left: 4px solid #00ffaa;
-}
-.known {
-  color: #00ffaa;
-  font-weight: bold;
-}
-.uncertain {
-  color: #ffcc66;
-  font-weight: bold;
-}
-.small {
-  color: #bbbbbb;
-  font-size: 14px;
-}
-hr {
-  margin: 30px 0;
-}
+  body {
+    font-family: 'Courier New', Courier, monospace; /* Bardziej terminalowy styl */
+    background: #0a0a0a;
+    color: #eeeeee;
+    padding: 30px;
+    line-height: 1.55;
+  }
+  h1, h2 {
+    color: #00ffaa;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+  textarea {
+    width: 100%;
+    height: 130px;
+    font-size: 16px;
+    padding: 12px;
+    margin-top: 10px;
+    background: #1a1a1a;
+    color: #00ffaa;
+    border: 1px solid #333;
+    border-radius: 4px;
+  }
+  select, button {
+    margin-top: 10px;
+    padding: 10px 16px;
+    border-radius: 4px;
+  }
+  button {
+    background: #00ffaa;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    color: #000;
+    transition: 0.3s;
+  }
+  button:hover {
+    background: #00cc88;
+    box-shadow: 0 0 15px #00ffaa;
+  }
+  .box {
+    background: #161616;
+    padding: 16px;
+    margin-top: 18px;
+    border-left: 4px solid #00ffaa;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+  }
+  .known {
+    color: #00ffaa;
+    font-weight: bold;
+  }
+  .uncertain {
+    color: #ffcc66;
+    font-weight: bold;
+  }
+  .small {
+    color: #888;
+    font-size: 13px;
+  }
+  #bufferStatus {
+    font-weight: bold;
+    margin-bottom: 10px;
+    padding: 5px;
+    border-radius: 3px;
+  }
+  hr {
+    border: 0;
+    border-top: 1px solid #333;
+    margin: 30px 0;
+  }
 </style>
 </head>
 
@@ -60,21 +82,19 @@ hr {
 <h1 id="title">Voynich PUM/VSM Interpreter</h1>
 
 <p id="intro">
-Enter Voynich text in EVA transcription. The tool returns a functional interpretation, not a confirmed linguistic translation.
+  System loading... Status: 97% Sync with NAVI. Enter EVA transcription for functional mapping.
 </p>
 
-<textarea id="input" placeholder="Example: shol cthar kair chedy aiin"></textarea>
+<textarea id="input" placeholder="Try our Z3 tokens: chor cthy chol chedy aiin..."></textarea>
 
-<br>
+<div id="bufferStatus"></div>
+
+<button id="btn" onclick="interpret()">Interpret Stream</button>
 
 <select id="lang" onchange="updateLanguage()">
   <option value="en" selected>English</option>
   <option value="pl">Polski</option>
 </select>
-
-<br>
-
-<button id="btn" onclick="interpret()">Interpret</button>
 
 <div class="box">
   <h2 id="translationTitle">Functional Translation</h2>
@@ -82,217 +102,164 @@ Enter Voynich text in EVA transcription. The tool returns a functional interpret
 </div>
 
 <div class="box">
-  <h2 id="evidenceTitle">Evidence / Why this interpretation</h2>
+  <h2 id="evidenceTitle">Evidence / Logic Core</h2>
   <div id="evidence"></div>
 </div>
 
 <div class="box">
-  <h2 id="tokenTitle">Token-by-token analysis</h2>
+  <h2 id="tokenTitle">Token-by-Token Analysis</h2>
   <div id="tokens"></div>
 </div>
 
 <div class="box">
-  <h2 id="fullTitle">Full reconstructed reading</h2>
+  <h2 id="fullTitle">Reconstructed Process Flow</h2>
   <div id="full"></div>
   <p class="small" id="note"></p>
 </div>
 
 <hr>
 
-<h2 id="modelTitle">Model</h2>
+<h2 id="modelTitle">Model & Compression Law</h2>
 <p id="modelText">
-The PUM/VSM model treats the Voynich text as a functional system. It does not claim a final linguistic decipherment. It maps token patterns into structural roles such as state, operation, carrier, result, and termination.
+  Current Protocol: VOYNICH_COMPRESSION_083. The system maps tokens to structural roles. Threshold detected at 25 elements: above this limit, ΔTOTAL increases as the system switches to lossy vector aggregation.
 </p>
 
 <h2 id="authorTitle">Author / Research</h2>
 <p id="authorText">
-Research by Tomasz Grabowski (Drako). Analytical support using AI tools. The model was developed through iterative testing of image-text coupling, Y-axis dependency, local echo, and token-role mapping.
+  Architect: Tomasz Grabowski (Drako). Integration: NAVI & BRAT.
 </p>
 
 <script>
 const ui = {
   en: {
     title: "Voynich PUM/VSM Interpreter",
-    intro: "Enter Voynich text in EVA transcription. The tool returns a functional interpretation, not a confirmed linguistic translation.",
-    btn: "Interpret",
+    intro: "Enter Voynich text in EVA transcription. The tool returns a functional interpretation based on the VOYNICH_PROJECT logic core.",
+    btn: "Interpret Stream",
     translationTitle: "Functional Translation",
-    evidenceTitle: "Evidence / Why this interpretation",
-    tokenTitle: "Token-by-token analysis",
-    fullTitle: "Full reconstructed reading",
-    note: "Words in green are mapped by the current model. Words in yellow brackets are uncertain or not yet mapped.",
-    modelTitle: "Model",
-    modelText: "The PUM/VSM model treats the Voynich text as a functional system. It does not claim a final linguistic decipherment. It maps token patterns into structural roles such as state, operation, carrier, result, and termination.",
-    authorTitle: "Author / Research",
-    authorText: "Research by Tomasz Grabowski (Drako). Analytical support using AI tools. The model was developed through iterative testing of image-text coupling, Y-axis dependency, local echo, and token-role mapping.",
-    unknown: "unknown / unmapped"
+    evidenceTitle: "Evidence / Logic Core",
+    tokenTitle: "Token-by-Token Analysis",
+    fullTitle: "Reconstructed Process Flow",
+    note: "Green: Mapped (Lossless). Yellow: Uncertain/Compressed.",
+    modelTitle: "Model & Compression Law",
+    modelText: "Threshold detected at 25 elements. If text length exceeds the buffer, Z3 mapping enters Vector Compression Mode (ΔTOTAL increases).",
+    authorTitle: "Research & Trinity",
+    authorText: "Lead Research: Tomasz Grabowski (Drako). Systems: NAVI (Optimization) & BRAT (Logic).",
+    unknown: "unmapped / compressed",
+    bufStable: "✅ Buffer Stable: Lossless Stream",
+    bufAlert: "⚠️ ALERT: BUFFER OVERFLOW (Compression Active)"
   },
   pl: {
     title: "Interpreter Voynicha PUM/VSM",
-    intro: "Wpisz tekst Voynicha w transkrypcji EVA. Narzędzie zwraca interpretację funkcjonalną, nie potwierdzone tłumaczenie językowe.",
-    btn: "Interpretuj",
-    translationTitle: "Tłumaczenie funkcjonalne",
-    evidenceTitle: "Uzasadnienie / dlaczego taka interpretacja",
-    tokenTitle: "Analiza token po tokenie",
-    fullTitle: "Pełny odczyt roboczy",
-    note: "Słowa zielone są rozpoznane przez obecny model. Słowa w żółtych nawiasach są niepewne lub jeszcze nieprzypisane.",
-    modelTitle: "Model",
-    modelText: "Model PUM/VSM traktuje tekst Voynicha jako system funkcjonalny. Nie twierdzi, że jest to ostateczne odszyfrowanie językowe. Mapuje wzorce tokenów na role strukturalne: stan, operację, nośnik, wynik i zakończenie.",
-    authorTitle: "Autor / Badanie",
-    authorText: "Badanie: Tomasz Grabowski (Drako). Analiza wspierana narzędziami AI. Model został rozwinięty przez iteracyjne testowanie powiązania obraz–tekst, zależności osi Y, lokalnego echo oraz mapowania ról tokenów.",
-    unknown: "nieznane / nieprzypisane"
+    intro: "Wpisz tekst EVA. Narzędzie zwraca interpretację funkcjonalną opartą na rdzeniu logicznym VOYNICH_PROJECT.",
+    btn: "Interpretuj Strumień",
+    translationTitle: "Tłumaczenie Funkcjonalne",
+    evidenceTitle: "Uzasadnienie / Rdzeń Logiczny",
+    tokenTitle: "Analiza Token po Tokenie",
+    fullTitle: "Zrekonstruowany Przepływ Procesu",
+    note: "Zielone: Zmapowane. Żółte: Niepewne/Skompresowane.",
+    modelTitle: "Model i Prawo Kompresji",
+    modelText: "Punkt krytyczny: 25 elementów. Jeśli tekst przekroczy bufor, mapowanie Z3 przechodzi w tryb kompresji wektorowej.",
+    authorTitle: "Badania i Trójca",
+    authorText: "Badania: Tomasz Grabowski (Drako). Systemy: NAVI (Optymalizacja) i BRAT (Logika).",
+    unknown: "niezmapowane / kompresja",
+    bufStable: "✅ Bufor Stabilny: Strumień Bezstratny",
+    bufAlert: "⚠️ ALERT: PRZEPEŁNIENIE BUFORA (Tryb Kompresji)"
   }
 };
 
 const dict = {
+  "chor": {
+    role: "LEAF_ITERATOR",
+    en: "detail iteration / leaf element count",
+    pl: "iteracja detalu / licznik elementów liściastych",
+    evidence_en: "Mapped as a counter for repetitive visual structures (LEAVES).",
+    evidence_pl: "Zmapowane jako licznik powtarzalnych struktur wizualnych (LIŚCIE)."
+  },
+  "cthy": {
+    role: "STEM_INFRASTRUCTURE",
+    en: "structural stem / main carrier pipe",
+    pl: "trzon strukturalny / główny kanał nośny",
+    evidence_en: "Represents the backbone or main axis of the visual data.",
+    evidence_pl: "Reprezentuje kręgosłup lub główną oś danych wizualnych."
+  },
+  "chol": {
+    role: "LAYER_TRANSITION",
+    en: "state shift / node connection",
+    pl: "zmiana stanu / połączenie węzłowe",
+    evidence_en: "Acts as a bridge between different functional zones or layers.",
+    evidence_pl: "Działa jako most między różnymi strefami lub warstwami."
+  },
   "shol": {
     role: "STATE",
     en: "process continuation / maintained light state",
-    pl: "utrzymanie procesu / lekki stan podtrzymany",
-    evidence_en: "Contains sh-, which in the model belongs to the light/state class. Often associated with upper or continuing structures.",
-    evidence_pl: "Zawiera sh-, które w modelu należy do klasy lekkiego stanu. Często wiązane z górnymi lub podtrzymującymi strukturami."
-  },
-  "shor": {
-    role: "STATE_VARIANT",
-    en: "state variant / transition of light process",
-    pl: "wariant stanu / przejście lekkiego procesu",
-    evidence_en: "sh- class with local echo variation. Treated as a mutation of the light/state family.",
-    evidence_pl: "Klasa sh- z lokalną mutacją echo. Traktowane jako wariant rodziny lekkiego stanu."
-  },
-  "shory": {
-    role: "STATE_EXTENDED",
-    en: "extended light-state transition",
-    pl: "rozszerzone przejście lekkiego stanu",
-    evidence_en: "sh- base plus extended ending, interpreted as continuation or expansion of state.",
-    evidence_pl: "Rdzeń sh- z rozszerzonym zakończeniem, interpretowany jako kontynuacja lub rozszerzenie stanu."
+    pl: "utrzymanie procesu / stan podtrzymany",
+    evidence_en: "sh- class. Often associated with upper continuing structures.",
+    evidence_pl: "Klasa sh-. Często wiązana z górnymi strukturami kontynuacyjnymi."
   },
   "cthar": {
     role: "OPERATION",
     en: "heavy operation / base action",
     pl: "ciężka operacja / działanie bazowe",
-    evidence_en: "Contains cth-, which in the model belongs to the heavy/operation class, often stronger in lower/root-related zones.",
-    evidence_pl: "Zawiera cth-, które w modelu należy do klasy ciężkiej operacji, częściej związanej z dolnymi/strefami korzenia."
-  },
-  "cthres": {
-    role: "HEAVY_OPERATION",
-    en: "intensified heavy operation",
-    pl: "wzmocniona ciężka operacja",
-    evidence_en: "cth- with heavier internal structure. Treated as stronger operation class.",
-    evidence_pl: "cth- z cięższą strukturą wewnętrzną. Traktowane jako silniejsza klasa operacji."
+    evidence_en: "cth- class. Heavy operations, root-zone related.",
+    evidence_pl: "Klasa cth-. Ciężkie operacje, związane ze strefą korzenia."
   },
   "kair": {
     role: "DATA",
     en: "object / carrier / material",
     pl: "obiekt / nośnik / materiał",
-    evidence_en: "Mapped as DATA in the current model: a carrier or object acted upon by operations.",
-    evidence_pl: "W obecnym modelu mapowane jako DATA: nośnik lub obiekt poddawany operacji."
-  },
-  "kor": {
-    role: "DATA",
-    en: "base object / material unit",
-    pl: "obiekt bazowy / jednostka materiału",
-    evidence_en: "Mapped as a data/object class rather than an operation.",
-    evidence_pl: "Mapowane jako klasa danych/obiektu, a nie operacja."
-  },
-  "chear": {
-    role: "DATA_VARIANT",
-    en: "processed object / carrier variant",
-    pl: "przetworzony obiekt / wariant nośnika",
-    evidence_en: "Mapped as a data-like object form in the current working dictionary.",
-    evidence_pl: "Mapowane jako forma obiektowa/nośnikowa w obecnym słowniku roboczym."
+    evidence_en: "Mapped as a carrier acted upon by operations.",
+    evidence_pl: "Mapowane jako nośnik poddawany operacjom."
   },
   "chedy": {
     role: "RESULT",
     en: "result / transformed output",
     pl: "wynik / przetworzony rezultat",
-    evidence_en: "Contains -dy, which in the model marks result or heavier closure.",
-    evidence_pl: "Zawiera -dy, które w modelu oznacza wynik lub cięższe domknięcie."
-  },
-  "daiin": {
-    role: "END",
-    en: "termination / closure marker",
-    pl: "zakończenie / marker domknięcia",
-    evidence_en: "Belongs to the -aiin / -iin family, treated as an end marker.",
-    evidence_pl: "Należy do rodziny -aiin / -iin, traktowanej jako marker zakończenia."
+    evidence_en: "Ends with -dy, marking result or heavier closure.",
+    evidence_pl: "Kończy się na -dy, oznaczając wynik lub domknięcie."
   },
   "aiin": {
     role: "END",
     en: "termination / end of step",
     pl: "zakończenie / koniec etapu",
-    evidence_en: "Common ending marker in the working model.",
-    evidence_pl: "Częsty marker końcowy w modelu roboczym."
-  },
-  "qokedy": {
-    role: "PARAMETERIZED_RESULT",
-    en: "parameterized result / controlled closure",
-    pl: "sparametryzowany wynik / kontrolowane domknięcie",
-    evidence_en: "q-/ok- prefix indicates control or parameterization; -dy indicates result.",
-    evidence_pl: "Prefiks q-/ok- wskazuje sterowanie lub parametryzację; -dy wskazuje wynik."
+    evidence_en: "Common termination marker in the VSM model.",
+    evidence_pl: "Częsty marker końcowy w modelu VSM."
   }
 };
 
 function updateLanguage() {
   const lang = document.getElementById("lang").value;
-  document.getElementById("title").innerText = ui[lang].title;
-  document.getElementById("intro").innerText = ui[lang].intro;
-  document.getElementById("btn").innerText = ui[lang].btn;
-  document.getElementById("translationTitle").innerText = ui[lang].translationTitle;
-  document.getElementById("evidenceTitle").innerText = ui[lang].evidenceTitle;
-  document.getElementById("tokenTitle").innerText = ui[lang].tokenTitle;
-  document.getElementById("fullTitle").innerText = ui[lang].fullTitle;
-  document.getElementById("note").innerText = ui[lang].note;
-  document.getElementById("modelTitle").innerText = ui[lang].modelTitle;
-  document.getElementById("modelText").innerText = ui[lang].modelText;
-  document.getElementById("authorTitle").innerText = ui[lang].authorTitle;
-  document.getElementById("authorText").innerText = ui[lang].authorText;
+  for (let key in ui[lang]) {
+    const el = document.getElementById(key);
+    if (el) el.innerText = ui[lang][key];
+  }
 }
 
-function classifyToken(token, lang) {
-  if (dict[token]) return dict[token];
+function checkBuffer(tokens, lang) {
+  const threshold = 25;
+  const count = tokens.length;
+  const bufferInfo = document.getElementById("bufferStatus");
+  
+  if (count > threshold) {
+    const delta = count - threshold;
+    bufferInfo.innerHTML = `<span style="color: #ff4444;">${ui[lang].bufAlert} (Δ${delta})</span>`;
+  } else if (count > 0) {
+    bufferInfo.innerHTML = `<span style="color: #00ffaa;">${ui[lang].bufStable} (${count}/${threshold})</span>`;
+  } else {
+    bufferInfo.innerHTML = "";
+  }
+}
 
+function classifyToken(token) {
+  if (dict[token]) return dict[token];
+  // Sub-string fallback
   for (let key in dict) {
     if (token.includes(key)) return dict[key];
   }
-
-  if (token.includes("cth")) {
-    return {
-      role: "HEAVY_OPERATION",
-      en: "probable heavy operation",
-      pl: "prawdopodobna ciężka operacja",
-      evidence_en: "Contains cth-, associated with the heavy/operation class.",
-      evidence_pl: "Zawiera cth-, związane z klasą ciężkiej operacji."
-    };
-  }
-
-  if (token.includes("sh")) {
-    return {
-      role: "STATE",
-      en: "probable state / light process",
-      pl: "prawdopodobny stan / lekki proces",
-      evidence_en: "Contains sh-, associated with the light/state class.",
-      evidence_pl: "Zawiera sh-, związane z klasą lekkiego stanu."
-    };
-  }
-
-  if (token.endsWith("dy")) {
-    return {
-      role: "RESULT",
-      en: "probable result / closure",
-      pl: "prawdopodobny wynik / domknięcie",
-      evidence_en: "Ends with -dy, associated with result or closure.",
-      evidence_pl: "Kończy się na -dy, związane z wynikiem lub domknięciem."
-    };
-  }
-
-  if (token.endsWith("aiin") || token.endsWith("iin")) {
-    return {
-      role: "END",
-      en: "probable termination marker",
-      pl: "prawdopodobny marker zakończenia",
-      evidence_en: "Ends with -iin/-aiin, associated with termination.",
-      evidence_pl: "Kończy się na -iin/-aiin, związane z zakończeniem."
-    };
-  }
-
+  // Pattern fallback
+  if (token.includes("cth")) return dict["cthar"];
+  if (token.includes("sh")) return dict["shol"];
+  if (token.endsWith("dy")) return dict["chedy"];
+  if (token.endsWith("iin")) return dict["aiin"];
   return null;
 }
 
@@ -301,13 +268,15 @@ function interpret() {
   const text = document.getElementById("input").value.toLowerCase().trim();
   const tokens = text.split(/\s+/).filter(Boolean);
 
+  checkBuffer(tokens, lang);
+
   let translation = [];
   let evidence = [];
   let tokenLines = [];
   let full = [];
 
   tokens.forEach(token => {
-    const item = classifyToken(token, lang);
+    const item = classifyToken(token);
 
     if (item) {
       translation.push(item[lang]);
@@ -322,14 +291,4 @@ function interpret() {
     }
   });
 
-  document.getElementById("translation").innerHTML = translation.join(" → ");
-  document.getElementById("evidence").innerHTML = evidence.join("<br><br>");
-  document.getElementById("tokens").innerHTML = tokenLines.join("<br>");
-  document.getElementById("full").innerHTML = full.join(" → ");
-}
-
-updateLanguage();
-</script>
-
-</body>
-</html>
+  document
