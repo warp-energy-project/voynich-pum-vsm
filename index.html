@@ -75,7 +75,7 @@ footer{text-align:center;padding:25px;color:var(--muted);border-top:1px solid #3
 <section>
   <h2 id="inputTitle">1. EVA Raw Input</h2>
   <textarea id="evaInput"></textarea>
-  <button id="runButton" onclick="interpretText()">Translate</button>
+  <button id="runButton" type="button">Translate</button>
 </section>
 
 <section>
@@ -115,6 +115,8 @@ const ui = {
     procedureTitle:"2. Translation Procedure",
     finalTitle:"3. Final Functional Reading",
     probabilityTitle:"4. Translation Probability / Confidence",
+    modelTitle:"Model Explanation",
+    authorTitle:"Author / Research",
     runButton:"Translate",
     placeholder:"Paste EVA text here",
     known:"KNOWN",
@@ -130,6 +132,8 @@ const ui = {
     procedureTitle:"2. Procedura tłumaczenia",
     finalTitle:"3. Ostateczny odczyt funkcjonalny",
     probabilityTitle:"4. Prawdopodobieństwo tłumaczenia",
+    modelTitle:"Opis modelu",
+    authorTitle:"Autor / badanie",
     runButton:"Tłumacz",
     placeholder:"Wklej tekst EVA",
     known:"ZNANY",
@@ -165,11 +169,12 @@ function setLanguage(){
   document.getElementById("procedureTitle").innerText=ui[lang].procedureTitle;
   document.getElementById("finalTitle").innerText=ui[lang].finalTitle;
   document.getElementById("probabilityTitle").innerText=ui[lang].probabilityTitle;
+  document.getElementById("modelTitle").innerText=ui[lang].modelTitle;
+  document.getElementById("authorTitle").innerText=ui[lang].authorTitle;
   document.getElementById("runButton").innerText=ui[lang].runButton;
   document.getElementById("evaInput").placeholder=ui[lang].placeholder;
   document.getElementById("modelText").innerHTML=ui[lang].modelText;
   document.getElementById("authorText").innerHTML=ui[lang].authorText;
-  interpretText();
 }
 
 function cleanToken(t){return t.toLowerCase().replace(/[^a-z]/g,"");}
@@ -339,24 +344,27 @@ function interpretText(){
   const input=document.getElementById("evaInput").value.trim();
 
   if(!input){
-    procedureOutput.innerText="";
-    finalOutput.innerText="";
-    probabilityOutput.innerText="";
-    probabilityFill.style.width="0%";
+    document.getElementById("procedureOutput").innerText="";
+    document.getElementById("finalOutput").innerText="";
+    document.getElementById("probabilityOutput").innerText="";
+    document.getElementById("probabilityFill").style.width="0%";
     return;
   }
 
   const items=input.split(/\s+/).map(t=>interpretToken(t,lang));
   const prob=calculateProbability(items,lang);
 
-  procedureOutput.innerText=buildProcedure(items,lang);
-  finalOutput.innerText=buildFinalReading(items,lang);
-  probabilityOutput.innerText=prob.text;
-  probabilityFill.style.width=prob.percent+"%";
+  document.getElementById("procedureOutput").innerText=buildProcedure(items,lang);
+  document.getElementById("finalOutput").innerText=buildFinalReading(items,lang);
+  document.getElementById("probabilityOutput").innerText=prob.text;
+  document.getElementById("probabilityFill").style.width=prob.percent+"%";
 }
 
-document.getElementById("language").value="en";
-setLanguage();
+document.addEventListener("DOMContentLoaded", function(){
+  document.getElementById("language").value="en";
+  setLanguage();
+  document.getElementById("runButton").addEventListener("click", interpretText);
+});
 </script>
 </body>
 </html>
