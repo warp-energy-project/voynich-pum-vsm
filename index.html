@@ -696,5 +696,51 @@ document.addEventListener("DOMContentLoaded",()=>{
   });
 });
 </script>
+  <!-- NAVI PATCH 001 START: FOLIO IMAGE LOADER FIX -->
+<script>
+naviPatch("NAVI_PATCH_001", "Fix Yale folio image loading (IIIF)", function(){
+
+  function fixYaleImage(url){
+    if(!url) return url;
+
+    // 🔥 kluczowa poprawka – poprawny endpoint IIIF
+    if(url.includes("collections.library.yale.edu")){
+      return url
+        .replace("/full/800,/0/default.jpg", "/full/1000,/0/default.jpg")
+        .replace("~", "%7E"); // encode znak ~
+    }
+
+    return url;
+  }
+
+  // 🔁 podmiana showImage żeby działało poprawnie
+  if(typeof showImage === "function"){
+    const originalShowImage = showImage;
+
+    window.showImage = function(src){
+      const fixed = fixYaleImage(src);
+      console.log("Loading image:", fixed);
+      originalShowImage(fixed);
+    };
+  }
+
+  // 🔁 podmiana loadera folio
+  if(typeof loadFolioFromDatabase === "function"){
+    const originalLoader = loadFolioFromDatabase;
+
+    window.loadFolioFromDatabase = function(id){
+      const folio = window.folioDatabase?.[id];
+
+      if(folio && folio.image){
+        folio.image = fixYaleImage(folio.image);
+      }
+
+      originalLoader(id);
+    };
+  }
+
+});
+</script>
+<!-- NAVI PATCH 001 END -->
 </body>
 </html>
