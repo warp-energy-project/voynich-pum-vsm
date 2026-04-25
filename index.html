@@ -148,376 +148,449 @@
 
 <body>
 
-  <header>
-    <h1 id="title">Voynich PUM/VSM Interpreter</h1>
-    <p id="subtitle">
-      Functional interpretation tool for the Voynich Manuscript based on the Procedural-Unary Model / Voynich Structural Model.
+<header>
+  <h1 id="title">Voynich PUM/VSM Interpreter</h1>
+  <p id="subtitle">
+    Functional interpretation tool for the Voynich Manuscript based on the Procedural-Unary Model / Voynich Structural Model.
+  </p>
+</header>
+
+<main>
+
+  <section>
+    <div class="controls">
+      <label for="language" id="languageLabel">Language:</label>
+      <select id="language" onchange="setLanguage()">
+        <option value="en" selected>English</option>
+        <option value="pl">Polski</option>
+      </select>
+    </div>
+
+    <p class="warning" id="disclaimer">
+      This tool does not claim confirmed linguistic decipherment. It provides a functional interpretation based on the PUM/VSM model.
     </p>
-  </header>
+  </section>
 
-  <main>
+  <section>
+    <h2 id="inputTitle">1. EVA Raw Input</h2>
+    <textarea id="evaInput" placeholder="Paste EVA text here"></textarea>
+    <button onclick="interpretText()" id="runButton">Translate</button>
+  </section>
 
-    <section>
-      <div class="controls">
-        <label for="language" id="languageLabel">Language:</label>
-        <select id="language" onchange="setLanguage()">
-          <option value="en" selected>English</option>
-          <option value="pl">Polski</option>
-        </select>
-      </div>
+  <section>
+    <h2 id="procedureTitle">2. Translation Procedure</h2>
+    <div id="procedureOutput" class="result-box"></div>
+  </section>
 
-      <p class="warning" id="disclaimer">
-        This tool does not claim confirmed linguistic decipherment. It provides a functional interpretation based on the PUM/VSM model.
-      </p>
-    </section>
+  <section>
+    <h2 id="dryTitle">3. Dry Translation Output</h2>
+    <div id="dryOutput" class="result-box"></div>
+  </section>
 
-    <section>
-      <h2 id="inputTitle">1. EVA Raw Input</h2>
-      <textarea id="evaInput" placeholder="Paste EVA text here, e.g. qokedy chedy shol aiin"></textarea>
-      <button onclick="interpretText()" id="runButton">Translate</button>
-    </section>
+  <section>
+    <h2 id="modelTitle">Model Explanation</h2>
+    <div id="modelText"></div>
+  </section>
 
-    <section>
-      <h2 id="procedureTitle">2. Translation Procedure</h2>
-      <div id="procedureOutput" class="result-box"></div>
-    </section>
+  <section>
+    <h2 id="authorTitle">Author / Research</h2>
+    <p id="authorText"></p>
+  </section>
 
-    <section>
-      <h2 id="dryTitle">3. Dry Translation Output</h2>
-      <div id="dryOutput" class="result-box"></div>
-    </section>
+</main>
 
-    <section>
-      <h2 id="modelTitle">Model Explanation</h2>
-      <div id="modelText">
-        <p>
-          The PUM/VSM model treats Voynich text not as ordinary natural language,
-          but as a parametric and procedural system.
-        </p>
-        <p>
-          <span class="model-code">IMAGE → PARAMETERS → TEXT DYNAMICS</span>
-        </p>
-      </div>
-    </section>
+<footer>
+  Voynich PUM/VSM Project — Functional Interpretation Framework
+</footer>
 
-    <section>
-      <h2 id="authorTitle">Author / Research</h2>
-      <p id="authorText">
-        Research concept and analytical direction:
-        <strong>Tomasz Grabowski (Drako)</strong>.
-        Analytical support: AI tools used for modelling, testing, structuring and presentation.
-      </p>
-    </section>
+<script>
+const translations = {
+  en: {
+    title: "Voynich PUM/VSM Interpreter",
+    subtitle: "Functional interpretation tool for the Voynich Manuscript based on the Procedural-Unary Model / Voynich Structural Model.",
+    languageLabel: "Language:",
+    disclaimer: "This tool does not claim confirmed linguistic decipherment. It provides a functional interpretation based on the PUM/VSM model.",
+    inputTitle: "1. EVA Raw Input",
+    procedureTitle: "2. Translation Procedure",
+    dryTitle: "3. Dry Translation Output",
+    modelTitle: "Model Explanation",
+    authorTitle: "Author / Research",
+    runButton: "Translate",
+    placeholder: "Paste EVA text here, e.g. qokedy qokedy chedy shol aiin",
+    known: "KNOWN",
+    unknown: "UNCERTAIN / UNKNOWN",
+    modelText: `
+      <p>The PUM/VSM model treats Voynich text not as ordinary natural language, but as a parametric and procedural system.</p>
+      <p><span class="model-code">IMAGE → PARAMETERS → TEXT DYNAMICS</span></p>
+      <p>The first window contains raw EVA text. The second window shows token processing and phrase building. The third window shows the dry reconstructed procedural output.</p>
+    `,
+    authorText: `Research concept and analytical direction: <strong>Tomasz Grabowski (Drako)</strong>. Analytical support: AI tools used for modelling, testing, structuring and presentation.`
+  },
 
-  </main>
+  pl: {
+    title: "Interpreter Voynich PUM/VSM",
+    subtitle: "Narzędzie interpretacji funkcjonalnej Manuskryptu Voynicha oparte na modelu Procedural-Unary Model / Voynich Structural Model.",
+    languageLabel: "Język:",
+    disclaimer: "To narzędzie nie twierdzi, że jest potwierdzonym odszyfrowaniem językowym. To interpretacja funkcjonalna oparta na modelu PUM/VSM.",
+    inputTitle: "1. Surowy tekst EVA",
+    procedureTitle: "2. Procedura tłumaczenia",
+    dryTitle: "3. Suchy wynik tłumaczenia",
+    modelTitle: "Opis modelu",
+    authorTitle: "Autor / badanie",
+    runButton: "Tłumacz",
+    placeholder: "Wklej tekst EVA, np. qokedy qokedy chedy shol aiin",
+    known: "ZNANY",
+    unknown: "NIEPEWNY / NIEZNANY",
+    modelText: `
+      <p>Model PUM/VSM traktuje tekst Voynicha nie jako zwykły język naturalny, lecz jako system parametryczny i proceduralny.</p>
+      <p><span class="model-code">OBRAZ → PARAMETRY → DYNAMIKA TEKSTU</span></p>
+      <p>Pierwsze okno zawiera surowy tekst EVA. Drugie okno pokazuje przetwarzanie tokenów i budowanie fraz. Trzecie okno pokazuje suchy wynik proceduralny.</p>
+    `,
+    authorText: `Koncepcja badawcza i kierunek analizy: <strong>Tomasz Grabowski (Drako)</strong>. Wsparcie analityczne: narzędzia AI użyte do modelowania, testowania, strukturyzacji i prezentacji.`
+  }
+};
 
-  <footer>
-    Voynich PUM/VSM Project — Functional Interpretation Framework
-  </footer>
+const dictionary = {
+  qokedy: {
+    en: "initiate controlled processing sequence",
+    pl: "zainicjuj kontrolowaną sekwencję przetwarzania",
+    dry_en: "initiate processing",
+    dry_pl: "inicjacja przetwarzania",
+    role: "ENTRY / INITIATION",
+    evidence: "qo-/qok- appears in entry-like positions; -dy indicates result-oriented action."
+  },
+  chedy: {
+    en: "process material / transform by operation",
+    pl: "przetwórz materiał / transformuj przez operację",
+    dry_en: "process material",
+    dry_pl: "przetwórz materiał",
+    role: "PROCESS",
+    evidence: "che- behaves as process/material root; -dy marks result or completed output."
+  },
+  shol: {
+    en: "maintain light process / continue active state",
+    pl: "utrzymaj lekki proces / kontynuuj aktywny stan",
+    dry_en: "maintain process",
+    dry_pl: "utrzymaj proces",
+    role: "STATE / CONTINUATION",
+    evidence: "sh- is treated as a light-state marker; -ol is treated as a held or resulting state."
+  },
+  shor: {
+    en: "branch or flow in light state",
+    pl: "rozgałęzienie lub przepływ w stanie lekkim",
+    dry_en: "light flow",
+    dry_pl: "lekki przepływ",
+    role: "FLOW / LIGHT STATE",
+    evidence: "sh- indicates light state; -or behaves as a flow or directional variant."
+  },
+  cthy: {
+    en: "heavy operation leading to result",
+    pl: "ciężka operacja prowadząca do wyniku",
+    dry_en: "heavy operation",
+    dry_pl: "ciężka operacja",
+    role: "HEAVY OPERATION",
+    evidence: "cth- is interpreted as heavy/process-intensive operation."
+  },
+  aiin: {
+    en: "end marker / closure of step",
+    pl: "znacznik zakończenia / zamknięcie kroku",
+    dry_en: "end",
+    dry_pl: "koniec",
+    role: "END MARKER",
+    evidence: "aiin/iin family is treated as termination, boundary or EOF-like marker."
+  },
+  iin: {
+    en: "minor end marker / local closure",
+    pl: "mniejszy znacznik zakończenia / lokalne zamknięcie",
+    dry_en: "local end",
+    dry_pl: "lokalny koniec",
+    role: "END MARKER",
+    evidence: "iin belongs to the aiin/iin termination family."
+  },
+  daiin: {
+    en: "completed closure after process",
+    pl: "pełne zamknięcie po procesie",
+    dry_en: "completed end",
+    dry_pl: "pełne zamknięcie",
+    role: "END / COMPLETION",
+    evidence: "d- may strengthen closure; aiin/iin family marks ending."
+  },
+  kair: {
+    en: "data object / carrier / material value",
+    pl: "obiekt danych / nośnik / wartość materiału",
+    dry_en: "material object",
+    dry_pl: "obiekt materiałowy",
+    role: "DATA",
+    evidence: "kair is treated as a DATA token: material, object or carrier."
+  },
+  kor: {
+    en: "data root / object reference",
+    pl: "rdzeń danych / odniesienie do obiektu",
+    dry_en: "object reference",
+    dry_pl: "odniesienie do obiektu",
+    role: "DATA",
+    evidence: "kor behaves as a stable data-like object token."
+  },
+  chear: {
+    en: "material or processed data object",
+    pl: "materiał lub przetworzony obiekt danych",
+    dry_en: "processed material",
+    dry_pl: "przetworzony materiał",
+    role: "DATA / MATERIAL",
+    evidence: "che- links with process/material roots."
+  },
+  ol: {
+    en: "resulting state / output condition",
+    pl: "stan wynikowy / warunek wyjściowy",
+    dry_en: "result state",
+    dry_pl: "stan wynikowy",
+    role: "RESULT STATE",
+    evidence: "ol appears as a compact state or result marker."
+  },
+  dy: {
+    en: "result / output marker",
+    pl: "wynik / znacznik wyjścia",
+    dry_en: "result",
+    dry_pl: "wynik",
+    role: "RESULT",
+    evidence: "-dy is treated as a result suffix in the PUM/VSM model."
+  }
+};
 
-  <script>
-    const translations = {
-      en: {
-        title: "Voynich PUM/VSM Interpreter",
-        subtitle: "Functional interpretation tool for the Voynich Manuscript based on the Procedural-Unary Model / Voynich Structural Model.",
-        languageLabel: "Language:",
-        disclaimer: "This tool does not claim confirmed linguistic decipherment. It provides a functional interpretation based on the PUM/VSM model.",
-        inputTitle: "1. EVA Raw Input",
-        procedureTitle: "2. Translation Procedure",
-        dryTitle: "3. Dry Translation Output",
-        modelTitle: "Model Explanation",
-        authorTitle: "Author / Research",
-        runButton: "Translate",
-        placeholder: "Paste EVA text here, e.g. qokedy chedy shol aiin",
-        known: "KNOWN",
-        unknown: "UNCERTAIN / UNKNOWN",
-        modelText: `
-          <p>The PUM/VSM model treats Voynich text not as ordinary natural language, but as a parametric and procedural system.</p>
-          <p><span class="model-code">IMAGE → PARAMETERS → TEXT DYNAMICS</span></p>
-          <p>The first window contains the raw EVA text. The second window shows how every token is processed. The third window shows only the dry functional output.</p>
-          <p>Main components: Y-axis position, b-gradient from image geometry, and Echo as local token mutation/repetition.</p>
-        `,
-        authorText: `Research concept and analytical direction: <strong>Tomasz Grabowski (Drako)</strong>. Analytical support: AI tools used for modelling, testing, structuring and presentation.`
-      },
+function setLanguage() {
+  const lang = document.getElementById("language").value;
+  const t = translations[lang];
 
-      pl: {
-        title: "Interpreter Voynich PUM/VSM",
-        subtitle: "Narzędzie interpretacji funkcjonalnej Manuskryptu Voynicha oparte na modelu Procedural-Unary Model / Voynich Structural Model.",
-        languageLabel: "Język:",
-        disclaimer: "To narzędzie nie twierdzi, że jest potwierdzonym odszyfrowaniem językowym. To interpretacja funkcjonalna oparta na modelu PUM/VSM.",
-        inputTitle: "1. Surowy tekst EVA",
-        procedureTitle: "2. Procedura tłumaczenia",
-        dryTitle: "3. Suchy wynik tłumaczenia",
-        modelTitle: "Opis modelu",
-        authorTitle: "Autor / badanie",
-        runButton: "Tłumacz",
-        placeholder: "Wklej tekst EVA, np. qokedy chedy shol aiin",
-        known: "ZNANY",
-        unknown: "NIEPEWNY / NIEZNANY",
-        modelText: `
-          <p>Model PUM/VSM traktuje tekst Voynicha nie jako zwykły język naturalny, lecz jako system parametryczny i proceduralny.</p>
-          <p><span class="model-code">OBRAZ → PARAMETRY → DYNAMIKA TEKSTU</span></p>
-          <p>Pierwsze okno zawiera surowy tekst EVA. Drugie okno pokazuje, jak każdy token jest przetwarzany. Trzecie okno pokazuje tylko suchy wynik funkcjonalny.</p>
-          <p>Główne komponenty: oś Y, gradient b zależny od geometrii obrazu oraz Echo jako lokalna mutacja/powtarzalność tokenów.</p>
-        `,
-        authorText: `Koncepcja badawcza i kierunek analizy: <strong>Tomasz Grabowski (Drako)</strong>. Wsparcie analityczne: narzędzia AI użyte do modelowania, testowania, strukturyzacji i prezentacji.`
-      }
+  document.documentElement.lang = lang;
+  document.getElementById("title").innerText = t.title;
+  document.getElementById("subtitle").innerText = t.subtitle;
+  document.getElementById("languageLabel").innerText = t.languageLabel;
+  document.getElementById("disclaimer").innerText = t.disclaimer;
+  document.getElementById("inputTitle").innerText = t.inputTitle;
+  document.getElementById("procedureTitle").innerText = t.procedureTitle;
+  document.getElementById("dryTitle").innerText = t.dryTitle;
+  document.getElementById("modelTitle").innerText = t.modelTitle;
+  document.getElementById("authorTitle").innerText = t.authorTitle;
+  document.getElementById("runButton").innerText = t.runButton;
+  document.getElementById("evaInput").placeholder = t.placeholder;
+  document.getElementById("modelText").innerHTML = t.modelText;
+  document.getElementById("authorText").innerHTML = t.authorText;
+
+  interpretText();
+}
+
+function normalizeToken(token) {
+  return token.toLowerCase().replace(/[^a-z]/g, "");
+}
+
+function isUncertain(token) {
+  return token.includes("*") || token.includes("?");
+}
+
+function interpretToken(token, lang) {
+  const clean = normalizeToken(token);
+  const uncertain = isUncertain(token);
+
+  if (dictionary[clean]) {
+    return {
+      token,
+      clean,
+      uncertain,
+      known: !uncertain,
+      role: uncertain ? "UNCERTAIN " + dictionary[clean].role : dictionary[clean].role,
+      meaning: dictionary[clean][lang],
+      dry: uncertain ? "[" + dictionary[clean]["dry_" + lang] + "]" : dictionary[clean]["dry_" + lang],
+      evidence: dictionary[clean].evidence + (uncertain ? " Original token contains uncertainty marker." : "")
     };
+  }
 
-    const dictionary = {
-      "qokedy": {
-        en: "initiate controlled processing sequence",
-        pl: "zainicjuj kontrolowaną sekwencję przetwarzania",
-        dry_en: "initiate processing",
-        dry_pl: "inicjacja przetwarzania",
-        role: "ENTRY / INITIATION",
-        evidence: "qo-/qok- appears in entry-like positions; -dy indicates result-oriented action."
-      },
-
-      "chedy": {
-        en: "process material / transform by operation",
-        pl: "przetwórz materiał / transformuj przez operację",
-        dry_en: "process material",
-        dry_pl: "przetwórz materiał",
-        role: "PROCESS",
-        evidence: "che- behaves as process/material root; -dy marks result or completed output."
-      },
-
-      "shol": {
-        en: "maintain light process / continue active state",
-        pl: "utrzymaj lekki proces / kontynuuj aktywny stan",
-        dry_en: "maintain process",
-        dry_pl: "utrzymaj proces",
-        role: "STATE / CONTINUATION",
-        evidence: "sh- is treated as a light-state marker; -ol is treated as a held or resulting state."
-      },
-
-      "shor": {
-        en: "branch or flow in light state",
-        pl: "rozgałęzienie lub przepływ w stanie lekkim",
-        dry_en: "light flow",
-        dry_pl: "lekki przepływ",
-        role: "FLOW / LIGHT STATE",
-        evidence: "sh- indicates light state; -or behaves as a flow or directional variant."
-      },
-
-      "cthy": {
-        en: "heavy operation leading to result",
-        pl: "ciężka operacja prowadząca do wyniku",
-        dry_en: "heavy operation",
-        dry_pl: "ciężka operacja",
-        role: "HEAVY OPERATION",
-        evidence: "cth- is interpreted as heavy/process-intensive operation; -y/-dy family suggests output/result."
-      },
-
-      "aiin": {
-        en: "end marker / closure of step",
-        pl: "znacznik zakończenia / zamknięcie kroku",
-        dry_en: "end",
-        dry_pl: "koniec",
-        role: "END MARKER",
-        evidence: "aiin/iin family is treated as termination, boundary or EOF-like marker."
-      },
-
-      "iin": {
-        en: "minor end marker / local closure",
-        pl: "mniejszy znacznik zakończenia / lokalne zamknięcie",
-        dry_en: "local end",
-        dry_pl: "lokalny koniec",
-        role: "END MARKER",
-        evidence: "iin belongs to the aiin/iin termination family."
-      },
-
-      "daiin": {
-        en: "completed closure after process",
-        pl: "pełne zamknięcie po procesie",
-        dry_en: "completed end",
-        dry_pl: "pełne zamknięcie",
-        role: "END / COMPLETION",
-        evidence: "d- may strengthen closure; aiin/iin family marks ending."
-      },
-
-      "kair": {
-        en: "data object / carrier / material value",
-        pl: "obiekt danych / nośnik / wartość materiału",
-        dry_en: "material object",
-        dry_pl: "obiekt materiałowy",
-        role: "DATA",
-        evidence: "kair is treated as a DATA token: material, object or carrier."
-      },
-
-      "kor": {
-        en: "data root / object reference",
-        pl: "rdzeń danych / odniesienie do obiektu",
-        dry_en: "object reference",
-        dry_pl: "odniesienie do obiektu",
-        role: "DATA",
-        evidence: "kor behaves as a stable data-like object token."
-      },
-
-      "chear": {
-        en: "material or processed data object",
-        pl: "materiał lub przetworzony obiekt danych",
-        dry_en: "processed material",
-        dry_pl: "przetworzony materiał",
-        role: "DATA / MATERIAL",
-        evidence: "che- links with process/material roots; -ar may indicate object/state form."
-      },
-
-      "ol": {
-        en: "resulting state / output condition",
-        pl: "stan wynikowy / warunek wyjściowy",
-        dry_en: "result state",
-        dry_pl: "stan wynikowy",
-        role: "RESULT STATE",
-        evidence: "ol appears as a compact state or result marker."
-      },
-
-      "dy": {
-        en: "result / output marker",
-        pl: "wynik / znacznik wyjścia",
-        dry_en: "result",
-        dry_pl: "wynik",
-        role: "RESULT",
-        evidence: "-dy is treated as a result suffix in the PUM/VSM model."
-      }
+  if (clean.endsWith("dy")) {
+    return {
+      token,
+      clean,
+      uncertain: true,
+      known: false,
+      role: "PROBABLE RESULT",
+      meaning: lang === "en" ? "uncertain result-form token" : "niepewny token formy wynikowej",
+      dry: "[" + clean + "]",
+      evidence: "Suffix -dy suggests possible result/output behaviour, but the full token is not confirmed."
     };
+  }
 
-    function setLanguage() {
-      const lang = document.getElementById("language").value;
-      const t = translations[lang];
+  if (clean.startsWith("sh")) {
+    return {
+      token,
+      clean,
+      uncertain: true,
+      known: false,
+      role: "PROBABLE LIGHT STATE",
+      meaning: lang === "en" ? "uncertain light-state token" : "niepewny token stanu lekkiego",
+      dry: "[" + clean + "]",
+      evidence: "Prefix sh- suggests possible light-state behaviour, but the full token is not confirmed."
+    };
+  }
 
-      document.documentElement.lang = lang;
+  if (clean.startsWith("cth")) {
+    return {
+      token,
+      clean,
+      uncertain: true,
+      known: false,
+      role: "PROBABLE HEAVY OPERATION",
+      meaning: lang === "en" ? "uncertain heavy-operation token" : "niepewny token ciężkiej operacji",
+      dry: "[" + clean + "]",
+      evidence: "Prefix cth- suggests possible heavy/process-intensive operation, but the full token is not confirmed."
+    };
+  }
 
-      document.getElementById("title").innerText = t.title;
-      document.getElementById("subtitle").innerText = t.subtitle;
-      document.getElementById("languageLabel").innerText = t.languageLabel;
-      document.getElementById("disclaimer").innerText = t.disclaimer;
-      document.getElementById("inputTitle").innerText = t.inputTitle;
-      document.getElementById("procedureTitle").innerText = t.procedureTitle;
-      document.getElementById("dryTitle").innerText = t.dryTitle;
-      document.getElementById("modelTitle").innerText = t.modelTitle;
-      document.getElementById("authorTitle").innerText = t.authorTitle;
-      document.getElementById("runButton").innerText = t.runButton;
-      document.getElementById("evaInput").placeholder = t.placeholder;
-      document.getElementById("modelText").innerHTML = t.modelText;
-      document.getElementById("authorText").innerHTML = t.authorText;
+  if (clean.endsWith("iin")) {
+    return {
+      token,
+      clean,
+      uncertain: true,
+      known: false,
+      role: "PROBABLE END MARKER",
+      meaning: lang === "en" ? "uncertain end marker" : "niepewny znacznik zakończenia",
+      dry: "[" + clean + "]",
+      evidence: "Suffix -iin belongs to the aiin/iin termination family, but the exact token is not confirmed."
+    };
+  }
 
-      interpretText();
+  return {
+    token,
+    clean,
+    uncertain: true,
+    known: false,
+    role: "UNKNOWN",
+    meaning: lang === "en" ? "unknown token" : "nieznany token",
+    dry: "[" + clean + "]",
+    evidence: "No stable mapping yet in the current PUM/VSM dictionary."
+  };
+}
+
+function buildDryTranslation(interpreted, lang) {
+  const tokens = interpreted.map(i => i.clean);
+  const phrases = [];
+  let i = 0;
+
+  while (i < tokens.length) {
+    const current = tokens[i];
+    const next = tokens[i + 1];
+    const third = tokens[i + 2];
+    const fourth = tokens[i + 3];
+
+    if (current === "qokedy" && next === "qokedy" && third === "chedy") {
+      phrases.push(lang === "en"
+        ? "begin repeated material processing"
+        : "rozpocznij powtórzone przetwarzanie materiału");
+      i += 3;
+      continue;
     }
 
-    function normalizeToken(token) {
-      return token.toLowerCase().replace(/[^a-z]/g, "");
+    if (current === "qokedy" && next === "chedy" && third === "shol" && fourth === "aiin") {
+      phrases.push(lang === "en"
+        ? "initiate material processing, maintain state, then close the step"
+        : "zainicjuj przetwarzanie materiału, utrzymaj stan, następnie zamknij krok");
+      i += 4;
+      continue;
     }
 
-    function interpretToken(token, lang) {
-      const clean = normalizeToken(token);
-
-      if (dictionary[clean]) {
-        return {
-          token: token,
-          clean: clean,
-          known: true,
-          role: dictionary[clean].role,
-          meaning: dictionary[clean][lang],
-          dry: dictionary[clean]["dry_" + lang],
-          evidence: dictionary[clean].evidence
-        };
-      }
-
-      if (clean.endsWith("dy")) {
-        return {
-          token: token,
-          clean: clean,
-          known: false,
-          role: "PROBABLE RESULT",
-          meaning: lang === "en" ? "uncertain result-form token" : "niepewny token formy wynikowej",
-          dry: "[" + clean + "]",
-          evidence: "Suffix -dy suggests possible result/output behaviour, but the full token is not confirmed yet."
-        };
-      }
-
-      if (clean.startsWith("sh")) {
-        return {
-          token: token,
-          clean: clean,
-          known: false,
-          role: "PROBABLE LIGHT STATE",
-          meaning: lang === "en" ? "uncertain light-state token" : "niepewny token stanu lekkiego",
-          dry: "[" + clean + "]",
-          evidence: "Prefix sh- suggests possible light-state behaviour, but the full token is not confirmed yet."
-        };
-      }
-
-      if (clean.startsWith("cth")) {
-        return {
-          token: token,
-          clean: clean,
-          known: false,
-          role: "PROBABLE HEAVY OPERATION",
-          meaning: lang === "en" ? "uncertain heavy-operation token" : "niepewny token ciężkiej operacji",
-          dry: "[" + clean + "]",
-          evidence: "Prefix cth- suggests possible heavy/process-intensive operation, but the full token is not confirmed yet."
-        };
-      }
-
-      if (clean.endsWith("iin")) {
-        return {
-          token: token,
-          clean: clean,
-          known: false,
-          role: "PROBABLE END MARKER",
-          meaning: lang === "en" ? "uncertain end marker" : "niepewny znacznik zakończenia",
-          dry: "[" + clean + "]",
-          evidence: "Suffix -iin belongs to the aiin/iin termination family, but the exact token is not confirmed yet."
-        };
-      }
-
-      return {
-        token: token,
-        clean: clean,
-        known: false,
-        role: "UNKNOWN",
-        meaning: lang === "en" ? "unknown token" : "nieznany token",
-        dry: "[" + clean + "]",
-        evidence: "No stable mapping yet in the current PUM/VSM dictionary."
-      };
+    if (current === "chedy" && next === "chedy") {
+      phrases.push(lang === "en"
+        ? "repeat material processing"
+        : "powtórz przetwarzanie materiału");
+      i += 2;
+      continue;
     }
 
-    function interpretText() {
-      const lang = document.getElementById("language").value;
-      const input = document.getElementById("evaInput").value.trim();
-
-      if (!input) {
-        document.getElementById("procedureOutput").innerText = "";
-        document.getElementById("dryOutput").innerText = "";
-        return;
-      }
-
-      const tokens = input.split(/\s+/);
-      const interpreted = tokens.map(t => interpretToken(t, lang));
-
-      let procedure = "";
-
-      interpreted.forEach((item, index) => {
-        procedure += `${index + 1}. TOKEN: ${item.token}\n`;
-        procedure += `   NORMALIZED: ${item.clean}\n`;
-        procedure += `   STATUS: ${item.known ? translations[lang].known : translations[lang].unknown}\n`;
-        procedure += `   ROLE: ${item.role}\n`;
-        procedure += `   METHOD: ${item.evidence}\n`;
-        procedure += `   FUNCTIONAL OUTPUT: ${item.meaning}\n`;
-        procedure += `   DRY OUTPUT: ${item.dry}\n\n`;
-      });
-
-      document.getElementById("procedureOutput").innerText = procedure;
-
-      const dryTranslation = interpreted.map(item => item.dry).join(" → ");
-      document.getElementById("dryOutput").innerText = dryTranslation;
+    if (current === "shol" && next === "shol") {
+      phrases.push(lang === "en"
+        ? "maintain state continuously"
+        : "utrzymuj stan ciągle");
+      i += 2;
+      continue;
     }
 
-    document.getElementById("language").value = "en";
-    setLanguage();
-  </script>
+    if (current === "shor" && next === "kair" && third === "ol" && fourth === "aiin") {
+      phrases.push(lang === "en"
+        ? "direct material flow into final state and close"
+        : "skieruj przepływ materiału do stanu końcowego i zamknij");
+      i += 4;
+      continue;
+    }
+
+    if (current === "cthy" && next === "chedy") {
+      phrases.push(lang === "en"
+        ? "apply heavy operation to processed material"
+        : "zastosuj ciężką operację na przetwarzanym materiale");
+      i += 2;
+      continue;
+    }
+
+    if (current === "aiin") {
+      phrases.push(lang === "en" ? "close step" : "zamknij krok");
+      i += 1;
+      continue;
+    }
+
+    if (current === "daiin") {
+      phrases.push(lang === "en" ? "complete closure" : "pełne zamknięcie");
+      i += 1;
+      continue;
+    }
+
+    if (!interpreted[i].known) {
+      phrases.push("[" + interpreted[i].clean + "]");
+      i += 1;
+      continue;
+    }
+
+    phrases.push(interpreted[i].dry);
+    i += 1;
+  }
+
+  return phrases.join(". ") + ".";
+}
+
+function buildProcedure(interpreted, lang) {
+  let output = "";
+
+  interpreted.forEach((item, index) => {
+    output += `${index + 1}. TOKEN: ${item.token}\n`;
+    output += `   NORMALIZED: ${item.clean}\n`;
+    output += `   STATUS: ${item.known ? translations[lang].known : translations[lang].unknown}\n`;
+    output += `   ROLE: ${item.role}\n`;
+    output += `   METHOD: ${item.evidence}\n`;
+    output += `   FUNCTIONAL OUTPUT: ${item.meaning}\n`;
+    output += `   DRY TOKEN OUTPUT: ${item.dry}\n\n`;
+  });
+
+  output += "PHRASE BUILDER:\n";
+  output += buildDryTranslation(interpreted, lang);
+
+  return output;
+}
+
+function interpretText() {
+  const lang = document.getElementById("language").value;
+  const input = document.getElementById("evaInput").value.trim();
+
+  if (!input) {
+    document.getElementById("procedureOutput").innerText = "";
+    document.getElementById("dryOutput").innerText = "";
+    return;
+  }
+
+  const tokens = input.split(/\s+/);
+  const interpreted = tokens.map(t => interpretToken(t, lang));
+
+  document.getElementById("procedureOutput").innerText = buildProcedure(interpreted, lang);
+  document.getElementById("dryOutput").innerText = buildDryTranslation(interpreted, lang);
+}
+
+document.getElementById("language").value = "en";
+setLanguage();
+</script>
 
 </body>
 </html>
