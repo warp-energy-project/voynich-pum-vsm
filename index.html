@@ -877,5 +877,75 @@ document.addEventListener("DOMContentLoaded",()=>{
 })();
 </script>
 <!-- NAVI PATCH: OCR IMAGE TO EVA END -->
+  <!-- NAVI OCR FIX START -->
+<script>
+(function(){
+  function ready(fn){
+    if(document.readyState !== "loading") fn();
+    else document.addEventListener("DOMContentLoaded", fn);
+  }
+
+  ready(function(){
+
+    const lang = document.getElementById("language")?.value || "en";
+    const folioImage = document.getElementById("folioImage");
+    const extracted = document.getElementById("naviExtractedEva");
+
+    if(!folioImage || !extracted) return;
+
+    // 🔹 Dodaj przycisk OCR jeśli go nie ma
+    if(!document.getElementById("naviOcrBtn")){
+      const btn = document.createElement("button");
+      btn.id = "naviOcrBtn";
+      btn.innerText = lang === "pl"
+        ? "Odczytaj tekst z obrazka (OCR)"
+        : "Read text from image (OCR)";
+
+      btn.style.marginTop = "10px";
+
+      extracted.parentElement.appendChild(btn);
+
+      btn.addEventListener("click", async function(){
+
+        if(!window.Tesseract){
+          alert("OCR library not loaded");
+          return;
+        }
+
+        btn.innerText = lang === "pl" ? "Czytam..." : "Reading...";
+
+        try{
+          const result = await Tesseract.recognize(
+            folioImage.src,
+            "eng"
+          );
+
+          let text = result.data.text || "";
+
+          // 🔥 filtr pod EVA
+          text = text
+            .toLowerCase()
+            .replace(/[^a-z\s]/g, " ")
+            .replace(/\s+/g, " ")
+            .trim();
+
+          extracted.value = text;
+
+          btn.innerText = lang === "pl"
+            ? "Gotowe — sprawdź tekst"
+            : "Done — check text";
+
+        }catch(e){
+          console.error(e);
+          btn.innerText = "OCR error";
+        }
+
+      });
+    }
+
+  });
+})();
+</script>
+<!-- NAVI OCR FIX END -->
 </body>
 </html>
