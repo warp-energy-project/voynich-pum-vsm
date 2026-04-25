@@ -631,5 +631,66 @@ document.addEventListener("DOMContentLoaded",()=>{
   });
 });
 </script>
+  <!-- NAVI PATCH ZONE START -->
+<script>
+(function(){
+  function ready(fn){
+    if(document.readyState !== "loading") fn();
+    else document.addEventListener("DOMContentLoaded", fn);
+  }
+
+  ready(function(){
+
+    const lang = document.getElementById("language")?.value || "en";
+
+    const extractedEva = document.getElementById("extractedEva");
+    const evaInput = document.getElementById("evaInput");
+    const imagePanel = document.querySelector(".image-panel");
+
+    if(!extractedEva || !evaInput || !imagePanel) return;
+
+    if(!document.getElementById("extractFromImageButton")){
+      const btn = document.createElement("button");
+      btn.id = "extractFromImageButton";
+      btn.type = "button";
+      btn.innerText = lang === "pl"
+        ? "Przenieś tekst EVA z obrazu do tłumacza"
+        : "Move EVA text from image panel to translator";
+
+      btn.addEventListener("click", function(){
+        const text = extractedEva.value.trim();
+
+        if(!text){
+          alert(lang === "pl"
+            ? "Najpierw wklej albo wpisz tekst EVA w polu pod obrazkiem. Sam obraz nie jest jeszcze automatycznie czytany."
+            : "First paste or type EVA text in the field under the image. The raw image is not automatically read yet.");
+          return;
+        }
+
+        evaInput.value = text;
+
+        if(typeof interpretText === "function"){
+          interpretText();
+        }
+      });
+
+      imagePanel.appendChild(btn);
+    }
+
+    const note = document.createElement("p");
+    note.className = "small-note";
+    note.innerText = lang === "pl"
+      ? "Uwaga: obraz służy jako podgląd folio. Aby tłumaczyć, wklej transkrypcję EVA pod obrazkiem i kliknij przycisk przeniesienia do tłumacza."
+      : "Note: the image is a folio preview. To translate, paste EVA transcription under the image and move it to the translator.";
+
+    if(!document.getElementById("ocrNotePatch")){
+      note.id = "ocrNotePatch";
+      imagePanel.appendChild(note);
+    }
+
+  });
+})();
+</script>
+<!-- NAVI PATCH ZONE END -->
 </body>
 </html>
