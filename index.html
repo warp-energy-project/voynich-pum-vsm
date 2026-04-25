@@ -3,125 +3,760 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<meta name="referrer" content="no-referrer-when-downgrade">
 <title>Voynich PUM/VSM Interpreter</title>
+
 <style>
-:root{ --bg:#07111f;--card:#111827;--soft:#1f2937;--text:#e5e7eb;--accent:#38bdf8;--green:#00ffaa;--danger:#f87171; }
-body{ margin:0; font-family:Arial,sans-serif; background:#07111f; color:var(--text); }
-header{ padding:40px; text-align:center; background:rgba(0,0,0,0.3); }
-main{ max-width:1200px; margin:auto; padding:20px; }
-section{ background:var(--card); border:1px solid #334155; border-radius:15px; padding:20px; margin-bottom:20px; }
-.grid{ display:grid; grid-template-columns: 1fr 1fr; gap:20px; }
-.image-wrap{ width:100%; height:500px; overflow:auto; background:#000; border-radius:10px; display:flex; align-items:center; justify-content:center; border:2px solid #334155; }
-#folioImage{ max-width:100%; transition: transform 0.2s; }
-textarea{ width:100%; height:150px; background:#020617; color:#00ffaa; border:1px solid #475569; border-radius:8px; padding:10px; font-family: monospace; }
-button, select{ padding:10px 15px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; background:var(--accent); margin-right:5px; }
-.controls{ margin-bottom:15px; }
-h2, h3{ color:var(--accent); margin-top:0; }
-@media(max-width:800px){ .grid{ grid-template-columns: 1fr; } }
+:root{
+  --bg:#07111f;--card:#111827;--soft:#1f2937;--text:#e5e7eb;
+  --muted:#9ca3af;--accent:#38bdf8;--green:#00ffaa;--danger:#f87171;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:Arial,Helvetica,sans-serif;
+  background:radial-gradient(circle at top,#12324d 0,#020617 45%,#07111f 100%);
+  color:var(--text);line-height:1.6;
+}
+header{padding:45px 20px 25px;text-align:center}
+header h1{margin:0;font-size:2.5rem;color:var(--accent)}
+header p{max-width:900px;margin:12px auto;color:var(--muted)}
+main{max-width:1250px;margin:auto;padding:20px}
+section{
+  background:rgba(17,24,39,.94);border:1px solid #334155;
+  border-radius:18px;padding:22px;margin-bottom:22px;box-shadow:0 12px 35px rgba(0,0,0,.28);
+}
+h2,h3{margin-top:0;color:var(--accent)}
+textarea,input[type=text]{
+  width:100%;background:#020617;color:var(--text);
+  border:1px solid #475569;border-radius:12px;padding:13px;font-size:1rem;
+}
+textarea{min-height:170px}
+button,select,input[type=file]{
+  margin-top:10px;padding:11px 16px;border-radius:10px;border:none;
+  font-weight:bold;cursor:pointer;
+}
+button{background:var(--accent);color:#020617}
+select,input[type=file]{background:var(--soft);color:var(--text);border:1px solid #475569}
+.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.result-box{
+  background:#020617;border:1px solid #334155;border-radius:12px;
+  padding:15px;margin-top:15px;white-space:pre-wrap;min-height:120px;
+}
+.warning{border-left:5px solid var(--danger);padding-left:15px;color:#fecaca}
+.hero-text{
+  background:rgba(0,255,170,.06);border-left:4px solid var(--green);
+  padding:18px 22px;border-radius:12px;font-size:1rem;white-space:pre-wrap;
+}
+.source-button{
+  display:inline-block;background:var(--green);color:#021018;text-decoration:none;
+  padding:12px 18px;border-radius:12px;font-weight:bold;
+}
+.image-panel{background:#020617;border:1px solid #334155;border-radius:14px;padding:15px}
+.image-wrap{
+  width:100%;height:460px;overflow:auto;border:1px solid #334155;border-radius:12px;
+  background:#000;display:flex;align-items:center;justify-content:center;
+}
+.image-wrap:focus{outline:2px solid var(--green)}
+#folioImage{max-width:100%;transform-origin:center center;transition:transform .2s ease}
+.placeholder{color:var(--muted);text-align:center;padding:30px}
+.small-note{color:var(--muted);font-size:.95rem;margin:8px 0 12px}
+.probability-bar{
+  width:100%;height:26px;background:#020617;border:1px solid #334155;
+  border-radius:20px;overflow:hidden;margin:12px 0;
+}
+.probability-fill{
+  height:100%;width:0%;background:linear-gradient(90deg,#f59e0b,#22c55e);
+  transition:width .3s ease;
+}
+.model-code{color:#bae6fd;font-weight:bold}
+footer{text-align:center;padding:25px;color:var(--muted);border-top:1px solid #334155}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.image-wrap{height:330px}}
 </style>
 </head>
-<body>
 
+<body>
 <header>
-  <h1>Voynich PUM/VSM Interpreter</h1>
-  <p>Tomasz Grabowski (Drako) & AI Collaboration</p>
+  <h1 id="pageTitle">Voynich PUM/VSM Interpreter</h1>
+  <p id="pageSubtitle">Functional interpretation tool for the Voynich Manuscript.</p>
 </header>
 
 <main>
-  <section>
-    <div class="grid">
-      <div>
-        <h3>Folio Selector</h3>
-        <div class="controls">
-          <select id="folioSelector"></select>
-          <button id="loadBtn">Load Folio</button>
-        </div>
-        
-        <div class="image-wrap" id="imageContainer">
-          <img id="folioImage" src="" style="display:none;">
-          <div id="imgStatus">Select a folio and press Load</div>
-        </div>
-        
-        <div class="controls" style="margin-top:10px;">
-          <button onclick="adjustZoom(0.2)">+ Zoom</button>
-          <button onclick="adjustZoom(-0.2)">- Zoom</button>
-          <button onclick="resetZoom()">Reset</button>
-        </div>
+
+<section>
+  <div class="controls">
+    <label id="languageLabel" for="language">Language:</label>
+    <select id="language">
+      <option value="en" selected>English</option>
+      <option value="pl">Polski</option>
+    </select>
+  </div>
+  <p class="warning" id="disclaimer"></p>
+</section>
+
+<section>
+  <div class="hero-text" id="heroText"></div>
+</section>
+
+<section>
+  <h2 id="sourceTitle">Original Manuscript Source</h2>
+  <p id="sourceText"></p>
+  <a class="source-button" href="https://collections.library.yale.edu/catalog/2002046" target="_blank" rel="noopener noreferrer" id="sourceButton">
+    Open Yale Original
+  </a>
+</section>
+
+<section>
+  <h2 id="workspaceTitle">Folio Workspace</h2>
+
+  <div class="grid">
+    <div class="image-panel">
+      <h3 id="folioSelectTitle">Voynich Folio Selector</h3>
+
+      <div class="controls">
+        <select id="folioSelector"></select>
+        <button type="button" id="loadFolioButton">Load selected folio</button>
       </div>
 
-      <div>
-        <h3>EVA Input</h3>
-        <textarea id="evaInput" placeholder="EVA text will appear here..."></textarea>
-        <button id="translateBtn" style="width:100%; margin-top:10px; background:var(--green); color:#000;">Run PUM/VSM Interpretation</button>
-        
-        <h3 style="margin-top:20px;">Interpretation Result</h3>
-        <div id="output" style="background:#020617; padding:15px; border-radius:10px; min-height:200px; white-space:pre-wrap; border:1px solid #334155;"></div>
+      <p id="folioInfo" class="small-note"></p>
+
+      <h3 id="imageTitle">Folio Image</h3>
+
+      <p class="small-note">
+        Stable mode: select folio for EVA data, upload image manually, paste screenshot, or paste a direct image URL.
+      </p>
+
+      <input type="text" id="imageUrlInput" placeholder="Paste direct image URL here, then click Load image URL..." />
+
+      <div class="controls">
+        <button type="button" id="loadImageUrlButton">Load image URL</button>
+        <input type="file" id="imageUpload" accept="image/*" />
+        <button type="button" id="clearImageButton">Clear Image</button>
+      </div>
+
+      <p id="pasteHint" class="small-note"></p>
+
+      <div class="controls">
+        <button type="button" id="zoomOut">- Zoom</button>
+        <button type="button" id="zoomIn">+ Zoom</button>
+        <button type="button" id="zoomReset">Reset</button>
+      </div>
+
+      <div class="image-wrap" id="imageWrap" tabindex="0">
+        <div class="placeholder" id="imagePlaceholder">Upload/paste image, paste image URL, or select a folio.</div>
+        <img id="folioImage" alt="Folio preview" style="display:none;" />
+      </div>
+
+      <div class="result-box">
+        <h3 id="extractedTitle">EVA Text From Selected Folio / Transcription</h3>
+        <p id="extractedHint" class="small-note"></p>
+        <textarea id="extractedEva"></textarea>
+        <div class="controls">
+          <button id="copyEvaButton" type="button">Copy EVA to Translator</button>
+          <button id="clearEvaButton" type="button">Clear EVA</button>
+        </div>
       </div>
     </div>
-  </section>
+
+    <div>
+      <h3 id="contextTitle">Visual Context</h3>
+      <select id="visualContext">
+        <option value="plant">Plant / Roślina</option>
+        <option value="process">Process / Ludzie + rury + kąpiel</option>
+        <option value="jars">Jars / Słoiki / pojemniki</option>
+        <option value="astro">Astro / Diagram</option>
+      </select>
+
+      <h3 id="inputTitle">1. EVA Raw Input</h3>
+      <textarea id="evaInput"></textarea>
+      <button id="runButton" type="button">Translate</button>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2 id="procedureTitle">2. Translation Procedure</h2>
+  <div id="procedureOutput" class="result-box"></div>
+</section>
+
+<section>
+  <h2 id="finalTitle">3. Final Functional Reading</h2>
+  <div id="finalOutput" class="result-box"></div>
+</section>
+
+<section>
+  <h2 id="probabilityTitle">4. Translation Probability / Confidence</h2>
+  <div class="probability-bar"><div id="probabilityFill" class="probability-fill"></div></div>
+  <div id="probabilityOutput" class="result-box"></div>
+</section>
+
+<section>
+  <h2 id="modelTitle">Model Explanation</h2>
+  <div id="modelText"></div>
+</section>
+
+<section>
+  <h2 id="authorTitle">Author / Research</h2>
+  <p id="authorText"></p>
+</section>
+
 </main>
 
-<script>
-const YALE_BASE = "https://iiif.library.yale.edu/iiif/2/digcoll:2002046/";
-let currentZoom = 1;
+<footer>Voynich PUM/VSM Project — Functional Interpretation Framework</footer>
 
-const FOLIO_DB = {
-  "f1r": { img: "1006195", context: "plant", eva: "qokedy qokedy chedy chedy shol shol aiin qokedy chedy shor kair ol aiin" },
-  "f8r": { img: "1006209", context: "plant", eva: "qokedy chedy kair shol aiin ol dy" },
-  "f78r": { img: "1006349", context: "process", eva: "qokedy chedy shol shor kair aiin kair shor chedy ol aiin" }
+<script>
+let zoomLevel = 1;
+
+const ui = {
+  en:{
+    title:"Voynich PUM/VSM Interpreter",
+    subtitle:"Functional interpretation tool for the Voynich Manuscript.",
+    languageLabel:"Language:",
+    disclaimer:"This tool does not claim confirmed linguistic decipherment. It provides a functional interpretation based on the PUM/VSM model.",
+    hero:`The Voynich Manuscript is not simply an unread book — it is a structured system where image, repetition and position converge into a functional code.
+
+The PUM/VSM Interpreter approaches the manuscript not as a hidden natural language, but as a framework:
+Visual Object → Parameters → Text Function.
+
+This project is led by Tomasz Grabowski (Drako), with analytical support from AI systems (Navi / ChatGPT + Gemini / Brat). It moves beyond traditional linguistic decoding toward structural and procedural interpretation.
+
+We do not claim a final decipherment. Instead, we present a research tool designed to test hypotheses, expose patterns, and make the internal logic of the manuscript visible.`,
+    sourceTitle:"Original Manuscript Source",
+    sourceText:"Voynich Manuscript, Beinecke Rare Book and Manuscript Library, Yale University. Open the original digital record in a new browser tab.",
+    sourceButton:"Open Yale Original",
+    workspaceTitle:"Folio Workspace",
+    folioSelectTitle:"Voynich Folio Selector",
+    loadFolioButton:"Load selected folio",
+    imageTitle:"Folio Image",
+    pasteHint:"You can upload a folio image or click inside the black image area and press Ctrl+V to paste a screenshot.",
+    extractedTitle:"EVA Text From Selected Folio / Transcription",
+    extractedHint:"Select a folio to load available local EVA text. If the folio has no local EVA data yet, paste a transcription manually. The interpreter translates EVA text, not raw image pixels.",
+    copyEvaButton:"Copy EVA to Translator",
+    clearEvaButton:"Clear EVA",
+    extractedPlaceholder:"EVA text for the selected folio appears here...",
+    contextTitle:"Visual Context",
+    inputTitle:"1. EVA Raw Input",
+    procedureTitle:"2. Translation Procedure",
+    finalTitle:"3. Final Functional Reading",
+    probabilityTitle:"4. Translation Probability / Confidence",
+    modelTitle:"Model Explanation",
+    authorTitle:"Author / Research",
+    runButton:"Translate",
+    clearImageButton:"Clear Image",
+    placeholder:"Paste EVA text here",
+    known:"KNOWN",
+    unknown:"UNCERTAIN / UNKNOWN",
+    modelText:`<p>The PUM/VSM model treats Voynich text as a parametric/procedural system.</p>
+    <p><span class="model-code">VISUAL OBJECT → PARAMETERS → TEXT FUNCTION</span></p>
+    <p>This stable version separates three layers: folio image, EVA transcription, and PUM/VSM functional interpretation.</p>`,
+    authorText:`Research concept and analytical direction: <strong>Tomasz Grabowski (Drako)</strong>. Analytical support: Navi / ChatGPT + Gemini / Brat.`
+  },
+  pl:{
+    title:"Voynich PUM/VSM Interpreter",
+    subtitle:"Narzędzie interpretacji funkcjonalnej Manuskryptu Voynicha.",
+    languageLabel:"Język:",
+    disclaimer:"To narzędzie nie twierdzi, że jest potwierdzonym odszyfrowaniem językowym. To interpretacja funkcjonalna oparta na modelu PUM/VSM.",
+    hero:`Manuskrypt Voynicha to nie tylko nieprzeczytana księga — to uporządkowany system, w którym obraz, powtarzalność i pozycja tworzą funkcjonalny kod.
+
+Interpreter PUM/VSM traktuje manuskrypt nie jako ukryty język naturalny, lecz jako strukturę:
+Obiekt Wizualny → Parametry → Funkcja Tekstu.
+
+Projekt prowadzony przez Tomasza Grabowskiego (Drako), wspierany przez analizę systemów AI (Navi / ChatGPT + Gemini / Brat), wychodzi poza klasyczne podejście lingwistyczne i skupia się na interpretacji strukturalnej i proceduralnej.
+
+Nie twierdzimy, że jest to pełne odszyfrowanie. To narzędzie badawcze do testowania hipotez, wykrywania wzorców i ujawniania wewnętrznej logiki manuskryptu.`,
+    sourceTitle:"Oryginalne źródło manuskryptu",
+    sourceText:"Manuskrypt Voynicha, Beinecke Rare Book and Manuscript Library, Yale University. Otwórz oryginalny zapis cyfrowy w nowej karcie.",
+    sourceButton:"Otwórz oryginał Yale",
+    workspaceTitle:"Obszar pracy folio",
+    folioSelectTitle:"Wybór folio Voynicha",
+    loadFolioButton:"Załaduj wybrane folio",
+    imageTitle:"Obraz folio",
+    pasteHint:"Możesz przesłać obraz folio albo kliknąć w czarne pole i wkleić screenshot przez Ctrl+V.",
+    extractedTitle:"Tekst EVA z wybranego folio / transkrypcji",
+    extractedHint:"Wybierz folio, aby załadować dostępny lokalny tekst EVA. Jeśli folio nie ma jeszcze danych EVA, wklej transkrypcję ręcznie. Interpreter tłumaczy tekst EVA, nie surowy obraz.",
+    copyEvaButton:"Kopiuj EVA do tłumacza",
+    clearEvaButton:"Wyczyść EVA",
+    extractedPlaceholder:"Tutaj pojawi się tekst EVA dla wybranego folio...",
+    contextTitle:"Kontekst wizualny",
+    inputTitle:"1. Surowy tekst EVA",
+    procedureTitle:"2. Procedura tłumaczenia",
+    finalTitle:"3. Ostateczny odczyt funkcjonalny",
+    probabilityTitle:"4. Prawdopodobieństwo tłumaczenia",
+    modelTitle:"Opis modelu",
+    authorTitle:"Autor / badanie",
+    runButton:"Tłumacz",
+    clearImageButton:"Wyczyść obraz",
+    placeholder:"Wklej tekst EVA",
+    known:"ZNANY",
+    unknown:"NIEPEWNY / NIEZNANY",
+    modelText:`<p>Model PUM/VSM traktuje tekst Voynicha jako system parametryczny/proceduralny.</p>
+    <p><span class="model-code">OBIEKT WIZUALNY → PARAMETRY → FUNKCJA TEKSTU</span></p>
+    <p>Ta stabilna wersja rozdziela trzy warstwy: obraz folio, transkrypcję EVA i interpretację funkcjonalną PUM/VSM.</p>`,
+    authorText:`Koncepcja badawcza i kierunek analizy: <strong>Tomasz Grabowski (Drako)</strong>. Wsparcie analityczne: Navi / ChatGPT + Gemini / Brat.`
+  }
 };
 
-// Inicjalizacja listy
-const sel = document.getElementById('folioSelector');
-for(let i=1; i<=116; i++) {
-  ['r','v'].forEach(side => {
-    let id = `f${i}${side}`;
-    let opt = document.createElement('option');
-    opt.value = id;
-    opt.textContent = FOLIO_DB[id] ? `${id} (Data Ready)` : id;
-    sel.appendChild(opt);
+const dictionary = {
+  qokedy:{role:"ENTRY", weight:.90, en:"initiate", pl:"inicjacja"},
+  chedy:{role:"PROCESS", weight:.88, en:"process material", pl:"przetwarzanie materiału"},
+  shol:{role:"STATE", weight:.84, en:"maintain state", pl:"utrzymanie stanu"},
+  shor:{role:"FLOW", weight:.78, en:"direct flow", pl:"skierowanie przepływu"},
+  cthy:{role:"HEAVY_OPERATION", weight:.72, en:"heavy operation", pl:"ciężka operacja"},
+  aiin:{role:"END", weight:.91, en:"close step", pl:"zamknięcie kroku"},
+  iin:{role:"END", weight:.80, en:"local end", pl:"lokalne zakończenie"},
+  daiin:{role:"END", weight:.83, en:"complete closure", pl:"pełne zamknięcie"},
+  kair:{role:"DATA", weight:.76, en:"carrier/material object", pl:"nośnik/obiekt materiałowy"},
+  kor:{role:"DATA", weight:.74, en:"object reference", pl:"odniesienie do obiektu"},
+  chear:{role:"DATA", weight:.70, en:"processed material", pl:"przetworzony materiał"},
+  ol:{role:"RESULT", weight:.82, en:"resulting state", pl:"stan wynikowy"},
+  dy:{role:"RESULT", weight:.65, en:"result marker", pl:"znacznik wyniku"}
+};
+
+/*
+  STABLE LOCAL DATABASE.
+  Add real image URLs only after checking they open directly in browser.
+  If img is empty, user can upload/paste image manually.
+*/
+const FOLIO_DB = {
+  "f1r": {
+    title:"f1r",
+    context:"plant",
+    img:"",
+    eva:"qokedy qokedy chedy chedy shol shol aiin qokedy chedy shor kair ol aiin",
+    note:"Sample EVA. Add verified image URL later."
+  },
+  "f8r": {
+    title:"f8r",
+    context:"plant",
+    img:"",
+    eva:"qokedy chedy shol shor kair aiin kair shor chedy ol aiin",
+    note:"Sample EVA. Upload folio image manually or paste direct image URL."
+  },
+  "f49r": {
+    title:"f49r",
+    context:"process",
+    img:"",
+    eva:"kair shor chedy ol aiin qokedy chedy shol aiin cthy chedy shor kair aiin",
+    note:"Sample EVA for process section."
+  },
+  "f75r": {
+    title:"f75r",
+    context:"process",
+    img:"",
+    eva:"qokedy chedy shol shor kair aiin kair shor chedy ol aiin qokedy chedy shol aiin",
+    note:"Sample EVA for balneo/process testing."
+  }
+};
+
+function allFolioLabels(){
+  const labels=[];
+  for(let i=1;i<=116;i++){
+    labels.push(`f${i}r`);
+    labels.push(`f${i}v`);
+  }
+  return labels;
+}
+
+function setLanguage(){
+  const lang=document.getElementById("language").value;
+  const t=ui[lang];
+
+  document.documentElement.lang=lang;
+  document.getElementById("pageTitle").innerText=t.title;
+  document.getElementById("pageSubtitle").innerText=t.subtitle;
+  document.getElementById("languageLabel").innerText=t.languageLabel;
+  document.getElementById("disclaimer").innerText=t.disclaimer;
+  document.getElementById("heroText").innerText=t.hero.trim();
+  document.getElementById("sourceTitle").innerText=t.sourceTitle;
+  document.getElementById("sourceText").innerText=t.sourceText;
+  document.getElementById("sourceButton").innerText=t.sourceButton;
+  document.getElementById("workspaceTitle").innerText=t.workspaceTitle;
+  document.getElementById("folioSelectTitle").innerText=t.folioSelectTitle;
+  document.getElementById("loadFolioButton").innerText=t.loadFolioButton;
+  document.getElementById("imageTitle").innerText=t.imageTitle;
+  document.getElementById("pasteHint").innerText=t.pasteHint;
+  document.getElementById("extractedTitle").innerText=t.extractedTitle;
+  document.getElementById("extractedHint").innerText=t.extractedHint;
+  document.getElementById("copyEvaButton").innerText=t.copyEvaButton;
+  document.getElementById("clearEvaButton").innerText=t.clearEvaButton;
+  document.getElementById("extractedEva").placeholder=t.extractedPlaceholder;
+  document.getElementById("contextTitle").innerText=t.contextTitle;
+  document.getElementById("inputTitle").innerText=t.inputTitle;
+  document.getElementById("procedureTitle").innerText=t.procedureTitle;
+  document.getElementById("finalTitle").innerText=t.finalTitle;
+  document.getElementById("probabilityTitle").innerText=t.probabilityTitle;
+  document.getElementById("modelTitle").innerText=t.modelTitle;
+  document.getElementById("authorTitle").innerText=t.authorTitle;
+  document.getElementById("runButton").innerText=t.runButton;
+  document.getElementById("clearImageButton").innerText=t.clearImageButton;
+  document.getElementById("evaInput").placeholder=t.placeholder;
+  document.getElementById("modelText").innerHTML=t.modelText;
+  document.getElementById("authorText").innerHTML=t.authorText;
+}
+
+function initFolioSelector(){
+  const sel=document.getElementById("folioSelector");
+  sel.innerHTML="";
+  const opt=document.createElement("option");
+  opt.value="";
+  opt.textContent="-- choose folio --";
+  sel.appendChild(opt);
+
+  allFolioLabels().forEach(label=>{
+    const o=document.createElement("option");
+    o.value=label;
+    o.textContent=FOLIO_DB[label] ? `${label} ✓` : label;
+    sel.appendChild(o);
   });
 }
 
-function loadFolio() {
-  const id = sel.value;
-  const data = FOLIO_DB[id];
-  const img = document.getElementById('folioImage');
-  const status = document.getElementById('imgStatus');
-  const eva = document.getElementById('evaInput');
+function loadSelectedFolio(){
+  const id=document.getElementById("folioSelector").value;
+  const lang=document.getElementById("language").value;
+  const data=FOLIO_DB[id];
 
-  if(data) {
-    status.style.display = 'none';
-    img.style.display = 'block';
-    // Omijamy cache i wymuszamy przeładowanie linku IIIF
-    img.src = `${YALE_BASE}${data.img}/full/1000,/0/default.jpg`;
-    eva.value = data.eva;
-    resetZoom();
+  if(!id) return;
+
+  document.getElementById("sourceButton").href="https://collections.library.yale.edu/catalog/2002046";
+
+  if(data){
+    document.getElementById("folioInfo").innerText = `${id}: ${data.note}`;
+    document.getElementById("visualContext").value=data.context;
+    document.getElementById("extractedEva").value=data.eva;
+    document.getElementById("evaInput").value=data.eva;
+
+    if(data.img){
+      showImage(data.img);
+    } else {
+      clearImage();
+      document.getElementById("imagePlaceholder").innerText =
+        lang==="pl"
+        ? "Brak zapisanego URL obrazu. Wklej URL obrazu, uploaduj plik albo wklej screenshot."
+        : "No saved image URL. Paste image URL, upload file, or paste screenshot.";
+    }
+
+    interpretText();
   } else {
-    img.style.display = 'none';
-    status.style.display = 'block';
-    status.textContent = `No local data for ${id}. You can paste EVA manually.`;
-    eva.value = "";
+    document.getElementById("folioInfo").innerText =
+      lang==="pl"
+      ? `${id}: brak lokalnej transkrypcji EVA. Wklej tekst ręcznie albo dodaj wpis do FOLIO_DB.`
+      : `${id}: no local EVA transcription yet. Paste text manually or add it to FOLIO_DB.`;
+
+    document.getElementById("extractedEva").value="";
+    document.getElementById("evaInput").value="";
+    clearImage();
+    interpretText();
   }
 }
 
-function adjustZoom(delta) {
-  currentZoom = Math.max(0.5, Math.min(3, currentZoom + delta));
-  document.getElementById('folioImage').style.transform = `scale(${currentZoom})`;
+function cleanToken(t){return t.toLowerCase().replace(/[^a-z]/g,"");}
+function uncertain(t){return t.includes("*")||t.includes("?");}
+
+function interpretToken(raw,lang){
+  const clean=cleanToken(raw);
+  const isUncertain=uncertain(raw);
+
+  if(dictionary[clean]){
+    const d=dictionary[clean];
+    return {raw,clean,role:d.role,known:!isUncertain,uncertain:isUncertain,meaning:d[lang],probability:isUncertain?d.weight*.65:d.weight};
+  }
+  if(clean.endsWith("dy")) return {raw,clean,role:"RESULT?",known:false,uncertain:true,meaning:lang==="pl"?"niepewny wynik":"uncertain result",probability:.42};
+  if(clean.startsWith("sh")) return {raw,clean,role:"STATE?",known:false,uncertain:true,meaning:lang==="pl"?"niepewny stan":"uncertain state",probability:.40};
+  if(clean.startsWith("cth")) return {raw,clean,role:"HEAVY_OPERATION?",known:false,uncertain:true,meaning:lang==="pl"?"niepewna ciężka operacja":"uncertain heavy operation",probability:.38};
+  if(clean.endsWith("iin")) return {raw,clean,role:"END?",known:false,uncertain:true,meaning:lang==="pl"?"niepewne zakończenie":"uncertain end",probability:.45};
+
+  return {raw,clean,role:"UNKNOWN",known:false,uncertain:true,meaning:lang==="pl"?"nieznane":"unknown",probability:.15};
 }
 
-function resetZoom() {
-  currentZoom = 1;
-  document.getElementById('folioImage').style.transform = `scale(1)`;
+function countRoles(items){
+  const c={ENTRY:0,PROCESS:0,STATE:0,FLOW:0,DATA:0,RESULT:0,END:0,HEAVY:0,UNKNOWN:0,UNCERTAIN:0};
+  items.forEach(x=>{
+    if(x.role.includes("ENTRY")) c.ENTRY++;
+    else if(x.role.includes("PROCESS")) c.PROCESS++;
+    else if(x.role.includes("STATE")) c.STATE++;
+    else if(x.role.includes("FLOW")) c.FLOW++;
+    else if(x.role.includes("DATA")) c.DATA++;
+    else if(x.role.includes("RESULT")) c.RESULT++;
+    else if(x.role.includes("END")) c.END++;
+    else if(x.role.includes("HEAVY")) c.HEAVY++;
+    else c.UNKNOWN++;
+    if(x.uncertain) c.UNCERTAIN++;
+  });
+  return c;
 }
 
-document.getElementById('loadBtn').onclick = loadFolio;
-document.getElementById('translateBtn').onclick = () => {
-  const text = document.getElementById('evaInput').value;
-  document.getElementById('output').textContent = "PUM/VSM Analysis in progress...\n\n" + 
-    text.split(' ').map((word, i) => `${i+1}. ${word} -> Interpreting...`).join('\n');
-};
+function ratio(a,b){return b ? (a/b).toFixed(2) : "0";}
+
+function contextText(context,lang){
+  const texts={
+    pl:{
+      plant:`Kontekst: folio roślinne. DATA może oznaczać części rośliny: korzeń, łodygę, liście, kwiat, materiał miękki, materiał twardy lub ekstrakt.`,
+      process:`Kontekst: scena procesu, ludzie, rury, kąpiel lub przepływ. DATA oznacza ciało, płyn, zbiornik albo nośnik; FLOW oznacza przejście między strefami; STATE oznacza utrzymanie warunku procesu.`,
+      jars:`Kontekst: słoiki, naczynia lub pojemniki. DATA oznacza materiał, nośnik, pojemnik albo zawartość; FLOW oznacza przeniesienie lub napełnianie; RESULT oznacza stan przechowywany.`,
+      astro:`Kontekst: diagram/astro. DATA oznacza punkt, sektor lub obiekt odniesienia; FLOW oznacza przejście cyklu; STATE oznacza fazę; RESULT oznacza przypisany stan końcowy.`
+    },
+    en:{
+      plant:`Context: botanical folio. DATA may refer to plant parts: root, stem, leaves, flower, soft material, hard material, or extract.`,
+      process:`Context: process scene, figures, tubes, bath or flow system. DATA means body, liquid, vessel or carrier; FLOW means transfer between zones; STATE means maintained process condition.`,
+      jars:`Context: jars, vessels or containers. DATA means material, carrier, container or content; FLOW means transfer or filling; RESULT means stored resulting state.`,
+      astro:`Context: diagram/astro. DATA means point, sector or reference object; FLOW means cycle transition; STATE means phase; RESULT means assigned final state.`
+    }
+  };
+  return texts[lang][context];
+}
+
+function buildFinalReading(items,lang){
+  const context=document.getElementById("visualContext").value;
+  const total=items.length;
+  const c=countRoles(items);
+  const unknowns=[...new Set(items.filter(x=>!x.known).map(x=>x.clean))].filter(Boolean).join(", ") || (lang==="pl"?"brak":"none");
+
+  const processPerData=ratio(c.PROCESS+c.HEAVY,Math.max(1,c.DATA));
+  const statePerProcess=ratio(c.STATE,Math.max(1,c.PROCESS+c.HEAVY));
+  const flowPerData=ratio(c.FLOW,Math.max(1,c.DATA));
+  const endDensity=ratio(c.END,total);
+
+  if(lang==="pl"){
+    let reading="Tekst wygląda jak instrukcja etapowa. ";
+    if(context==="plant") reading+="Rozpocznij od materiału roślinnego widocznego na folio. Część miękką rozdrobnij, część twardą lub korzeniową ucieraj dłużej, a następnie doprowadź materiał do stanu wynikowego. ";
+    if(context==="process") reading+="Rozpocznij proces w punkcie wejścia. Skieruj płyn, ciało lub obiekt procesu przez kolejne strefy, utrzymuj warunek procesu i zamykaj etapy po osiągnięciu wyniku. ";
+    if(context==="jars") reading+="Rozpocznij od materiału lub zawartości naczynia. Przetwarzaj, przenoś do nośnika lub pojemnika, a stan wynikowy traktuj jako produkt do przechowania. ";
+    if(context==="astro") reading+="Rozpocznij od punktu lub sektora diagramu. Przejdź przez kolejne fazy, utrzymaj stan i zamknij cykl po osiągnięciu wyniku. ";
+
+    return `
+KONTEKST WIZUALNY / POWIĄZANIE Z RYSUNKIEM:
+${contextText(context,lang)}
+
+OSTATECZNY ODCZYT FUNKCJONALNY:
+${reading}
+
+PROPORCJE OPERACYJNE:
+- Materiał / DATA: ${c.DATA} jednostek
+- Przetwarzanie / PROCESS + HEAVY: ${c.PROCESS+c.HEAVY} jednostek
+- Utrzymanie stanu / STATE: ${c.STATE} jednostek
+- Przepływ / FLOW: ${c.FLOW} jednostek
+- Wynik / RESULT: ${c.RESULT} jednostek
+- Zakończenia etapów / END: ${c.END} jednostek
+
+SZACUNEK PRAKTYCZNY:
+- Przetwarzanie względem materiału: około ${processPerData} jednostki pracy na 1 jednostkę materiału.
+- Utrzymanie stanu względem przetwarzania: około ${statePerProcess} jednostki czasu/stanu na 1 jednostkę pracy.
+- Przepływ względem materiału: około ${flowPerData} jednostki przeniesienia na 1 jednostkę materiału.
+- Gęstość zakończeń: ${endDensity} zakończenia na token.
+
+MIEJSCA NIEPEWNE:
+${unknowns}
+`.trim();
+  }
+
+  let reading="The text behaves like a staged instruction. ";
+  if(context==="plant") reading+="Begin with the plant material visible on the folio. Break down the soft material, grind the hard or root-like part longer, then bring the material toward a resulting state. ";
+  if(context==="process") reading+="Begin at the entry point of the process. Direct the liquid, body or process object through successive zones, maintain the condition, and close stages after reaching the result. ";
+  if(context==="jars") reading+="Begin with the material or vessel content. Process it, transfer it into a carrier or container, and treat the resulting state as a stored product. ";
+  if(context==="astro") reading+="Begin from a point or sector of the diagram. Move through successive phases, maintain the state, and close the cycle after reaching the result. ";
+
+  return `
+VISUAL CONTEXT / LINK TO DRAWING:
+${contextText(context,lang)}
+
+FINAL FUNCTIONAL READING:
+${reading}
+
+OPERATIONAL PROPORTIONS:
+- Material / DATA: ${c.DATA} units
+- Processing / PROCESS + HEAVY: ${c.PROCESS+c.HEAVY} units
+- State maintenance / STATE: ${c.STATE} units
+- Flow / FLOW: ${c.FLOW} units
+- Result / RESULT: ${c.RESULT} units
+- Step closures / END: ${c.END} units
+
+PRACTICAL ESTIMATE:
+- Processing-to-material ratio: about ${processPerData} work units per 1 material unit.
+- State-to-processing ratio: about ${statePerProcess} state/time units per 1 work unit.
+- Flow-to-material ratio: about ${flowPerData} transfer units per 1 material unit.
+- Closure density: ${endDensity} closures per token.
+
+UNCERTAIN POINTS:
+${unknowns}
+`.trim();
+}
+
+function buildProcedure(items,lang){
+  return items.map((x,i)=>
+`${i+1}. TOKEN: ${x.raw}
+   NORMALIZED: ${x.clean}
+   STATUS: ${x.known?ui[lang].known:ui[lang].unknown}
+   ROLE: ${x.role}
+   TOKEN PROBABILITY: ${Math.round(x.probability*100)}%
+   FUNCTIONAL OUTPUT: ${x.meaning}`
+  ).join("\n\n");
+}
+
+function calculateProbability(items,lang){
+  if(!items.length) return {percent:0,text:""};
+  const c=countRoles(items);
+  const avg=items.reduce((s,x)=>s+x.probability,0)/items.length;
+  const known=items.filter(x=>x.known).length;
+  const knownRatio=known/items.length;
+  const unknownPenalty=c.UNKNOWN*.05;
+  const uncertaintyPenalty=c.UNCERTAIN*.025;
+  const structureBonus=(c.ENTRY&&c.PROCESS&&c.END)?.10:.03;
+
+  let score=avg*.55+knownRatio*.25+structureBonus-unknownPenalty-uncertaintyPenalty;
+  score=Math.max(.05,Math.min(.97,score));
+  const percent=Math.round(score*100);
+
+  const text=lang==="pl"
+?`Szacowane prawdopodobieństwo tłumaczenia: ${percent}%
+
+Znane tokeny: ${known}/${items.length}
+Niepewne tokeny: ${c.UNCERTAIN}
+Nieznane tokeny: ${c.UNKNOWN}
+
+Metoda:
+Wynik liczony jest z wag tokenów, liczby tokenów znanych, kar za niepewność/nieznane oraz bonusu za rozpoznaną strukturę ENTRY → PROCESS → END.
+
+Ważne: to szacunek wewnątrz modelu PUM/VSM, nie dowód pełnego odszyfrowania.`
+:`Estimated translation confidence: ${percent}%
+
+Known tokens: ${known}/${items.length}
+Uncertain tokens: ${c.UNCERTAIN}
+Unknown tokens: ${c.UNKNOWN}
+
+Method:
+The score uses token weights, known-token ratio, penalties for uncertainty/unknowns, and a bonus for recognized ENTRY → PROCESS → END structure.
+
+Important: this is an estimate inside the PUM/VSM model, not proof of full decipherment.`;
+
+  return {percent,text};
+}
+
+function interpretText(){
+  const lang=document.getElementById("language").value;
+  const input=document.getElementById("evaInput").value.trim();
+
+  if(!input){
+    document.getElementById("procedureOutput").innerText="";
+    document.getElementById("finalOutput").innerText="";
+    document.getElementById("probabilityOutput").innerText="";
+    document.getElementById("probabilityFill").style.width="0%";
+    return;
+  }
+
+  const items=input.split(/\s+/).map(t=>interpretToken(t,lang));
+  const prob=calculateProbability(items,lang);
+
+  document.getElementById("procedureOutput").innerText=buildProcedure(items,lang);
+  document.getElementById("finalOutput").innerText=buildFinalReading(items,lang);
+  document.getElementById("probabilityOutput").innerText=prob.text;
+  document.getElementById("probabilityFill").style.width=prob.percent+"%";
+}
+
+function copyEvaToTranslator(){
+  const text=document.getElementById("extractedEva").value.trim();
+  document.getElementById("evaInput").value=text;
+  interpretText();
+}
+
+function showImage(src){
+  const img=document.getElementById("folioImage");
+  const ph=document.getElementById("imagePlaceholder");
+
+  if(!src){
+    clearImage();
+    return;
+  }
+
+  ph.style.display="block";
+  ph.innerText="Loading image...";
+  img.style.display="none";
+
+  img.onload=function(){
+    img.style.display="block";
+    ph.style.display="none";
+  };
+
+  img.onerror=function(){
+    img.style.display="none";
+    ph.style.display="block";
+    ph.innerHTML=`Image failed to load.<br><a href="${src}" target="_blank" style="color:#00ffaa">Open image manually</a>`;
+  };
+
+  img.src=src;
+  zoomLevel=1;
+  img.style.transform="scale(1)";
+}
+
+function clearImage(){
+  const img=document.getElementById("folioImage");
+  img.removeAttribute("src");
+  img.style.display="none";
+  const ph=document.getElementById("imagePlaceholder");
+  ph.style.display="block";
+  ph.innerText="Upload/paste image, paste image URL, or select a folio.";
+}
+
+function loadImageFromUrl(){
+  const url=document.getElementById("imageUrlInput").value.trim();
+  showImage(url);
+}
+
+function handleUpload(e){
+  const file=e.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=()=>showImage(reader.result);
+  reader.readAsDataURL(file);
+}
+
+function handlePaste(e){
+  const items=e.clipboardData?.items || [];
+  for(const item of items){
+    if(item.type.indexOf("image")===0){
+      const file=item.getAsFile();
+      const reader=new FileReader();
+      reader.onload=()=>showImage(reader.result);
+      reader.readAsDataURL(file);
+      e.preventDefault();
+      return;
+    }
+  }
+}
+
+function zoom(delta){
+  const img=document.getElementById("folioImage");
+  if(img.style.display==="none") return;
+  zoomLevel=Math.max(.5,Math.min(3,zoomLevel+delta));
+  img.style.transform=`scale(${zoomLevel})`;
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  document.getElementById("language").value="en";
+  initFolioSelector();
+  setLanguage();
+
+  document.getElementById("language").addEventListener("change",setLanguage);
+  document.getElementById("loadFolioButton").addEventListener("click",loadSelectedFolio);
+  document.getElementById("loadImageUrlButton").addEventListener("click",loadImageFromUrl);
+  document.getElementById("runButton").addEventListener("click",interpretText);
+  document.getElementById("visualContext").addEventListener("change",interpretText);
+
+  document.getElementById("copyEvaButton").addEventListener("click",copyEvaToTranslator);
+  document.getElementById("clearEvaButton").addEventListener("click",()=>{ document.getElementById("extractedEva").value=""; });
+
+  document.getElementById("imageUpload").addEventListener("change",handleUpload);
+  document.getElementById("clearImageButton").addEventListener("click",clearImage);
+
+  const imageWrap=document.getElementById("imageWrap");
+  imageWrap.addEventListener("click",()=>imageWrap.focus());
+  imageWrap.addEventListener("paste",handlePaste);
+
+  document.getElementById("zoomIn").addEventListener("click",()=>zoom(.2));
+  document.getElementById("zoomOut").addEventListener("click",()=>zoom(-.2));
+  document.getElementById("zoomReset").addEventListener("click",()=>{
+    zoomLevel=1;
+    document.getElementById("folioImage").style.transform="scale(1)";
+  });
+});
 </script>
 </body>
 </html>
