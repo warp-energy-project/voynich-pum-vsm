@@ -947,5 +947,117 @@ document.addEventListener("DOMContentLoaded",()=>{
 })();
 </script>
 <!-- NAVI OCR FIX END -->
+  <!-- ================= NAVI PATCH: FOLIO DATABASE + SELECT ================= -->
+<script>
+(function(){
+
+/* ===== 1. BAZA FOLIO ===== */
+const folioDatabase = {
+  "folio_1r": {
+    title: "Folio 1r",
+    image: "https://collections.library.yale.edu/iiif/2/2002046~f1r/full/800,/0/default.jpg",
+    eva_default: "qokedy chedy shol shor kair aiin",
+    visual_context: "plant",
+    section: "Herbal",
+    model_context: "State Initiation"
+  },
+
+  "folio_49r": {
+    title: "Folio 49r",
+    image: "https://collections.library.yale.edu/iiif/2/2002046~f49r/full/800,/0/default.jpg",
+    eva_default: "kair shor chedy ol aiin",
+    visual_context: "process",
+    section: "Biological",
+    model_context: "Process Loop"
+  }
+};
+
+
+/* ===== 2. DODAJ SELECT DO STRONY ===== */
+function createFolioSelector(){
+
+  if(document.getElementById("folioSelector")) return;
+
+  const container = document.createElement("div");
+  container.style.margin = "15px 0";
+
+  const label = document.createElement("div");
+  label.innerText = "Select Voynich folio:";
+  label.style.marginBottom = "5px";
+  label.style.color = "#00ffaa";
+
+  const select = document.createElement("select");
+  select.id = "folioSelector";
+  select.style.padding = "8px";
+  select.style.background = "#021018";
+  select.style.color = "#00ffaa";
+  select.style.border = "1px solid #00ffaa";
+
+  const defaultOpt = document.createElement("option");
+  defaultOpt.value = "";
+  defaultOpt.innerText = "-- choose folio --";
+  select.appendChild(defaultOpt);
+
+  Object.keys(folioDatabase).forEach(id=>{
+    const opt = document.createElement("option");
+    opt.value = id;
+    opt.innerText = folioDatabase[id].title;
+    select.appendChild(opt);
+  });
+
+  select.addEventListener("change", function(){
+    loadFolioFromDatabase(this.value);
+  });
+
+  container.appendChild(label);
+  container.appendChild(select);
+
+  const target = document.querySelector(".image-panel") || document.body;
+  target.prepend(container);
+}
+
+
+/* ===== 3. ŁADOWANIE FOLIO ===== */
+function loadFolioFromDatabase(id){
+
+  const folio = folioDatabase[id];
+  if(!folio) return;
+
+  /* obraz */
+  if(typeof showImage === "function"){
+    showImage(folio.image);
+  }else{
+    const img = document.querySelector(".image-panel img");
+    if(img) img.src = folio.image;
+  }
+
+  /* EVA */
+  const extracted = document.getElementById("extractedEva");
+  const input = document.getElementById("evaInput");
+
+  if(extracted) extracted.value = folio.eva_default;
+  if(input) input.value = folio.eva_default;
+
+  /* kontekst */
+  const ctx = document.getElementById("visualContext");
+  if(ctx) ctx.value = folio.visual_context;
+
+  /* auto tłumaczenie */
+  setTimeout(()=>{
+    if(typeof interpretText === "function"){
+      interpretText();
+    }
+  },200);
+}
+
+
+/* ===== 4. INIT ===== */
+window.addEventListener("load", function(){
+  createFolioSelector();
+});
+
+})();
+</script>
+<!-- ================= END PATCH ================= -->
 </body>
 </html>
