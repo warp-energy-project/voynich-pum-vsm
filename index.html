@@ -116,15 +116,8 @@
       min-height: 120px;
     }
 
-    .known {
-      color: var(--known);
-      font-weight: bold;
-    }
-
-    .unknown {
-      color: var(--unknown);
-      font-weight: bold;
-    }
+    .known { color: var(--known); font-weight: bold; }
+    .unknown { color: var(--unknown); font-weight: bold; }
 
     .warning {
       border-left: 5px solid var(--danger);
@@ -135,6 +128,23 @@
     .model-code {
       color: #bae6fd;
       font-weight: bold;
+    }
+
+    .probability-bar {
+      width: 100%;
+      height: 26px;
+      background: #020617;
+      border: 1px solid #334155;
+      border-radius: 20px;
+      overflow: hidden;
+      margin: 12px 0;
+    }
+
+    .probability-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #f59e0b, #22c55e);
+      transition: width 0.3s ease;
     }
 
     footer {
@@ -183,8 +193,16 @@
   </section>
 
   <section>
-    <h2 id="dryTitle">3. Dry Translation Output</h2>
-    <div id="dryOutput" class="result-box"></div>
+    <h2 id="finalTitle">3. Final Meaningful Translation</h2>
+    <div id="finalOutput" class="result-box"></div>
+  </section>
+
+  <section>
+    <h2 id="probabilityTitle">4. Translation Probability / Confidence</h2>
+    <div class="probability-bar">
+      <div id="probabilityFill" class="probability-fill"></div>
+    </div>
+    <div id="probabilityOutput" class="result-box"></div>
   </section>
 
   <section>
@@ -212,7 +230,8 @@ const translations = {
     disclaimer: "This tool does not claim confirmed linguistic decipherment. It provides a functional interpretation based on the PUM/VSM model.",
     inputTitle: "1. EVA Raw Input",
     procedureTitle: "2. Translation Procedure",
-    dryTitle: "3. Dry Translation Output",
+    finalTitle: "3. Final Meaningful Translation",
+    probabilityTitle: "4. Translation Probability / Confidence",
     modelTitle: "Model Explanation",
     authorTitle: "Author / Research",
     runButton: "Translate",
@@ -222,7 +241,7 @@ const translations = {
     modelText: `
       <p>The PUM/VSM model treats Voynich text not as ordinary natural language, but as a parametric and procedural system.</p>
       <p><span class="model-code">IMAGE → PARAMETERS → TEXT DYNAMICS</span></p>
-      <p>The first window contains raw EVA text. The second window shows token processing and phrase building. The third window shows the dry reconstructed procedural output.</p>
+      <p>The system works in four stages: raw EVA input, token procedure, meaningful reconstructed translation, and probability/confidence estimation.</p>
     `,
     authorText: `Research concept and analytical direction: <strong>Tomasz Grabowski (Drako)</strong>. Analytical support: AI tools used for modelling, testing, structuring and presentation.`
   },
@@ -234,7 +253,8 @@ const translations = {
     disclaimer: "To narzędzie nie twierdzi, że jest potwierdzonym odszyfrowaniem językowym. To interpretacja funkcjonalna oparta na modelu PUM/VSM.",
     inputTitle: "1. Surowy tekst EVA",
     procedureTitle: "2. Procedura tłumaczenia",
-    dryTitle: "3. Suchy wynik tłumaczenia",
+    finalTitle: "3. Ostateczne tłumaczenie z sensem",
+    probabilityTitle: "4. Prawdopodobieństwo tłumaczenia",
     modelTitle: "Opis modelu",
     authorTitle: "Autor / badanie",
     runButton: "Tłumacz",
@@ -244,7 +264,7 @@ const translations = {
     modelText: `
       <p>Model PUM/VSM traktuje tekst Voynicha nie jako zwykły język naturalny, lecz jako system parametryczny i proceduralny.</p>
       <p><span class="model-code">OBRAZ → PARAMETRY → DYNAMIKA TEKSTU</span></p>
-      <p>Pierwsze okno zawiera surowy tekst EVA. Drugie okno pokazuje przetwarzanie tokenów i budowanie fraz. Trzecie okno pokazuje suchy wynik proceduralny.</p>
+      <p>System działa w czterech etapach: surowy tekst EVA, procedura tokenów, sensowne tłumaczenie końcowe oraz szacowanie prawdopodobieństwa.</p>
     `,
     authorText: `Koncepcja badawcza i kierunek analizy: <strong>Tomasz Grabowski (Drako)</strong>. Wsparcie analityczne: narzędzia AI użyte do modelowania, testowania, strukturyzacji i prezentacji.`
   }
@@ -257,6 +277,7 @@ const dictionary = {
     dry_en: "initiate processing",
     dry_pl: "inicjacja przetwarzania",
     role: "ENTRY / INITIATION",
+    weight: 0.90,
     evidence: "qo-/qok- appears in entry-like positions; -dy indicates result-oriented action."
   },
   chedy: {
@@ -265,6 +286,7 @@ const dictionary = {
     dry_en: "process material",
     dry_pl: "przetwórz materiał",
     role: "PROCESS",
+    weight: 0.88,
     evidence: "che- behaves as process/material root; -dy marks result or completed output."
   },
   shol: {
@@ -273,6 +295,7 @@ const dictionary = {
     dry_en: "maintain process",
     dry_pl: "utrzymaj proces",
     role: "STATE / CONTINUATION",
+    weight: 0.84,
     evidence: "sh- is treated as a light-state marker; -ol is treated as a held or resulting state."
   },
   shor: {
@@ -281,6 +304,7 @@ const dictionary = {
     dry_en: "light flow",
     dry_pl: "lekki przepływ",
     role: "FLOW / LIGHT STATE",
+    weight: 0.78,
     evidence: "sh- indicates light state; -or behaves as a flow or directional variant."
   },
   cthy: {
@@ -289,6 +313,7 @@ const dictionary = {
     dry_en: "heavy operation",
     dry_pl: "ciężka operacja",
     role: "HEAVY OPERATION",
+    weight: 0.72,
     evidence: "cth- is interpreted as heavy/process-intensive operation."
   },
   aiin: {
@@ -297,6 +322,7 @@ const dictionary = {
     dry_en: "end",
     dry_pl: "koniec",
     role: "END MARKER",
+    weight: 0.91,
     evidence: "aiin/iin family is treated as termination, boundary or EOF-like marker."
   },
   iin: {
@@ -305,6 +331,7 @@ const dictionary = {
     dry_en: "local end",
     dry_pl: "lokalny koniec",
     role: "END MARKER",
+    weight: 0.80,
     evidence: "iin belongs to the aiin/iin termination family."
   },
   daiin: {
@@ -313,6 +340,7 @@ const dictionary = {
     dry_en: "completed end",
     dry_pl: "pełne zamknięcie",
     role: "END / COMPLETION",
+    weight: 0.83,
     evidence: "d- may strengthen closure; aiin/iin family marks ending."
   },
   kair: {
@@ -321,6 +349,7 @@ const dictionary = {
     dry_en: "material object",
     dry_pl: "obiekt materiałowy",
     role: "DATA",
+    weight: 0.76,
     evidence: "kair is treated as a DATA token: material, object or carrier."
   },
   kor: {
@@ -329,6 +358,7 @@ const dictionary = {
     dry_en: "object reference",
     dry_pl: "odniesienie do obiektu",
     role: "DATA",
+    weight: 0.74,
     evidence: "kor behaves as a stable data-like object token."
   },
   chear: {
@@ -337,6 +367,7 @@ const dictionary = {
     dry_en: "processed material",
     dry_pl: "przetworzony materiał",
     role: "DATA / MATERIAL",
+    weight: 0.70,
     evidence: "che- links with process/material roots."
   },
   ol: {
@@ -345,6 +376,7 @@ const dictionary = {
     dry_en: "result state",
     dry_pl: "stan wynikowy",
     role: "RESULT STATE",
+    weight: 0.82,
     evidence: "ol appears as a compact state or result marker."
   },
   dy: {
@@ -353,6 +385,7 @@ const dictionary = {
     dry_en: "result",
     dry_pl: "wynik",
     role: "RESULT",
+    weight: 0.65,
     evidence: "-dy is treated as a result suffix in the PUM/VSM model."
   }
 };
@@ -368,7 +401,8 @@ function setLanguage() {
   document.getElementById("disclaimer").innerText = t.disclaimer;
   document.getElementById("inputTitle").innerText = t.inputTitle;
   document.getElementById("procedureTitle").innerText = t.procedureTitle;
-  document.getElementById("dryTitle").innerText = t.dryTitle;
+  document.getElementById("finalTitle").innerText = t.finalTitle;
+  document.getElementById("probabilityTitle").innerText = t.probabilityTitle;
   document.getElementById("modelTitle").innerText = t.modelTitle;
   document.getElementById("authorTitle").innerText = t.authorTitle;
   document.getElementById("runButton").innerText = t.runButton;
@@ -392,164 +426,212 @@ function interpretToken(token, lang) {
   const uncertain = isUncertain(token);
 
   if (dictionary[clean]) {
+    const base = dictionary[clean];
     return {
       token,
       clean,
       uncertain,
       known: !uncertain,
-      role: uncertain ? "UNCERTAIN " + dictionary[clean].role : dictionary[clean].role,
-      meaning: dictionary[clean][lang],
-      dry: uncertain ? "[" + dictionary[clean]["dry_" + lang] + "]" : dictionary[clean]["dry_" + lang],
-      evidence: dictionary[clean].evidence + (uncertain ? " Original token contains uncertainty marker." : "")
+      role: uncertain ? "UNCERTAIN " + base.role : base.role,
+      meaning: base[lang],
+      dry: uncertain ? "[" + base["dry_" + lang] + "]" : base["dry_" + lang],
+      probability: uncertain ? base.weight * 0.65 : base.weight,
+      evidence: base.evidence + (uncertain ? " Original token contains uncertainty marker." : "")
     };
   }
 
   if (clean.endsWith("dy")) {
     return {
-      token,
-      clean,
-      uncertain: true,
-      known: false,
+      token, clean, uncertain: true, known: false,
       role: "PROBABLE RESULT",
       meaning: lang === "en" ? "uncertain result-form token" : "niepewny token formy wynikowej",
       dry: "[" + clean + "]",
+      probability: 0.42,
       evidence: "Suffix -dy suggests possible result/output behaviour, but the full token is not confirmed."
     };
   }
 
   if (clean.startsWith("sh")) {
     return {
-      token,
-      clean,
-      uncertain: true,
-      known: false,
+      token, clean, uncertain: true, known: false,
       role: "PROBABLE LIGHT STATE",
       meaning: lang === "en" ? "uncertain light-state token" : "niepewny token stanu lekkiego",
       dry: "[" + clean + "]",
+      probability: 0.40,
       evidence: "Prefix sh- suggests possible light-state behaviour, but the full token is not confirmed."
     };
   }
 
   if (clean.startsWith("cth")) {
     return {
-      token,
-      clean,
-      uncertain: true,
-      known: false,
+      token, clean, uncertain: true, known: false,
       role: "PROBABLE HEAVY OPERATION",
       meaning: lang === "en" ? "uncertain heavy-operation token" : "niepewny token ciężkiej operacji",
       dry: "[" + clean + "]",
+      probability: 0.38,
       evidence: "Prefix cth- suggests possible heavy/process-intensive operation, but the full token is not confirmed."
     };
   }
 
   if (clean.endsWith("iin")) {
     return {
-      token,
-      clean,
-      uncertain: true,
-      known: false,
+      token, clean, uncertain: true, known: false,
       role: "PROBABLE END MARKER",
       meaning: lang === "en" ? "uncertain end marker" : "niepewny znacznik zakończenia",
       dry: "[" + clean + "]",
+      probability: 0.45,
       evidence: "Suffix -iin belongs to the aiin/iin termination family, but the exact token is not confirmed."
     };
   }
 
   return {
-    token,
-    clean,
-    uncertain: true,
-    known: false,
+    token, clean, uncertain: true, known: false,
     role: "UNKNOWN",
     meaning: lang === "en" ? "unknown token" : "nieznany token",
     dry: "[" + clean + "]",
+    probability: 0.15,
     evidence: "No stable mapping yet in the current PUM/VSM dictionary."
   };
 }
 
-function buildDryTranslation(interpreted, lang) {
+function buildFinalTranslation(interpreted, lang) {
   const tokens = interpreted.map(i => i.clean);
-  const phrases = [];
+  const sentences = [];
   let i = 0;
 
   while (i < tokens.length) {
-    const current = tokens[i];
-    const next = tokens[i + 1];
-    const third = tokens[i + 2];
-    const fourth = tokens[i + 3];
+    const a = tokens[i];
+    const b = tokens[i + 1];
+    const c = tokens[i + 2];
+    const d = tokens[i + 3];
+    const e = tokens[i + 4];
 
-    if (current === "qokedy" && next === "qokedy" && third === "chedy") {
-      phrases.push(lang === "en"
-        ? "begin repeated material processing"
-        : "rozpocznij powtórzone przetwarzanie materiału");
+    if (a === "qokedy" && b === "qokedy" && c === "chedy" && d === "chedy" && e === "shol") {
+      sentences.push(lang === "en"
+        ? "Begin a repeated material-processing sequence and maintain the active state"
+        : "Rozpocznij powtórzoną sekwencję przetwarzania materiału i utrzymaj stan aktywny");
+      i += 5;
+      continue;
+    }
+
+    if (a === "qokedy" && b === "qokedy" && c === "chedy") {
+      sentences.push(lang === "en"
+        ? "Begin a repeated material-processing sequence"
+        : "Rozpocznij powtórzoną sekwencję przetwarzania materiału");
       i += 3;
       continue;
     }
 
-    if (current === "qokedy" && next === "chedy" && third === "shol" && fourth === "aiin") {
-      phrases.push(lang === "en"
-        ? "initiate material processing, maintain state, then close the step"
-        : "zainicjuj przetwarzanie materiału, utrzymaj stan, następnie zamknij krok");
+    if (a === "qokedy" && b === "chedy" && c === "shol" && d === "aiin") {
+      sentences.push(lang === "en"
+        ? "Start processing the material, maintain the active state, then close the step"
+        : "Rozpocznij przetwarzanie materiału, utrzymaj stan aktywny, następnie zamknij krok");
       i += 4;
       continue;
     }
 
-    if (current === "chedy" && next === "chedy") {
-      phrases.push(lang === "en"
-        ? "repeat material processing"
-        : "powtórz przetwarzanie materiału");
-      i += 2;
+    if (a === "qokedy" && b === "chedy" && c === "shor" && d === "kair" && e === "aiin") {
+      sentences.push(lang === "en"
+        ? "Start the process and direct the material flow into the carrier, then close the step"
+        : "Rozpocznij proces i skieruj przepływ materiału do nośnika, następnie zamknij krok");
+      i += 5;
       continue;
     }
 
-    if (current === "shol" && next === "shol") {
-      phrases.push(lang === "en"
-        ? "maintain state continuously"
-        : "utrzymuj stan ciągle");
-      i += 2;
-      continue;
-    }
-
-    if (current === "shor" && next === "kair" && third === "ol" && fourth === "aiin") {
-      phrases.push(lang === "en"
-        ? "direct material flow into final state and close"
-        : "skieruj przepływ materiału do stanu końcowego i zamknij");
+    if (a === "shor" && b === "kair" && c === "ol" && d === "aiin") {
+      sentences.push(lang === "en"
+        ? "Direct the material flow toward the resulting state and close the step"
+        : "Skieruj przepływ materiału do stanu wynikowego i zamknij krok");
       i += 4;
       continue;
     }
 
-    if (current === "cthy" && next === "chedy") {
-      phrases.push(lang === "en"
-        ? "apply heavy operation to processed material"
-        : "zastosuj ciężką operację na przetwarzanym materiale");
+    if (a === "cthy" && b === "chedy") {
+      sentences.push(lang === "en"
+        ? "Apply a heavy operation to the processed material"
+        : "Zastosuj ciężką operację na przetwarzanym materiale");
       i += 2;
       continue;
     }
 
-    if (current === "aiin") {
-      phrases.push(lang === "en" ? "close step" : "zamknij krok");
+    if (a === "chedy" && b === "chedy") {
+      sentences.push(lang === "en"
+        ? "Repeat the material-processing operation"
+        : "Powtórz operację przetwarzania materiału");
+      i += 2;
+      continue;
+    }
+
+    if (a === "shol" && b === "shol") {
+      sentences.push(lang === "en"
+        ? "Maintain the active state continuously"
+        : "Utrzymuj stan aktywny w sposób ciągły");
+      i += 2;
+      continue;
+    }
+
+    if (a === "aiin") {
+      sentences.push(lang === "en"
+        ? "Close the current step"
+        : "Zamknij bieżący krok");
       i += 1;
       continue;
     }
 
-    if (current === "daiin") {
-      phrases.push(lang === "en" ? "complete closure" : "pełne zamknięcie");
+    if (a === "daiin") {
+      sentences.push(lang === "en"
+        ? "Complete and seal the procedure"
+        : "Zakończ i zamknij procedurę");
       i += 1;
       continue;
     }
 
     if (!interpreted[i].known) {
-      phrases.push("[" + interpreted[i].clean + "]");
+      sentences.push(lang === "en"
+        ? "An uncertain element remains unresolved: [" + interpreted[i].clean + "]"
+        : "Pozostaje niepewny element nierozwiązany: [" + interpreted[i].clean + "]");
       i += 1;
       continue;
     }
 
-    phrases.push(interpreted[i].dry);
+    sentences.push(interpreted[i].dry);
     i += 1;
   }
 
-  return phrases.join(". ") + ".";
+  let text = sentences.join(". ");
+  if (!text.endsWith(".")) text += ".";
+  return text;
+}
+
+function calculateProbability(interpreted, finalText, lang) {
+  if (interpreted.length === 0) return { percent: 0, report: "" };
+
+  const tokenAverage =
+    interpreted.reduce((sum, item) => sum + item.probability, 0) / interpreted.length;
+
+  const knownCount = interpreted.filter(i => i.known).length;
+  const uncertainCount = interpreted.filter(i => i.uncertain).length;
+  const unknownCount = interpreted.filter(i => i.role === "UNKNOWN").length;
+
+  const knownRatio = knownCount / interpreted.length;
+  const uncertaintyPenalty = uncertainCount * 0.025;
+  const unknownPenalty = unknownCount * 0.06;
+
+  const phraseBonus =
+    finalText.includes(".") ? 0.08 : 0.02;
+
+  let score = tokenAverage * 0.65 + knownRatio * 0.25 + phraseBonus;
+  score -= uncertaintyPenalty;
+  score -= unknownPenalty;
+
+  score = Math.max(0.05, Math.min(score, 0.97));
+  const percent = Math.round(score * 100);
+
+  const report = lang === "en"
+    ? `Estimated translation confidence: ${percent}%\n\nKnown tokens: ${knownCount}/${interpreted.length}\nUncertain tokens: ${uncertainCount}\nUnknown tokens: ${unknownCount}\n\nMethod:\nConfidence is calculated from token recognition weights, uncertainty markers, unknown-token penalties, and phrase-structure recognition.\n\nImportant: this is not proof of linguistic decipherment. It is a probability estimate inside the PUM/VSM functional model.`
+    : `Szacowane prawdopodobieństwo tłumaczenia: ${percent}%\n\nZnane tokeny: ${knownCount}/${interpreted.length}\nNiepewne tokeny: ${uncertainCount}\nNieznane tokeny: ${unknownCount}\n\nMetoda:\nWynik liczony jest z wag rozpoznania tokenów, markerów niepewności, kar za tokeny nieznane oraz rozpoznania struktury fraz.\n\nWażne: to nie jest dowód odszyfrowania językowego. To szacunek prawdopodobieństwa wewnątrz funkcjonalnego modelu PUM/VSM.`;
+
+  return { percent, report };
 }
 
 function buildProcedure(interpreted, lang) {
@@ -560,13 +642,10 @@ function buildProcedure(interpreted, lang) {
     output += `   NORMALIZED: ${item.clean}\n`;
     output += `   STATUS: ${item.known ? translations[lang].known : translations[lang].unknown}\n`;
     output += `   ROLE: ${item.role}\n`;
+    output += `   TOKEN PROBABILITY: ${Math.round(item.probability * 100)}%\n`;
     output += `   METHOD: ${item.evidence}\n`;
-    output += `   FUNCTIONAL OUTPUT: ${item.meaning}\n`;
-    output += `   DRY TOKEN OUTPUT: ${item.dry}\n\n`;
+    output += `   FUNCTIONAL OUTPUT: ${item.meaning}\n\n`;
   });
-
-  output += "PHRASE BUILDER:\n";
-  output += buildDryTranslation(interpreted, lang);
 
   return output;
 }
@@ -577,15 +656,22 @@ function interpretText() {
 
   if (!input) {
     document.getElementById("procedureOutput").innerText = "";
-    document.getElementById("dryOutput").innerText = "";
+    document.getElementById("finalOutput").innerText = "";
+    document.getElementById("probabilityOutput").innerText = "";
+    document.getElementById("probabilityFill").style.width = "0%";
     return;
   }
 
   const tokens = input.split(/\s+/);
   const interpreted = tokens.map(t => interpretToken(t, lang));
 
+  const finalTranslation = buildFinalTranslation(interpreted, lang);
+  const probability = calculateProbability(interpreted, finalTranslation, lang);
+
   document.getElementById("procedureOutput").innerText = buildProcedure(interpreted, lang);
-  document.getElementById("dryOutput").innerText = buildDryTranslation(interpreted, lang);
+  document.getElementById("finalOutput").innerText = finalTranslation;
+  document.getElementById("probabilityOutput").innerText = probability.report;
+  document.getElementById("probabilityFill").style.width = probability.percent + "%";
 }
 
 document.getElementById("language").value = "en";
