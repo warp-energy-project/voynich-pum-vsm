@@ -24,7 +24,7 @@ section{
   background:rgba(17,24,39,.94);border:1px solid #334155;
   border-radius:18px;padding:22px;margin-bottom:22px;box-shadow:0 12px 35px rgba(0,0,0,.28);
 }
-h2{margin-top:0;color:var(--accent)}
+h2,h3{margin-top:0;color:var(--accent)}
 textarea{
   width:100%;min-height:180px;background:#020617;color:var(--text);
   border:1px solid #475569;border-radius:12px;padding:15px;font-size:1rem;
@@ -60,11 +60,15 @@ select,input[type=file]{background:var(--soft);color:var(--text);border:1px soli
   width:100%;height:460px;overflow:auto;border:1px solid #334155;border-radius:12px;
   background:#000;display:flex;align-items:center;justify-content:center;
 }
+.image-wrap:focus{outline:2px solid var(--green)}
 #folioImage{
   max-width:100%;transform-origin:center center;transition:transform .2s ease;
 }
 .placeholder{
   color:var(--muted);text-align:center;padding:30px;
+}
+.small-note{
+  color:var(--muted);font-size:.95rem;margin:8px 0 12px;
 }
 .probability-bar{
   width:100%;height:26px;background:#020617;border:1px solid #334155;
@@ -125,7 +129,7 @@ footer{text-align:center;padding:25px;color:var(--muted);border-top:1px solid #3
         <button type="button" id="clearImageButton">Clear Image</button>
       </div>
 
-      <p id="pasteHint" class="placeholder"></p>
+      <p id="pasteHint" class="small-note"></p>
 
       <div class="controls">
         <button type="button" id="zoomOut">- Zoom</button>
@@ -133,9 +137,19 @@ footer{text-align:center;padding:25px;color:var(--muted);border-top:1px solid #3
         <button type="button" id="zoomReset">Reset</button>
       </div>
 
-      <div class="image-wrap" id="imageWrap">
-        <div class="placeholder" id="imagePlaceholder">Upload or paste a folio image here.</div>
+      <div class="image-wrap" id="imageWrap" tabindex="0">
+        <div class="placeholder" id="imagePlaceholder">Click here and press Ctrl+V to paste screenshot, or upload image above.</div>
         <img id="folioImage" alt="Folio preview" style="display:none;" />
+      </div>
+
+      <div class="result-box">
+        <h3 id="extractedTitle">Generated / Extracted EVA Text</h3>
+        <p id="extractedHint" class="small-note"></p>
+        <textarea id="extractedEva"></textarea>
+        <div class="controls">
+          <button id="copyEvaButton" type="button">Copy EVA to Translator</button>
+          <button id="clearEvaButton" type="button">Clear EVA</button>
+        </div>
       </div>
     </div>
 
@@ -211,7 +225,12 @@ The goal is not only to read — but to understand how the system operates.
     sourceButton:"Open Yale Original",
     workspaceTitle:"Folio Workspace",
     imageTitle:"Folio Image",
-    pasteHint:"You can upload an image file or paste a screenshot directly onto this page with Ctrl+V.",
+    pasteHint:"Upload a folio image or click inside the black image area and press Ctrl+V to paste a screenshot.",
+    extractedTitle:"Generated / Extracted EVA Text",
+    extractedHint:"The image preview helps compare the folio with the transcription. This interpreter translates EVA transcription, not raw Voynich glyphs. Paste or correct EVA text here, then copy it into the translator.",
+    copyEvaButton:"Copy EVA to Translator",
+    clearEvaButton:"Clear EVA",
+    extractedPlaceholder:"Paste extracted or manually corrected EVA transcription here...",
     contextTitle:"Visual Context",
     inputTitle:"1. EVA Raw Input",
     procedureTitle:"2. Translation Procedure",
@@ -226,7 +245,8 @@ The goal is not only to read — but to understand how the system operates.
     unknown:"UNCERTAIN / UNKNOWN",
     modelText:`<p>The PUM/VSM model treats Voynich text as a parametric/procedural system.</p>
     <p><span class="model-code">VISUAL OBJECT → PARAMETERS → TEXT FUNCTION</span></p>
-    <p>The final reading links token proportions to the visual context: plant, jar, vessel, tube, bath, process scene or diagram.</p>`,
+    <p>The final reading links token proportions to the visual context: plant, jar, vessel, tube, bath, process scene or diagram.</p>
+    <p><strong>Note:</strong> automatic Voynich glyph OCR is experimental. This page currently interprets EVA transcription text supplied by the user.</p>`,
     authorText:`Research concept and analytical direction: <strong>Tomasz Grabowski (Drako)</strong>. Analytical support: Navi / ChatGPT + Gemini / Brat.`
   },
   pl:{
@@ -251,7 +271,12 @@ Celem nie jest tylko czytanie — lecz zrozumienie, jak ten system działa.
     sourceButton:"Otwórz oryginał Yale",
     workspaceTitle:"Obszar pracy folio",
     imageTitle:"Obraz folio",
-    pasteHint:"Możesz przesłać plik obrazu albo wkleić screenshot bezpośrednio na stronie przez Ctrl+V.",
+    pasteHint:"Prześlij obraz folio albo kliknij w czarne pole obrazu i naciśnij Ctrl+V, aby wkleić screenshot.",
+    extractedTitle:"Wygenerowany / odczytany tekst EVA",
+    extractedHint:"Podgląd obrazu pomaga porównać folio z transkrypcją. Interpreter tłumaczy tekst EVA, a nie surowe znaki z obrazu. Wklej albo popraw tekst EVA tutaj, potem przenieś go do tłumacza.",
+    copyEvaButton:"Kopiuj EVA do tłumacza",
+    clearEvaButton:"Wyczyść EVA",
+    extractedPlaceholder:"Wklej odczytaną albo ręcznie poprawioną transkrypcję EVA tutaj...",
     contextTitle:"Kontekst wizualny",
     inputTitle:"1. Surowy tekst EVA",
     procedureTitle:"2. Procedura tłumaczenia",
@@ -266,7 +291,8 @@ Celem nie jest tylko czytanie — lecz zrozumienie, jak ten system działa.
     unknown:"NIEPEWNY / NIEZNANY",
     modelText:`<p>Model PUM/VSM traktuje tekst Voynicha jako system parametryczny/proceduralny.</p>
     <p><span class="model-code">OBIEKT WIZUALNY → PARAMETRY → FUNKCJA TEKSTU</span></p>
-    <p>Ostateczny odczyt łączy proporcje tokenów z kontekstem wizualnym: roślina, słoik, naczynie, rurka, kąpiel, scena procesu albo diagram.</p>`,
+    <p>Ostateczny odczyt łączy proporcje tokenów z kontekstem wizualnym: roślina, słoik, naczynie, rurka, kąpiel, scena procesu albo diagram.</p>
+    <p><strong>Uwaga:</strong> automatyczne OCR znaków Voynicha jest eksperymentalne. Ta strona obecnie interpretuje tekst transkrypcji EVA podany przez użytkownika.</p>`,
     authorText:`Koncepcja badawcza i kierunek analizy: <strong>Tomasz Grabowski (Drako)</strong>. Wsparcie analityczne: Navi / ChatGPT + Gemini / Brat.`
   }
 };
@@ -303,6 +329,11 @@ function setLanguage(){
   document.getElementById("workspaceTitle").innerText=t.workspaceTitle;
   document.getElementById("imageTitle").innerText=t.imageTitle;
   document.getElementById("pasteHint").innerText=t.pasteHint;
+  document.getElementById("extractedTitle").innerText=t.extractedTitle;
+  document.getElementById("extractedHint").innerText=t.extractedHint;
+  document.getElementById("copyEvaButton").innerText=t.copyEvaButton;
+  document.getElementById("clearEvaButton").innerText=t.clearEvaButton;
+  document.getElementById("extractedEva").placeholder=t.extractedPlaceholder;
   document.getElementById("contextTitle").innerText=t.contextTitle;
   document.getElementById("inputTitle").innerText=t.inputTitle;
   document.getElementById("procedureTitle").innerText=t.procedureTitle;
@@ -504,20 +535,26 @@ function interpretText(){
   const input=document.getElementById("evaInput").value.trim();
 
   if(!input){
-    procedureOutput.innerText="";
-    finalOutput.innerText="";
-    probabilityOutput.innerText="";
-    probabilityFill.style.width="0%";
+    document.getElementById("procedureOutput").innerText="";
+    document.getElementById("finalOutput").innerText="";
+    document.getElementById("probabilityOutput").innerText="";
+    document.getElementById("probabilityFill").style.width="0%";
     return;
   }
 
   const items=input.split(/\s+/).map(t=>interpretToken(t,lang));
   const prob=calculateProbability(items,lang);
 
-  procedureOutput.innerText=buildProcedure(items,lang);
-  finalOutput.innerText=buildFinalReading(items,lang);
-  probabilityOutput.innerText=prob.text;
-  probabilityFill.style.width=prob.percent+"%";
+  document.getElementById("procedureOutput").innerText=buildProcedure(items,lang);
+  document.getElementById("finalOutput").innerText=buildFinalReading(items,lang);
+  document.getElementById("probabilityOutput").innerText=prob.text;
+  document.getElementById("probabilityFill").style.width=prob.percent+"%";
+}
+
+function copyEvaToTranslator(){
+  const text=document.getElementById("extractedEva").value.trim();
+  document.getElementById("evaInput").value=text;
+  interpretText();
 }
 
 function showImage(src){
@@ -553,7 +590,8 @@ function handlePaste(e){
       const reader=new FileReader();
       reader.onload=()=>showImage(reader.result);
       reader.readAsDataURL(file);
-      break;
+      e.preventDefault();
+      return;
     }
   }
 }
@@ -573,9 +611,17 @@ document.addEventListener("DOMContentLoaded",()=>{
   document.getElementById("runButton").addEventListener("click",interpretText);
   document.getElementById("visualContext").addEventListener("change",interpretText);
 
+  document.getElementById("copyEvaButton").addEventListener("click",copyEvaToTranslator);
+  document.getElementById("clearEvaButton").addEventListener("click",()=>{
+    document.getElementById("extractedEva").value="";
+  });
+
   document.getElementById("imageUpload").addEventListener("change",handleUpload);
   document.getElementById("clearImageButton").addEventListener("click",clearImage);
-  document.addEventListener("paste",handlePaste);
+
+  const imageWrap=document.getElementById("imageWrap");
+  imageWrap.addEventListener("click",()=>imageWrap.focus());
+  imageWrap.addEventListener("paste",handlePaste);
 
   document.getElementById("zoomIn").addEventListener("click",()=>zoom(.2));
   document.getElementById("zoomOut").addEventListener("click",()=>zoom(-.2));
