@@ -3,379 +3,125 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="referrer" content="no-referrer-when-downgrade">
 <title>Voynich PUM/VSM Interpreter</title>
-
 <style>
-:root{
-  --bg:#07111f;--card:#111827;--soft:#1f2937;--text:#e5e7eb;
-  --muted:#9ca3af;--accent:#38bdf8;--green:#00ffaa;--danger:#f87171;
-}
-*{box-sizing:border-box}
-body{
-  margin:0;font-family:Arial,Helvetica,sans-serif;
-  background:radial-gradient(circle at top,#12324d 0,#020617 45%,#07111f 100%);
-  color:var(--text);line-height:1.6;
-}
-header{padding:45px 20px 25px;text-align:center}
-header h1{margin:0;font-size:2.5rem;color:var(--accent)}
-header p{max-width:900px;margin:12px auto;color:var(--muted)}
-main{max-width:1250px;margin:auto;padding:20px}
-section{
-  background:rgba(17,24,39,.94);border:1px solid #334155;
-  border-radius:18px;padding:22px;margin-bottom:22px;box-shadow:0 12px 35px rgba(0,0,0,.28);
-}
-h2,h3{margin-top:0;color:var(--accent)}
-textarea{
-  width:100%;min-height:170px;background:#020617;color:var(--text);
-  border:1px solid #475569;border-radius:12px;padding:15px;font-size:1rem;
-}
-button,select,input[type=file]{
-  margin-top:10px;padding:11px 16px;border-radius:10px;border:none;
-  font-weight:bold;cursor:pointer;
-}
-button{background:var(--accent);color:#020617}
-select,input[type=file]{background:var(--soft);color:var(--text);border:1px solid #475569}
-.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
-.result-box{
-  background:#020617;border:1px solid #334155;border-radius:12px;
-  padding:15px;margin-top:15px;white-space:pre-wrap;min-height:120px;
-}
-.warning{border-left:5px solid var(--danger);padding-left:15px;color:#fecaca}
-.hero-text{
-  background:rgba(0,255,170,.06);border-left:4px solid var(--green);
-  padding:18px 22px;border-radius:12px;font-size:1rem;white-space:pre-wrap;
-}
-.source-button{
-  display:inline-block;background:var(--green);color:#021018;text-decoration:none;
-  padding:12px 18px;border-radius:12px;font-weight:bold;
-}
-.image-panel{background:#020617;border:1px solid #334155;border-radius:14px;padding:15px}
-.image-wrap{
-  width:100%;height:460px;overflow:auto;border:1px solid #334155;border-radius:12px;
-  background:#000;display:flex;align-items:center;justify-content:center;position:relative;
-}
-.image-wrap:focus{outline:2px solid var(--green)}
-#folioImage{max-width:100%;transform-origin:center center;transition:transform .2s ease}
-.placeholder{color:var(--muted);text-align:center;padding:30px;z-index:1}
-.small-note{color:var(--muted);font-size:.95rem;margin:8px 0 12px}
-.probability-bar{
-  width:100%;height:26px;background:#020617;border:1px solid #334155;
-  border-radius:20px;overflow:hidden;margin:12px 0;
-}
-.probability-fill{
-  height:100%;width:0%;background:linear-gradient(90deg,#f59e0b,#22c55e);
-  transition:width .3s ease;
-}
-.model-code{color:#bae6fd;font-weight:bold}
-footer{text-align:center;padding:25px;color:var(--muted);border-top:1px solid #334155}
-@media(max-width:850px){.grid{grid-template-columns:1fr}.image-wrap{height:330px}}
+:root{ --bg:#07111f;--card:#111827;--soft:#1f2937;--text:#e5e7eb;--accent:#38bdf8;--green:#00ffaa;--danger:#f87171; }
+body{ margin:0; font-family:Arial,sans-serif; background:#07111f; color:var(--text); }
+header{ padding:40px; text-align:center; background:rgba(0,0,0,0.3); }
+main{ max-width:1200px; margin:auto; padding:20px; }
+section{ background:var(--card); border:1px solid #334155; border-radius:15px; padding:20px; margin-bottom:20px; }
+.grid{ display:grid; grid-template-columns: 1fr 1fr; gap:20px; }
+.image-wrap{ width:100%; height:500px; overflow:auto; background:#000; border-radius:10px; display:flex; align-items:center; justify-content:center; border:2px solid #334155; }
+#folioImage{ max-width:100%; transition: transform 0.2s; }
+textarea{ width:100%; height:150px; background:#020617; color:#00ffaa; border:1px solid #475569; border-radius:8px; padding:10px; font-family: monospace; }
+button, select{ padding:10px 15px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; background:var(--accent); margin-right:5px; }
+.controls{ margin-bottom:15px; }
+h2, h3{ color:var(--accent); margin-top:0; }
+@media(max-width:800px){ .grid{ grid-template-columns: 1fr; } }
 </style>
 </head>
-
 <body>
+
 <header>
-  <h1 id="pageTitle">Voynich PUM/VSM Interpreter</h1>
-  <p id="pageSubtitle">Functional interpretation tool for the Voynich Manuscript.</p>
+  <h1>Voynich PUM/VSM Interpreter</h1>
+  <p>Tomasz Grabowski (Drako) & AI Collaboration</p>
 </header>
 
 <main>
-<section>
-  <div class="controls">
-    <label id="languageLabel" for="language">Language:</label>
-    <select id="language">
-      <option value="en" selected>English</option>
-      <option value="pl">Polski</option>
-    </select>
-  </div>
-  <p class="warning" id="disclaimer"></p>
-</section>
-
-<section>
-  <div class="hero-text" id="heroText"></div>
-</section>
-
-<section>
-  <h2 id="sourceTitle">Original Manuscript Source</h2>
-  <p id="sourceText"></p>
-  <a class="source-button" href="https://collections.library.yale.edu/catalog/2002046" target="_blank" rel="noopener noreferrer" id="sourceButton">
-    Open Yale Original
-  </a>
-</section>
-
-<section>
-  <h2 id="workspaceTitle">Folio Workspace</h2>
-  <div class="grid">
-    <div class="image-panel">
-      <h3 id="folioSelectTitle">Voynich Folio Selector</h3>
-      <div class="controls">
-        <select id="folioSelector"></select>
-        <button type="button" id="loadFolioButton">Load selected folio</button>
-      </div>
-      <p id="folioInfo" class="small-note"></p>
-
-      <h3 id="imageTitle">Folio Image</h3>
-      <div class="controls">
-        <input type="file" id="imageUpload" accept="image/*" />
-        <button type="button" id="clearImageButton">Clear Image</button>
-      </div>
-
-      <p id="pasteHint" class="small-note"></p>
-      <div class="controls">
-        <button type="button" id="zoomOut">- Zoom</button>
-        <button type="button" id="zoomIn">+ Zoom</button>
-        <button type="button" id="zoomReset">Reset</button>
-      </div>
-
-      <div class="image-wrap" id="imageWrap" tabindex="0">
-        <div class="placeholder" id="imagePlaceholder">Upload/paste image or select a folio.</div>
-        <img id="folioImage" alt="Folio preview" style="display:none;" />
-      </div>
-
-      <div class="result-box">
-        <h3 id="extractedTitle">EVA Text From Selected Folio</h3>
-        <p id="extractedHint" class="small-note"></p>
-        <textarea id="extractedEva"></textarea>
+  <section>
+    <div class="grid">
+      <div>
+        <h3>Folio Selector</h3>
         <div class="controls">
-          <button id="copyEvaButton" type="button">Copy EVA to Translator</button>
-          <button id="clearEvaButton" type="button">Clear EVA</button>
+          <select id="folioSelector"></select>
+          <button id="loadBtn">Load Folio</button>
+        </div>
+        
+        <div class="image-wrap" id="imageContainer">
+          <img id="folioImage" src="" style="display:none;">
+          <div id="imgStatus">Select a folio and press Load</div>
+        </div>
+        
+        <div class="controls" style="margin-top:10px;">
+          <button onclick="adjustZoom(0.2)">+ Zoom</button>
+          <button onclick="adjustZoom(-0.2)">- Zoom</button>
+          <button onclick="resetZoom()">Reset</button>
         </div>
       </div>
+
+      <div>
+        <h3>EVA Input</h3>
+        <textarea id="evaInput" placeholder="EVA text will appear here..."></textarea>
+        <button id="translateBtn" style="width:100%; margin-top:10px; background:var(--green); color:#000;">Run PUM/VSM Interpretation</button>
+        
+        <h3 style="margin-top:20px;">Interpretation Result</h3>
+        <div id="output" style="background:#020617; padding:15px; border-radius:10px; min-height:200px; white-space:pre-wrap; border:1px solid #334155;"></div>
+      </div>
     </div>
-
-    <div>
-      <h3 id="contextTitle">Visual Context</h3>
-      <select id="visualContext">
-        <option value="plant">Plant / Roślina</option>
-        <option value="process">Process / Ludzie + rury + kąpiel</option>
-        <option value="jars">Jars / Słoiki / pojemniki</option>
-        <option value="astro">Astro / Diagram</option>
-      </select>
-      <h3 id="inputTitle">1. EVA Raw Input</h3>
-      <textarea id="evaInput"></textarea>
-      <button id="runButton" type="button">Translate</button>
-    </div>
-  </div>
-</section>
-
-<section>
-  <h2 id="procedureTitle">2. Translation Procedure</h2>
-  <div id="procedureOutput" class="result-box"></div>
-</section>
-
-<section>
-  <h2 id="finalTitle">3. Final Functional Reading</h2>
-  <div id="finalOutput" class="result-box"></div>
-</section>
-
-<section>
-  <h2 id="probabilityTitle">4. Translation Probability / Confidence</h2>
-  <div class="probability-bar"><div id="probabilityFill" class="probability-fill"></div></div>
-  <div id="probabilityOutput" class="result-box"></div>
-</section>
-
-<section>
-  <h2 id="modelTitle">Model Explanation</h2>
-  <div id="modelText"></div>
-</section>
-
-<section>
-  <h2 id="authorTitle">Author / Research</h2>
-  <p id="authorText"></p>
-</section>
+  </section>
 </main>
 
-<footer>Voynich PUM/VSM Project — Functional Interpretation Framework</footer>
-
 <script>
-let zoomLevel = 1;
-const YALE_IIIF_BASE = "https://iiif.library.yale.edu/iiif/2/digcoll:2002046/";
-
-const ui = {
-  en:{
-    title:"Voynich PUM/VSM Interpreter",
-    subtitle:"Functional interpretation tool for the Voynich Manuscript.",
-    languageLabel:"Language:",
-    disclaimer:"This tool does not claim confirmed linguistic decipherment. It provides a functional interpretation based on the PUM/VSM model.",
-    hero:`The Voynich Manuscript is not simply an unread book — it is a structured system where image, repetition and position converge into a functional code. Led by Tomasz Grabowski (Drako), with analytical support from AI (Navi + Brat).`,
-    sourceTitle:"Original Manuscript Source",
-    sourceText:"Voynich Manuscript, Beinecke Rare Book and Manuscript Library, Yale University.",
-    sourceButton:"Open Yale Original",
-    workspaceTitle:"Folio Workspace",
-    folioSelectTitle:"Voynich Folio Selector",
-    loadFolioButton:"Load selected folio",
-    imageTitle:"Folio Image",
-    pasteHint:"Upload an image or select a folio from the list above.",
-    extractedTitle:"EVA Text From Selected Folio",
-    extractedHint:"Select a folio to load local EVA data. Translation is based on text, not image pixels.",
-    copyEvaButton:"Copy EVA to Translator",
-    clearEvaButton:"Clear EVA",
-    extractedPlaceholder:"EVA text appears here...",
-    contextTitle:"Visual Context",
-    inputTitle:"1. EVA Raw Input",
-    procedureTitle:"2. Translation Procedure",
-    finalTitle:"3. Final Functional Reading",
-    probabilityTitle:"4. Translation Probability / Confidence",
-    modelTitle:"Model Explanation",
-    authorTitle:"Author / Research",
-    runButton:"Translate",
-    clearImageButton:"Clear Image",
-    placeholder:"Paste EVA text here",
-    known:"KNOWN",
-    unknown:"UNCERTAIN / UNKNOWN",
-    modelText:`<p>The PUM/VSM model treats Voynich text as a parametric/procedural system.</p>`,
-    authorText:`Research concept: <strong>Tomasz Grabowski (Drako)</strong>. Analytical support: Navi + Brat.`
-  },
-  pl:{
-    title:"Voynich PUM/VSM Interpreter",
-    subtitle:"Narzędzie interpretacji funkcjonalnej Manuskryptu Voynicha.",
-    languageLabel:"Język:",
-    disclaimer:"To narzędzie nie twierdzi, że jest potwierdzonym odszyfrowaniem językowym. To interpretacja funkcjonalna oparta na modelu PUM/VSM.",
-    hero:`Manuskrypt Voynicha to uporządkowany system, w którym obraz i powtarzalność tworzą kod. Projekt prowadzony przez Tomasza Grabowskiego (Drako), wspierany przez Navi i Brata (AI).`,
-    sourceTitle:"Oryginalne źródło manuskryptu",
-    sourceText:"Manuskrypt Voynicha, Beinecke Library, Yale University.",
-    sourceButton:"Otwórz oryginał Yale",
-    workspaceTitle:"Obszar pracy folio",
-    folioSelectTitle:"Wybór folio Voynicha",
-    loadFolioButton:"Załaduj wybrane folio",
-    imageTitle:"Obraz folio",
-    pasteHint:"Prześlij obraz lub wybierz folio z listy powyżej.",
-    extractedTitle:"Tekst EVA z wybranego folio",
-    extractedHint:"Wybierz folio, aby załadować tekst EVA. Interpreter tłumaczy tekst, nie surowy obraz.",
-    copyEvaButton:"Kopiuj EVA do tłumacza",
-    clearEvaButton:"Wyczyść EVA",
-    extractedPlaceholder:"Tutaj pojawi się tekst EVA...",
-    contextTitle:"Kontekst wizualny",
-    inputTitle:"1. Surowy tekst EVA",
-    procedureTitle:"2. Procedura tłumaczenia",
-    finalTitle:"3. Ostateczny odczyt funkcjonalny",
-    probabilityTitle:"4. Prawdopodobieństwo tłumaczenia",
-    modelTitle:"Opis modelu",
-    authorTitle:"Autor / badanie",
-    runButton:"Tłumacz",
-    clearImageButton:"Wyczyść obraz",
-    placeholder:"Wklej tekst EVA",
-    known:"ZNANY",
-    unknown:"NIEPEWNY / NIEZNANY",
-    modelText:`<p>Model PUM/VSM traktuje tekst Voynicha jako system parametryczny.</p>`,
-    authorText:`Koncepcja badawcza: <strong>Tomasz Grabowski (Drako)</strong>. Wsparcie: Navi + Brat.`
-  }
-};
-
-const dictionary = {
-  qokedy:{role:"ENTRY", weight:.90, en:"initiate", pl:"inicjacja"},
-  chedy:{role:"PROCESS", weight:.88, en:"process material", pl:"przetwarzanie materiału"},
-  shol:{role:"STATE", weight:.84, en:"maintain state", pl:"utrzymanie stanu"},
-  kair:{role:"DATA", weight:.76, en:"carrier/material object", pl:"nośnik/obiekt materiałowy"},
-  aiin:{role:"END", weight:.91, en:"close step", pl:"zamknięcie kroku"},
-  ol:{role:"RESULT", weight:.82, en:"resulting state", pl:"stan wynikowy"}
-};
+const YALE_BASE = "https://iiif.library.yale.edu/iiif/2/digcoll:2002046/";
+let currentZoom = 1;
 
 const FOLIO_DB = {
-  "f1r": { context:"plant", img: YALE_IIIF_BASE + "1006195/full/1000,/0/default.jpg", eva:"qokedy qokedy chedy chedy shol shol aiin qokedy chedy shor kair ol aiin", note:"Herbal Start" },
-  "f8r": { context:"plant", img: YALE_IIIF_BASE + "1006209/full/1000,/0/default.jpg", eva:"qokedy chedy kair shol aiin ol dy", note:"Botanical Section" },
-  "f78r": { context:"process", img: YALE_IIIF_BASE + "1006349/full/1000,/0/default.jpg", eva:"qokedy chedy shol shor kair aiin kair shor chedy ol aiin", note:"Balneological Section" }
+  "f1r": { img: "1006195", context: "plant", eva: "qokedy qokedy chedy chedy shol shol aiin qokedy chedy shor kair ol aiin" },
+  "f8r": { img: "1006209", context: "plant", eva: "qokedy chedy kair shol aiin ol dy" },
+  "f78r": { img: "1006349", context: "process", eva: "qokedy chedy shol shor kair aiin kair shor chedy ol aiin" }
 };
 
-function allFolioLabels(){
-  const labels=[];
-  for(let i=1;i<=116;i++){ labels.push(`f${i}r`, `f${i}v`); }
-  return labels;
-}
-
-function setLanguage(){
-  const lang=document.getElementById("language").value;
-  const t=ui[lang];
-  document.getElementById("pageTitle").innerText=t.title;
-  document.getElementById("heroText").innerText=t.hero;
-  document.getElementById("sourceButton").innerText=t.sourceButton;
-  document.getElementById("loadFolioButton").innerText=t.loadFolioButton;
-  document.getElementById("runButton").innerText=t.runButton;
-  document.getElementById("disclaimer").innerText=t.disclaimer;
-  // Dodatkowe mapowania językowe...
-}
-
-function initFolioSelector(){
-  const sel=document.getElementById("folioSelector");
-  sel.innerHTML='<option value="">-- choose folio --</option>';
-  allFolioLabels().forEach(label=>{
-    const o=document.createElement("option");
-    o.value=label;
-    o.textContent=FOLIO_DB[label] ? `${label} ✓` : label;
-    sel.appendChild(o);
+// Inicjalizacja listy
+const sel = document.getElementById('folioSelector');
+for(let i=1; i<=116; i++) {
+  ['r','v'].forEach(side => {
+    let id = `f${i}${side}`;
+    let opt = document.createElement('option');
+    opt.value = id;
+    opt.textContent = FOLIO_DB[id] ? `${id} (Data Ready)` : id;
+    sel.appendChild(opt);
   });
 }
 
-function loadSelectedFolio(){
-  const id=document.getElementById("folioSelector").value;
-  const data=FOLIO_DB[id];
-  const ph=document.getElementById("imagePlaceholder");
-  const img=document.getElementById("folioImage");
+function loadFolio() {
+  const id = sel.value;
+  const data = FOLIO_DB[id];
+  const img = document.getElementById('folioImage');
+  const status = document.getElementById('imgStatus');
+  const eva = document.getElementById('evaInput');
 
-  if(data && data.img){
-    ph.innerText = "Connecting to Yale Library Archives...";
-    img.style.display = "none";
-    img.src = data.img;
-    img.onload = () => {
-      ph.style.display = "none";
-      img.style.display = "block";
-    };
-    img.onerror = () => {
-      ph.innerHTML = `<span style="color:var(--danger)">Image failed to load.</span><br><a href="${data.img}" target="_blank" style="color:var(--green)">Open link manually</a>`;
-    };
-    
-    document.getElementById("visualContext").value = data.context;
-    document.getElementById("extractedEva").value = data.eva;
-    document.getElementById("evaInput").value = data.eva;
-    interpretText();
+  if(data) {
+    status.style.display = 'none';
+    img.style.display = 'block';
+    // Omijamy cache i wymuszamy przeładowanie linku IIIF
+    img.src = `${YALE_BASE}${data.img}/full/1000,/0/default.jpg`;
+    eva.value = data.eva;
+    resetZoom();
   } else {
-    clearImage();
-    ph.innerText = id ? `No local data for ${id}` : "Select a folio.";
-    document.getElementById("extractedEva").value = "";
-    document.getElementById("evaInput").value = "";
+    img.style.display = 'none';
+    status.style.display = 'block';
+    status.textContent = `No local data for ${id}. You can paste EVA manually.`;
+    eva.value = "";
   }
 }
 
-function interpretToken(raw,lang){
-  const clean=raw.toLowerCase().replace(/[^a-z]/g,"");
-  if(dictionary[clean]){
-    const d=dictionary[clean];
-    return {raw,clean,role:d.role,known:true,meaning:d[lang],probability:d.weight};
-  }
-  return {raw,clean,role:"UNKNOWN",known:false,meaning:lang==="pl"?"nieznane":"unknown",probability:.15};
+function adjustZoom(delta) {
+  currentZoom = Math.max(0.5, Math.min(3, currentZoom + delta));
+  document.getElementById('folioImage').style.transform = `scale(${currentZoom})`;
 }
 
-function interpretText(){
-  const lang=document.getElementById("language").value;
-  const input=document.getElementById("evaInput").value.trim();
-  const procOut=document.getElementById("procedureOutput");
-  if(!input){ procOut.innerText=""; return; }
-
-  const items=input.split(/\s+/).map(t=>interpretToken(t,lang));
-  procOut.innerText=items.map((x,i)=>`${i+1}. TOKEN: ${x.raw} -> ROLE: ${x.role} (${x.meaning})`).join("\n\n");
-  document.getElementById("finalOutput").innerText = "Processed " + items.length + " tokens in VSM mode.";
+function resetZoom() {
+  currentZoom = 1;
+  document.getElementById('folioImage').style.transform = `scale(1)`;
 }
 
-function clearImage(){
-  const img=document.getElementById("folioImage");
-  img.style.display="none"; img.src="";
-  document.getElementById("imagePlaceholder").style.display="block";
-}
-
-document.addEventListener("DOMContentLoaded",()=>{
-  initFolioSelector();
-  setLanguage();
-  document.getElementById("loadFolioButton").addEventListener("click", loadSelectedFolio);
-  document.getElementById("runButton").addEventListener("click", interpretText);
-  document.getElementById("language").addEventListener("change", setLanguage);
-  document.getElementById("copyEvaButton").addEventListener("click", () => {
-    document.getElementById("evaInput").value = document.getElementById("extractedEva").value;
-    interpretText();
-  });
-  document.getElementById("zoomIn").addEventListener("click", () => { zoomLevel += 0.2; document.getElementById("folioImage").style.transform = `scale(${zoomLevel})`; });
-  document.getElementById("zoomOut").addEventListener("click", () => { zoomLevel = Math.max(0.2, zoomLevel - 0.2); document.getElementById("folioImage").style.transform = `scale(${zoomLevel})`; });
-  document.getElementById("zoomReset").addEventListener("click", () => { zoomLevel = 1; document.getElementById("folioImage").style.transform = "scale(1)"; });
-});
+document.getElementById('loadBtn').onclick = loadFolio;
+document.getElementById('translateBtn').onclick = () => {
+  const text = document.getElementById('evaInput').value;
+  document.getElementById('output').textContent = "PUM/VSM Analysis in progress...\n\n" + 
+    text.split(' ').map((word, i) => `${i+1}. ${word} -> Interpreting...`).join('\n');
+};
 </script>
 </body>
 </html>
