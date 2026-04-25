@@ -758,412 +758,250 @@ document.addEventListener("DOMContentLoaded",()=>{
   });
 });
 </script>
-  <!-- NAVI PATCH 002 START: NATURAL TRANSLATION ENGINE -->
+<!-- NAVI PATCH 003 START: NATURAL DYNAMIC READING FIX -->
 <script>
-(function(){
+(function () {
+  if (window.NAVI_PATCH_003_DYNAMIC_READING_FIX) return;
+  window.NAVI_PATCH_003_DYNAMIC_READING_FIX = true;
 
-  window.NAVI_PATCHES = window.NAVI_PATCHES || {};
+  const originalInterpret = window.interpretText;
 
-  if(window.NAVI_PATCHES["NAVI_PATCH_002"]){
-    console.log("NAVI_PATCH_002 already loaded");
-    return;
+  const TOKEN_MAP = {
+    chedy: { role: "PROCESS", pl: "przetwarzanie", en: "processing" },
+    qokedy: { role: "ENTRY", pl: "wejście materiału", en: "material entry" },
+    shedy: { role: "STATE", pl: "stan lekki / aktywny", en: "light / active state" },
+    shol: { role: "FLOW", pl: "podtrzymanie przepływu", en: "maintained flow" },
+    chol: { role: "POINTER", pl: "wskazanie procesu", en: "process pointer" },
+    cthy: { role: "HEAVY", pl: "ciężka operacja", en: "heavy operation" },
+    ol: { role: "RESULT", pl: "wynik / produkt", en: "result / product" },
+    dy: { role: "RESULT", pl: "zakończony efekt", en: "completed effect" },
+    daiin: { role: "END", pl: "koniec etapu", en: "step ending" },
+    aiin: { role: "END", pl: "znacznik końca", en: "ending marker" },
+    kair: { role: "DATA", pl: "parametr materiału", en: "material parameter" },
+    kor: { role: "DATA", pl: "wartość materiałowa", en: "material value" },
+    chear: { role: "DATA", pl: "cecha substancji", en: "substance feature" }
+  };
+
+  function getLang() {
+    const el = document.getElementById("languageSelect") ||
+               document.getElementById("langSelect") ||
+               document.querySelector("select");
+    return el && String(el.value).toLowerCase().startsWith("pl") ? "pl" : "en";
   }
 
-  window.NAVI_PATCHES["NAVI_PATCH_002"] = true;
-
-  function getLang(){
-    return document.getElementById("language")?.value || "en";
+  function getVisualContext() {
+    const el = document.getElementById("visualContext") ||
+               document.getElementById("contextSelect");
+    return el ? String(el.value).toLowerCase() : "";
   }
 
-  function getContext(){
-    return document.getElementById("visualContext")?.value || "plant";
+  function getEvaText() {
+    const el = document.getElementById("evaInput") ||
+               document.querySelector("textarea");
+    return el ? el.value : "";
   }
 
-  function normalizeToken(t){
-    return String(t).toLowerCase().replace(/[^a-z]/g,"");
+  function tokenize(text) {
+    return text
+      .toLowerCase()
+      .replace(/[^\w\s]/g, " ")
+      .split(/\s+/)
+      .filter(Boolean);
   }
 
-  function tokenRole(token){
-    const t = normalizeToken(token);
+  function analyse(tokens) {
+    const counts = {};
+    const known = [];
 
-    if(["qokedy","qokeedy","qokaiin"].includes(t)) return "ENTRY";
-    if(["chedy","chedy","chear","shedy"].includes(t)) return "PROCESS";
-    if(["cthy","cthar","cthedy"].includes(t)) return "HEAVY";
-    if(["shol","shody","sholody"].includes(t)) return "STATE";
-    if(["shor","chor","chol"].includes(t)) return "FLOW";
-    if(["kair","kor","kar","otol","otal"].includes(t)) return "DATA";
-    if(["ol","dy","odaiin"].includes(t)) return "RESULT";
-    if(["aiin","iin","daiin"].includes(t)) return "END";
-
-    if(t.endsWith("dy")) return "RESULT";
-    if(t.endsWith("iin")) return "END";
-    if(t.startsWith("sh")) return "STATE";
-    if(t.startsWith("cth")) return "HEAVY";
-
-    return "UNKNOWN";
-  }
-
-  function countRoles(tokens){
-    const c = {
-      ENTRY:0, PROCESS:0, HEAVY:0, STATE:0,
-      FLOW:0, DATA:0, RESULT:0, END:0, UNKNOWN:0
-    };
-
-    tokens.forEach(t=>{
-      const r = tokenRole(t);
-      c[r] = (c[r] || 0) + 1;
+    tokens.forEach((t, i) => {
+      const info = TOKEN_MAP[t] || null;
+      const role = info ? info.role : "UNKNOWN";
+      counts[role] = (counts[role] || 0) + 1;
+      known.push({ token: t, role, info, index: i });
     });
 
-    return c;
+    const total = Math.max(tokens.length, 1);
+    const processHeavy = (counts.PROCESS || 0) + (counts.HEAVY || 0);
+
+    return {
+      total,
+      counts,
+      known,
+      density: {
+        processHeavy: processHeavy / total,
+        state: (counts.STATE || 0) / total,
+        flow: (counts.FLOW || 0) / total,
+        end: (counts.END || 0) / total,
+        data: (counts.DATA || 0) / total,
+        unknown: (counts.UNKNOWN || 0) / total
+      }
+    };
   }
 
-  function intensityWord(count, lang){
-    if(count >= 3) return lang === "pl" ? "intensywnie i wielokrotnie" : "intensively and repeatedly";
-    if(count === 2) return lang === "pl" ? "dokładnie i powtórnie" : "carefully and repeatedly";
-    return lang === "pl" ? "normalnie" : "normally";
+  function procedureLine(item, lang) {
+    if (!item.info) {
+      return `${item.token} → [unknown / unresolved]`;
+    }
+    return `${item.token} → ${item.role} → ${item.info[lang]}`;
   }
 
-  function buildPlantContext(lang){
-    if(lang === "pl"){
-      return `KONTEKST ROŚLINNY:
-Rysunek rośliny nie musi przedstawiać jednej konkretnej rośliny. Może być diagramem złożonym z różnych części: korzenia, łodygi, liści, kwiatu lub ekstraktu. Oznacza to, że botanik albo użytkownik praktyczny może dopasować realną roślinę i jej części do widocznego schematu. Tekst opisuje nie samą roślinę, lecz proces wykonywany na wybranym materiale roślinnym.`;
-    }
+  function buildNaturalReading(a, lang, visualContext) {
+    const c = a.counts;
+    const d = a.density;
 
-    return `BOTANICAL CONTEXT:
-The illustrated plant does not have to represent one single species. It may be a composite diagram of different parts: root, stem, leaves, flower, or extract. This means that a botanist or practical user may identify the real plant equivalent and its usable parts from the drawing. The text describes not the plant itself, but a process applied to selected plant material.`;
-  }
+    const strongProcess = d.processHeavy >= 0.28;
+    const mediumProcess = d.processHeavy >= 0.14;
+    const strongState = d.state >= 0.18;
+    const strongFlow = d.flow >= 0.12;
+    const strongEnd = d.end >= 0.12;
+    const manyData = d.data >= 0.12;
 
-  function buildNaturalTranslation(tokens, lang, context){
-    const c = countRoles(tokens);
+    if (lang === "pl") {
+      let s = [];
 
-    const processIntensity = intensityWord(c.PROCESS + c.HEAVY, lang);
-    const stateIntensity = intensityWord(c.STATE, lang);
-    const flowIntensity = intensityWord(c.FLOW, lang);
-
-    if(lang === "pl"){
-
-      let subject = "materiał";
-      if(context === "plant") subject = "wybraną część rośliny lub materiał roślinny";
-      if(context === "process") subject = "płyn, ciało albo obiekt procesu";
-      if(context === "jars") subject = "zawartość naczynia albo nośnik";
-      if(context === "astro") subject = "punkt, sektor albo fazę diagramu";
-
-      let text = "";
-
-      if(c.ENTRY > 0){
-        text += `Rozpocznij procedurę od wskazanego elementu. `;
+      if (visualContext === "plant") {
+        s.push("Kontekst roślinny: rysunek nie musi oznaczać jednej konkretnej rośliny. Może działać jako diagram materiału roślinnego: korzeń, łodyga, liście, kwiat albo ekstrakt.");
       }
 
-      if(c.DATA > 0){
-        text += `Jako główny materiał potraktuj ${subject}. `;
-      }
-
-      if(c.PROCESS > 0 || c.HEAVY > 0){
-        if(context === "plant"){
-          text += `Przetwarzaj ${subject} ${processIntensity}; część miękką można rozdrabniać, a część twardą lub korzeniową ucierać albo zgniatać dłużej. `;
-        } else if(context === "process"){
-          text += `Przeprowadź ${subject} przez działanie procesu ${processIntensity}, utrzymując ciągłość transformacji. `;
-        } else if(context === "jars"){
-          text += `Przetwarzaj zawartość i przygotuj ją do przeniesienia albo przechowania. `;
-        } else {
-          text += `Przetwarzaj wskazany element zgodnie z kolejnością diagramu. `;
-        }
-      }
-
-      if(c.STATE > 0){
-        text += `Utrzymuj aktywny stan ${stateIntensity}, aż materiał osiągnie stabilny etap pośredni. `;
-      }
-
-      if(c.FLOW > 0){
-        text += `Następnie przenieś lub skieruj materiał dalej ${flowIntensity}, do kanału, nośnika, naczynia albo kolejnej strefy procesu. `;
-      }
-
-      if(c.RESULT > 0){
-        text += `Doprowadź całość do stanu wynikowego. `;
-      }
-
-      if(c.END > 0){
-        text += `Po osiągnięciu wyniku zamknij etap i przejdź do następnej części procedury. `;
-      }
-
-      if(c.UNKNOWN > 0){
-        text += `Niektóre znaki pozostają niepewne, dlatego wynik należy traktować jako rekonstrukcję funkcjonalną, nie dosłowne tłumaczenie.`;
-      }
-
-      return text.trim();
-    }
-
-    let subject = "the material";
-    if(context === "plant") subject = "the selected plant part or plant material";
-    if(context === "process") subject = "the liquid, body, or process object";
-    if(context === "jars") subject = "the vessel content or carrier";
-    if(context === "astro") subject = "the point, sector, or diagram phase";
-
-    let text = "";
-
-    if(c.ENTRY > 0){
-      text += `Begin the procedure from the indicated element. `;
-    }
-
-    if(c.DATA > 0){
-      text += `Treat ${subject} as the main working material. `;
-    }
-
-    if(c.PROCESS > 0 || c.HEAVY > 0){
-      if(context === "plant"){
-        text += `Process ${subject} ${processIntensity}; the soft part may be broken down, while the hard or root-like part may require longer grinding or crushing. `;
-      } else if(context === "process"){
-        text += `Move ${subject} through the process ${processIntensity}, maintaining the continuity of transformation. `;
-      } else if(context === "jars"){
-        text += `Process the content and prepare it for transfer or storage. `;
+      if (strongProcess) {
+        s.push("Tekst wskazuje na intensywne przetwarzanie materiału.");
+      } else if (mediumProcess) {
+        s.push("Tekst opisuje umiarkowaną operację przygotowania lub obróbki.");
       } else {
-        text += `Process the indicated element according to the diagram sequence. `;
+        s.push("Tekst ma słaby nacisk na sam proces mechaniczny.");
       }
+
+      if (strongFlow) {
+        s.push("Widoczny jest motyw podtrzymywania przepływu lub kontynuacji działania.");
+      }
+
+      if (strongState) {
+        s.push("Duża liczba znaczników stanu sugeruje kontrolę fazy, aktywności albo zmiany właściwości materiału.");
+      }
+
+      if (manyData) {
+        s.push("Obecne są tokeny danych, więc część tekstu może określać cechy materiału, parametry albo wartości praktyczne.");
+      }
+
+      if (strongEnd) {
+        s.push("Częste znaczniki końca wskazują, że tekst jest podzielony na krótkie etapy lub instrukcje.");
+      } else {
+        s.push("Zakończenia etapów są słabe lub rzadkie, więc zapis może być bardziej ciągły.");
+      }
+
+      return s.join(" ");
     }
 
-    if(c.STATE > 0){
-      text += `Maintain the active state ${stateIntensity} until the material reaches a stable intermediate condition. `;
+    let s = [];
+
+    if (visualContext === "plant") {
+      s.push("Plant context: the drawing does not need to represent one exact botanical species. It may function as a diagram of plant material: root, stem, leaves, flower, or extract.");
     }
 
-    if(c.FLOW > 0){
-      text += `Then transfer or direct the material onward ${flowIntensity}, into a channel, carrier, vessel, or next process zone. `;
+    if (strongProcess) {
+      s.push("The text indicates intensive processing of the material.");
+    } else if (mediumProcess) {
+      s.push("The text describes a moderate preparation or treatment operation.");
+    } else {
+      s.push("The text places weak emphasis on mechanical processing itself.");
     }
 
-    if(c.RESULT > 0){
-      text += `Bring the whole operation to the resulting state. `;
+    if (strongFlow) {
+      s.push("A maintained flow or continuation pattern is visible.");
     }
 
-    if(c.END > 0){
-      text += `Once the result is reached, close the step and move to the next part of the procedure. `;
+    if (strongState) {
+      s.push("The number of state markers suggests control of phase, activity, or material properties.");
     }
 
-    if(c.UNKNOWN > 0){
-      text += `Some signs remain uncertain, so this should be treated as a functional reconstruction rather than a literal translation.`;
+    if (manyData) {
+      s.push("Data tokens are present, so part of the text may encode material features, parameters, or practical values.");
     }
 
-    return text.trim();
+    if (strongEnd) {
+      s.push("Frequent ending markers suggest short procedural steps or segmented instructions.");
+    } else {
+      s.push("Ending markers are weak or rare, so the record may be more continuous.");
+    }
+
+    return s.join(" ");
   }
 
-  function appendNaturalTranslation(){
-    const evaInput = document.getElementById("evaInput");
-    const finalOutput = document.getElementById("finalOutput");
+  function buildFinalReading(a, lang) {
+    const c = a.counts;
 
-    if(!evaInput || !finalOutput) return;
+    if (lang === "pl") {
+      return `Odczyt funkcjonalny: materiał wejściowy jest opisany przez sekwencję operacji, stanów i zakończeń. Wykryto PROCESS/HEAVY: ${(c.PROCESS || 0) + (c.HEAVY || 0)}, STATE: ${c.STATE || 0}, FLOW: ${c.FLOW || 0}, DATA: ${c.DATA || 0}, END: ${c.END || 0}.`;
+    }
 
-    const raw = evaInput.value.trim();
-    if(!raw) return;
+    return `Functional reading: the input material is described through a sequence of operations, states, and endings. Detected PROCESS/HEAVY: ${(c.PROCESS || 0) + (c.HEAVY || 0)}, STATE: ${c.STATE || 0}, FLOW: ${c.FLOW || 0}, DATA: ${c.DATA || 0}, END: ${c.END || 0}.`;
+  }
 
+  function confidence(a) {
+    const known = a.total - (a.counts.UNKNOWN || 0);
+    const base = known / a.total;
+    const structureBonus =
+      ((a.counts.END || 0) > 0 ? 0.08 : 0) +
+      ((a.counts.PROCESS || 0) > 0 ? 0.08 : 0) +
+      ((a.counts.STATE || 0) > 0 ? 0.05 : 0);
+
+    return Math.min(0.95, Math.max(0.05, base * 0.75 + structureBonus));
+  }
+
+  function renderPatchOutput() {
     const lang = getLang();
-    const context = getContext();
-    const tokens = raw.split(/\s+/).filter(Boolean);
+    const text = getEvaText();
+    const visualContext = getVisualContext();
+    const tokens = tokenize(text);
+    const a = analyse(tokens);
 
-    const natural = buildNaturalTranslation(tokens, lang, context);
+    let old = document.getElementById("naviPatch003Output");
+    if (old) old.remove();
 
-    let plantBlock = "";
-    if(context === "plant"){
-      plantBlock = buildPlantContext(lang) + "\n\n";
-    }
+    const host = document.getElementById("finalOutput") ||
+                 document.getElementById("output") ||
+                 document.querySelector("main") ||
+                 document.body;
 
-    const title = lang === "pl"
-      ? "TŁUMACZENIE NATURALNE / DLA CZŁOWIEKA:"
-      : "NATURAL / HUMAN-READABLE TRANSLATION:";
+    const box = document.createElement("div");
+    box.id = "naviPatch003Output";
+    box.style.marginTop = "18px";
+    box.style.padding = "14px";
+    box.style.border = "1px solid #444";
+    box.style.borderRadius = "10px";
+    box.style.background = "rgba(255,255,255,0.04)";
 
-    const patchText = "\n\n" + plantBlock + title + "\n" + natural;
+    const procedure = a.known.map(x => `<li><code>${procedureLine(x, lang)}</code></li>`).join("");
 
-    if(!finalOutput.innerText.includes(title)){
-      finalOutput.innerText += patchText;
-    }
+    const prob = Math.round(confidence(a) * 100);
+
+    box.innerHTML = `
+      <h3>PATCH_003 — Natural Dynamic Reading</h3>
+
+      <h4>${lang === "pl" ? "1. Procedura token po tokenie" : "1. Token-by-token procedure"}</h4>
+      <ol>${procedure || "<li>[no EVA input]</li>"}</ol>
+
+      <h4>${lang === "pl" ? "2. Final functional reading" : "2. Final functional reading"}</h4>
+      <p>${buildFinalReading(a, lang)}</p>
+
+      <h4>${lang === "pl" ? "3. Naturalny ludzki odczyt" : "3. Natural human-readable reading"}</h4>
+      <p>${buildNaturalReading(a, lang, visualContext)}</p>
+
+      <h4>${lang === "pl" ? "4. Probability / confidence" : "4. Probability / confidence"}</h4>
+      <p><strong>${prob}%</strong> — ${lang === "pl"
+        ? "pewność modelu PUM/VSM, nie potwierdzone odczytanie języka."
+        : "PUM/VSM model confidence, not confirmed linguistic decipherment."}</p>
+    `;
+
+    host.appendChild(box);
   }
 
-  const oldInterpretText = window.interpretText;
-
-  if(typeof oldInterpretText === "function"){
-    window.interpretText = function(){
-      oldInterpretText();
-      appendNaturalTranslation();
-    };
-  }
-
-  document.addEventListener("DOMContentLoaded", function(){
-    const runButton = document.getElementById("runButton");
-    const copyButton = document.getElementById("copyEvaButton");
-    const context = document.getElementById("visualContext");
-
-    if(runButton){
-      runButton.addEventListener("click", function(){
-        setTimeout(appendNaturalTranslation, 50);
-      });
+  window.interpretText = function () {
+    if (typeof originalInterpret === "function") {
+      originalInterpret.apply(this, arguments);
     }
-
-    if(copyButton){
-      copyButton.addEventListener("click", function(){
-        setTimeout(appendNaturalTranslation, 50);
-      });
-    }
-
-    if(context){
-      context.addEventListener("change", function(){
-        setTimeout(function(){
-          if(typeof window.interpretText === "function"){
-            window.interpretText();
-          }
-        }, 50);
-      });
-    }
-  });
-
-  console.log("NAVI_PATCH_002 loaded: Natural Translation Engine");
-
-})();
-</script>
-<!-- NAVI PATCH 002 END -->
-  <!-- NAVI PATCH 003 START -->
-<script>
-(function(){
-
-    // SYSTEM PATCHY — brak duplikacji
-    window.NAVI_PATCHES = window.NAVI_PATCHES || {};
-    if(window.NAVI_PATCHES["NAVI_PATCH_003"]) return;
-    window.NAVI_PATCHES["NAVI_PATCH_003"] = true;
-
-    console.log("NAVI_PATCH_003: Natural Translation Engine v3");
-
-    const NATURAL_TOKEN_DB = {
-        qokedy:{role:"ENTRY"},
-        qokeedy:{role:"ENTRY"},
-        chedy:{role:"PROCESS"},
-        shedy:{role:"PROCESS"},
-        cthy:{role:"HEAVY"},
-        shol:{role:"STATE"},
-        shor:{role:"FLOW"},
-        kair:{role:"DATA"},
-        kor:{role:"DATA"},
-        ol:{role:"RESULT"},
-        dy:{role:"RESULT"},
-        aiin:{role:"END"},
-        daiin:{role:"END"}
-    };
-
-    function lang(){ return document.getElementById("language")?.value || "en"; }
-    function context(){ return document.getElementById("visualContext")?.value || "plant"; }
-    function clean(t){ return String(t).toLowerCase().replace(/[^a-z]/g,""); }
-
-    function countRoles(tokens){
-        const c = {ENTRY:0, DATA:0, PROCESS:0, HEAVY:0, STATE:0, FLOW:0, RESULT:0, END:0};
-
-        tokens.forEach(t=>{
-            const key = clean(t);
-            const entry = NATURAL_TOKEN_DB[key];
-            if(entry){
-                const role = entry.role;
-                c[role] = (c[role] || 0) + 1;
-            }
-        });
-
-        return c;
-    }
-
-    function buildPlantContext(l){
-        if(l==="pl"){
-            return `KONTEKST ROŚLINNY:
-Rysunek nie przedstawia jednej konkretnej rośliny.
-Jest to schemat złożony z różnych części: korzenia, łodygi, liści i kwiatu.
-
-Oznacza to, że użytkownik (np. botanik) sam identyfikuje rzeczywistą roślinę.
-Tekst opisuje proces wykonywany na materiale roślinnym, a nie nazwę rośliny.`;
-        }
-        return `BOTANICAL CONTEXT:
-The drawing does not represent a single plant.
-It is a composite diagram of root, stem, leaves and flower.
-
-The reader must identify the real plant.
-The text describes a process applied to plant material, not a plant name.`;
-    }
-
-    function buildNaturalTranslation(tokens, l, ctx){
-
-        const c = countRoles(tokens);
-
-        if(l==="pl"){
-
-            let subject = "materiał";
-            if(ctx==="plant") subject = "materiał roślinny";
-            if(ctx==="process") subject = "obiekt procesu";
-            if(ctx==="jars") subject = "zawartość naczynia";
-            if(ctx==="astro") subject = "element diagramu";
-
-            let out = "";
-
-            if(c.ENTRY) out += "Rozpocznij proces. ";
-            if(c.DATA) out += `Przygotuj ${subject}. `;
-            if(c.PROCESS || c.HEAVY) out += `Przetwarzaj ${subject} zgodnie z instrukcją. `;
-            if(c.STATE) out += "Utrzymuj stabilny stan procesu. ";
-            if(c.FLOW) out += "Przenieś materiał do kolejnego etapu. ";
-            if(c.RESULT) out += "Doprowadź do uzyskania wyniku. ";
-            if(c.END) out += "Zamknij etap procesu.";
-
-            return out.trim();
-        }
-
-        let subject = "material";
-        if(ctx==="plant") subject = "plant material";
-        if(ctx==="process") subject = "process object";
-        if(ctx==="jars") subject = "container content";
-        if(ctx==="astro") subject = "diagram element";
-
-        let out = "";
-
-        if(c.ENTRY) out += "Begin the process. ";
-        if(c.DATA) out += `Prepare the ${subject}. `;
-        if(c.PROCESS || c.HEAVY) out += `Process the ${subject} according to the steps. `;
-        if(c.STATE) out += "Maintain stable conditions. ";
-        if(c.FLOW) out += "Move the material to the next stage. ";
-        if(c.RESULT) out += "Bring it to the final state. ";
-        if(c.END) out += "Close the step.";
-
-        return out.trim();
-    }
-
-    // NADPISANIE interpretText
-    const originalInterpret = window.interpretText;
-
-    window.interpretText = function(){
-
-        if(typeof originalInterpret === "function"){
-            originalInterpret();
-        }
-
-        const eva = document.getElementById("evaInput")?.value.trim();
-        const finalBox = document.getElementById("finalOutput");
-
-        if(!eva || !finalBox) return;
-
-        const tokens = eva.split(/\s+/);
-        const l = lang();
-        const ctx = context();
-
-        let output = "";
-
-        // 🔥 DODAJ KONTEKST ROŚLIN
-        if(ctx==="plant"){
-            output += buildPlantContext(l) + "\n\n";
-        }
-
-        const title = l==="pl"
-            ? "ODCZYT PŁYNNY (NATURALNY):"
-            : "NATURAL READING:";
-
-        const translation = buildNaturalTranslation(tokens, l, ctx);
-
-        output += title + "\n" + translation;
-
-        // 🔥 NIE DUPELIKUJEMY — ZAMIENIAMY
-        const parts = finalBox.innerText.split(title);
-        finalBox.innerText = parts[0] + output;
-    };
-
-    console.log("NAVI_PATCH_003 READY");
-
+    renderPatchOutput();
+  };
 })();
 </script>
 <!-- NAVI PATCH 003 END -->
