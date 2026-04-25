@@ -1,682 +1,362 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Voynich PUM/VSM Interpreter</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Voynich PUM/VSM Interpreter</title>
 
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card: #111827;
-      --soft: #1f2937;
-      --text: #e5e7eb;
-      --muted: #9ca3af;
-      --accent: #38bdf8;
-      --known: #22c55e;
-      --unknown: #f59e0b;
-      --danger: #f87171;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      font-family: Arial, Helvetica, sans-serif;
-      background: linear-gradient(180deg, #020617, var(--bg));
-      color: var(--text);
-      line-height: 1.6;
-    }
-
-    header {
-      padding: 40px 20px;
-      text-align: center;
-      border-bottom: 1px solid #334155;
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 2.2rem;
-      color: var(--accent);
-    }
-
-    header p {
-      max-width: 900px;
-      margin: 15px auto 0;
-      color: var(--muted);
-    }
-
-    main {
-      max-width: 1150px;
-      margin: auto;
-      padding: 25px 20px 60px;
-    }
-
-    section {
-      background: rgba(17, 24, 39, 0.94);
-      border: 1px solid #334155;
-      border-radius: 16px;
-      padding: 22px;
-      margin-bottom: 22px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-    }
-
-    h2 {
-      margin-top: 0;
-      color: var(--accent);
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 170px;
-      background: #020617;
-      color: var(--text);
-      border: 1px solid #475569;
-      border-radius: 12px;
-      padding: 15px;
-      font-size: 1rem;
-      resize: vertical;
-    }
-
-    button, select {
-      margin-top: 15px;
-      padding: 11px 16px;
-      border-radius: 10px;
-      border: none;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    button {
-      background: var(--accent);
-      color: #020617;
-    }
-
-    select {
-      background: var(--soft);
-      color: var(--text);
-      border: 1px solid #475569;
-    }
-
-    .controls {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-
-    .result-box {
-      background: #020617;
-      border: 1px solid #334155;
-      border-radius: 12px;
-      padding: 15px;
-      margin-top: 15px;
-      white-space: pre-wrap;
-      min-height: 120px;
-    }
-
-    .known { color: var(--known); font-weight: bold; }
-    .unknown { color: var(--unknown); font-weight: bold; }
-
-    .warning {
-      border-left: 5px solid var(--danger);
-      padding-left: 15px;
-      color: #fecaca;
-    }
-
-    .model-code {
-      color: #bae6fd;
-      font-weight: bold;
-    }
-
-    .probability-bar {
-      width: 100%;
-      height: 26px;
-      background: #020617;
-      border: 1px solid #334155;
-      border-radius: 20px;
-      overflow: hidden;
-      margin: 12px 0;
-    }
-
-    .probability-fill {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #f59e0b, #22c55e);
-      transition: width 0.3s ease;
-    }
-
-    footer {
-      text-align: center;
-      padding: 25px;
-      color: var(--muted);
-      border-top: 1px solid #334155;
-    }
-  </style>
+<style>
+:root {
+  --bg:#0f172a; --card:#111827; --soft:#1f2937; --text:#e5e7eb;
+  --muted:#9ca3af; --accent:#38bdf8; --danger:#f87171;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;font-family:Arial,Helvetica,sans-serif;
+  background:linear-gradient(180deg,#020617,var(--bg));
+  color:var(--text);line-height:1.6;
+}
+header{padding:40px 20px;text-align:center;border-bottom:1px solid #334155}
+header h1{margin:0;font-size:2.2rem;color:var(--accent)}
+header p{max-width:900px;margin:15px auto 0;color:var(--muted)}
+main{max-width:1150px;margin:auto;padding:25px 20px 60px}
+section{
+  background:rgba(17,24,39,.94);border:1px solid #334155;
+  border-radius:16px;padding:22px;margin-bottom:22px;
+}
+h2{margin-top:0;color:var(--accent)}
+textarea{
+  width:100%;min-height:170px;background:#020617;color:var(--text);
+  border:1px solid #475569;border-radius:12px;padding:15px;font-size:1rem;
+}
+button,select{
+  margin-top:15px;padding:11px 16px;border-radius:10px;border:none;
+  font-weight:bold;cursor:pointer;
+}
+button{background:var(--accent);color:#020617}
+select{background:var(--soft);color:var(--text);border:1px solid #475569}
+.controls{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.result-box{
+  background:#020617;border:1px solid #334155;border-radius:12px;
+  padding:15px;margin-top:15px;white-space:pre-wrap;min-height:120px;
+}
+.warning{border-left:5px solid var(--danger);padding-left:15px;color:#fecaca}
+.probability-bar{
+  width:100%;height:26px;background:#020617;border:1px solid #334155;
+  border-radius:20px;overflow:hidden;margin:12px 0;
+}
+.probability-fill{
+  height:100%;width:0%;background:linear-gradient(90deg,#f59e0b,#22c55e);
+  transition:width .3s ease;
+}
+footer{text-align:center;padding:25px;color:var(--muted);border-top:1px solid #334155}
+.model-code{color:#bae6fd;font-weight:bold}
+</style>
 </head>
 
 <body>
-
 <header>
   <h1 id="title">Voynich PUM/VSM Interpreter</h1>
-  <p id="subtitle">
-    Functional interpretation tool for the Voynich Manuscript based on the Procedural-Unary Model / Voynich Structural Model.
-  </p>
+  <p id="subtitle">Functional interpretation tool for the Voynich Manuscript.</p>
 </header>
 
 <main>
+<section>
+  <div class="controls">
+    <label id="languageLabel" for="language">Language:</label>
+    <select id="language" onchange="setLanguage()">
+      <option value="en" selected>English</option>
+      <option value="pl">Polski</option>
+    </select>
+  </div>
+  <p class="warning" id="disclaimer"></p>
+</section>
 
-  <section>
-    <div class="controls">
-      <label for="language" id="languageLabel">Language:</label>
-      <select id="language" onchange="setLanguage()">
-        <option value="en" selected>English</option>
-        <option value="pl">Polski</option>
-      </select>
-    </div>
+<section>
+  <h2 id="inputTitle">1. EVA Raw Input</h2>
+  <textarea id="evaInput"></textarea>
+  <button id="runButton" onclick="interpretText()">Translate</button>
+</section>
 
-    <p class="warning" id="disclaimer">
-      This tool does not claim confirmed linguistic decipherment. It provides a functional interpretation based on the PUM/VSM model.
-    </p>
-  </section>
+<section>
+  <h2 id="procedureTitle">2. Translation Procedure</h2>
+  <div id="procedureOutput" class="result-box"></div>
+</section>
 
-  <section>
-    <h2 id="inputTitle">1. EVA Raw Input</h2>
-    <textarea id="evaInput" placeholder="Paste EVA text here"></textarea>
-    <button onclick="interpretText()" id="runButton">Translate</button>
-  </section>
+<section>
+  <h2 id="finalTitle">3. Final Functional Reading</h2>
+  <div id="finalOutput" class="result-box"></div>
+</section>
 
-  <section>
-    <h2 id="procedureTitle">2. Translation Procedure</h2>
-    <div id="procedureOutput" class="result-box"></div>
-  </section>
+<section>
+  <h2 id="probabilityTitle">4. Translation Probability / Confidence</h2>
+  <div class="probability-bar"><div id="probabilityFill" class="probability-fill"></div></div>
+  <div id="probabilityOutput" class="result-box"></div>
+</section>
 
-  <section>
-    <h2 id="finalTitle">3. Final Meaningful Translation</h2>
-    <div id="finalOutput" class="result-box"></div>
-  </section>
+<section>
+  <h2 id="modelTitle">Model Explanation</h2>
+  <div id="modelText"></div>
+</section>
 
-  <section>
-    <h2 id="probabilityTitle">4. Translation Probability / Confidence</h2>
-    <div class="probability-bar">
-      <div id="probabilityFill" class="probability-fill"></div>
-    </div>
-    <div id="probabilityOutput" class="result-box"></div>
-  </section>
-
-  <section>
-    <h2 id="modelTitle">Model Explanation</h2>
-    <div id="modelText"></div>
-  </section>
-
-  <section>
-    <h2 id="authorTitle">Author / Research</h2>
-    <p id="authorText"></p>
-  </section>
-
+<section>
+  <h2 id="authorTitle">Author / Research</h2>
+  <p id="authorText"></p>
+</section>
 </main>
 
-<footer>
-  Voynich PUM/VSM Project — Functional Interpretation Framework
-</footer>
+<footer>Voynich PUM/VSM Project — Functional Interpretation Framework</footer>
 
 <script>
-const translations = {
-  en: {
-    title: "Voynich PUM/VSM Interpreter",
-    subtitle: "Functional interpretation tool for the Voynich Manuscript based on the Procedural-Unary Model / Voynich Structural Model.",
-    languageLabel: "Language:",
-    disclaimer: "This tool does not claim confirmed linguistic decipherment. It provides a functional interpretation based on the PUM/VSM model.",
-    inputTitle: "1. EVA Raw Input",
-    procedureTitle: "2. Translation Procedure",
-    finalTitle: "3. Final Meaningful Translation",
-    probabilityTitle: "4. Translation Probability / Confidence",
-    modelTitle: "Model Explanation",
-    authorTitle: "Author / Research",
-    runButton: "Translate",
-    placeholder: "Paste EVA text here, e.g. qokedy qokedy chedy shol aiin",
-    known: "KNOWN",
-    unknown: "UNCERTAIN / UNKNOWN",
-    modelText: `
-      <p>The PUM/VSM model treats Voynich text not as ordinary natural language, but as a parametric and procedural system.</p>
-      <p><span class="model-code">IMAGE → PARAMETERS → TEXT DYNAMICS</span></p>
-      <p>The system works in four stages: raw EVA input, token procedure, meaningful reconstructed translation, and probability/confidence estimation.</p>
-    `,
-    authorText: `Research concept and analytical direction: <strong>Tomasz Grabowski (Drako)</strong>. Analytical support: AI tools used for modelling, testing, structuring and presentation.`
+const ui = {
+  en:{
+    disclaimer:"This tool does not claim confirmed linguistic decipherment. It provides a functional interpretation based on the PUM/VSM model.",
+    inputTitle:"1. EVA Raw Input",
+    procedureTitle:"2. Translation Procedure",
+    finalTitle:"3. Final Functional Reading",
+    probabilityTitle:"4. Translation Probability / Confidence",
+    runButton:"Translate",
+    placeholder:"Paste EVA text here",
+    known:"KNOWN",
+    unknown:"UNCERTAIN / UNKNOWN",
+    modelText:`<p>The PUM/VSM model treats Voynich text as a parametric/procedural system.</p>
+    <p><span class="model-code">VISUAL OBJECT → PARAMETERS → TEXT FUNCTION</span></p>
+    <p>The final reading links token proportions to the visual context: plant, jar, vessel, tube, bath, process scene or storage object.</p>`,
+    authorText:`Research concept and analytical direction: <strong>Tomasz Grabowski (Drako)</strong>. Analytical support: AI tools.`
   },
-
-  pl: {
-    title: "Interpreter Voynich PUM/VSM",
-    subtitle: "Narzędzie interpretacji funkcjonalnej Manuskryptu Voynicha oparte na modelu Procedural-Unary Model / Voynich Structural Model.",
-    languageLabel: "Język:",
-    disclaimer: "To narzędzie nie twierdzi, że jest potwierdzonym odszyfrowaniem językowym. To interpretacja funkcjonalna oparta na modelu PUM/VSM.",
-    inputTitle: "1. Surowy tekst EVA",
-    procedureTitle: "2. Procedura tłumaczenia",
-    finalTitle: "3. Ostateczne tłumaczenie z sensem",
-    probabilityTitle: "4. Prawdopodobieństwo tłumaczenia",
-    modelTitle: "Opis modelu",
-    authorTitle: "Autor / badanie",
-    runButton: "Tłumacz",
-    placeholder: "Wklej tekst EVA, np. qokedy qokedy chedy shol aiin",
-    known: "ZNANY",
-    unknown: "NIEPEWNY / NIEZNANY",
-    modelText: `
-      <p>Model PUM/VSM traktuje tekst Voynicha nie jako zwykły język naturalny, lecz jako system parametryczny i proceduralny.</p>
-      <p><span class="model-code">OBRAZ → PARAMETRY → DYNAMIKA TEKSTU</span></p>
-      <p>System działa w czterech etapach: surowy tekst EVA, procedura tokenów, sensowne tłumaczenie końcowe oraz szacowanie prawdopodobieństwa.</p>
-    `,
-    authorText: `Koncepcja badawcza i kierunek analizy: <strong>Tomasz Grabowski (Drako)</strong>. Wsparcie analityczne: narzędzia AI użyte do modelowania, testowania, strukturyzacji i prezentacji.`
+  pl:{
+    disclaimer:"To narzędzie nie twierdzi, że jest potwierdzonym odszyfrowaniem językowym. To interpretacja funkcjonalna oparta na modelu PUM/VSM.",
+    inputTitle:"1. Surowy tekst EVA",
+    procedureTitle:"2. Procedura tłumaczenia",
+    finalTitle:"3. Ostateczny odczyt funkcjonalny",
+    probabilityTitle:"4. Prawdopodobieństwo tłumaczenia",
+    runButton:"Tłumacz",
+    placeholder:"Wklej tekst EVA",
+    known:"ZNANY",
+    unknown:"NIEPEWNY / NIEZNANY",
+    modelText:`<p>Model PUM/VSM traktuje tekst Voynicha jako system parametryczny/proceduralny.</p>
+    <p><span class="model-code">OBIEKT WIZUALNY → PARAMETRY → FUNKCJA TEKSTU</span></p>
+    <p>Ostateczny odczyt łączy proporcje tokenów z kontekstem wizualnym: roślina, słoik, naczynie, rurka, kąpiel, scena procesu albo obiekt przechowywania.</p>`,
+    authorText:`Koncepcja badawcza i kierunek analizy: <strong>Tomasz Grabowski (Drako)</strong>. Wsparcie analityczne: narzędzia AI.`
   }
 };
 
 const dictionary = {
-  qokedy: {
-    en: "initiate controlled processing sequence",
-    pl: "zainicjuj kontrolowaną sekwencję przetwarzania",
-    dry_en: "initiate processing",
-    dry_pl: "inicjacja przetwarzania",
-    role: "ENTRY / INITIATION",
-    weight: 0.90,
-    evidence: "qo-/qok- appears in entry-like positions; -dy indicates result-oriented action."
-  },
-  chedy: {
-    en: "process material / transform by operation",
-    pl: "przetwórz materiał / transformuj przez operację",
-    dry_en: "process material",
-    dry_pl: "przetwórz materiał",
-    role: "PROCESS",
-    weight: 0.88,
-    evidence: "che- behaves as process/material root; -dy marks result or completed output."
-  },
-  shol: {
-    en: "maintain light process / continue active state",
-    pl: "utrzymaj lekki proces / kontynuuj aktywny stan",
-    dry_en: "maintain process",
-    dry_pl: "utrzymaj proces",
-    role: "STATE / CONTINUATION",
-    weight: 0.84,
-    evidence: "sh- is treated as a light-state marker; -ol is treated as a held or resulting state."
-  },
-  shor: {
-    en: "branch or flow in light state",
-    pl: "rozgałęzienie lub przepływ w stanie lekkim",
-    dry_en: "light flow",
-    dry_pl: "lekki przepływ",
-    role: "FLOW / LIGHT STATE",
-    weight: 0.78,
-    evidence: "sh- indicates light state; -or behaves as a flow or directional variant."
-  },
-  cthy: {
-    en: "heavy operation leading to result",
-    pl: "ciężka operacja prowadząca do wyniku",
-    dry_en: "heavy operation",
-    dry_pl: "ciężka operacja",
-    role: "HEAVY OPERATION",
-    weight: 0.72,
-    evidence: "cth- is interpreted as heavy/process-intensive operation."
-  },
-  aiin: {
-    en: "end marker / closure of step",
-    pl: "znacznik zakończenia / zamknięcie kroku",
-    dry_en: "end",
-    dry_pl: "koniec",
-    role: "END MARKER",
-    weight: 0.91,
-    evidence: "aiin/iin family is treated as termination, boundary or EOF-like marker."
-  },
-  iin: {
-    en: "minor end marker / local closure",
-    pl: "mniejszy znacznik zakończenia / lokalne zamknięcie",
-    dry_en: "local end",
-    dry_pl: "lokalny koniec",
-    role: "END MARKER",
-    weight: 0.80,
-    evidence: "iin belongs to the aiin/iin termination family."
-  },
-  daiin: {
-    en: "completed closure after process",
-    pl: "pełne zamknięcie po procesie",
-    dry_en: "completed end",
-    dry_pl: "pełne zamknięcie",
-    role: "END / COMPLETION",
-    weight: 0.83,
-    evidence: "d- may strengthen closure; aiin/iin family marks ending."
-  },
-  kair: {
-    en: "data object / carrier / material value",
-    pl: "obiekt danych / nośnik / wartość materiału",
-    dry_en: "material object",
-    dry_pl: "obiekt materiałowy",
-    role: "DATA",
-    weight: 0.76,
-    evidence: "kair is treated as a DATA token: material, object or carrier."
-  },
-  kor: {
-    en: "data root / object reference",
-    pl: "rdzeń danych / odniesienie do obiektu",
-    dry_en: "object reference",
-    dry_pl: "odniesienie do obiektu",
-    role: "DATA",
-    weight: 0.74,
-    evidence: "kor behaves as a stable data-like object token."
-  },
-  chear: {
-    en: "material or processed data object",
-    pl: "materiał lub przetworzony obiekt danych",
-    dry_en: "processed material",
-    dry_pl: "przetworzony materiał",
-    role: "DATA / MATERIAL",
-    weight: 0.70,
-    evidence: "che- links with process/material roots."
-  },
-  ol: {
-    en: "resulting state / output condition",
-    pl: "stan wynikowy / warunek wyjściowy",
-    dry_en: "result state",
-    dry_pl: "stan wynikowy",
-    role: "RESULT STATE",
-    weight: 0.82,
-    evidence: "ol appears as a compact state or result marker."
-  },
-  dy: {
-    en: "result / output marker",
-    pl: "wynik / znacznik wyjścia",
-    dry_en: "result",
-    dry_pl: "wynik",
-    role: "RESULT",
-    weight: 0.65,
-    evidence: "-dy is treated as a result suffix in the PUM/VSM model."
-  }
+  qokedy:{role:"ENTRY", weight:.90, en:"initiate", pl:"inicjacja"},
+  chedy:{role:"PROCESS", weight:.88, en:"process material", pl:"przetwarzanie materiału"},
+  shol:{role:"STATE", weight:.84, en:"maintain state", pl:"utrzymanie stanu"},
+  shor:{role:"FLOW", weight:.78, en:"direct flow", pl:"skierowanie przepływu"},
+  cthy:{role:"HEAVY_OPERATION", weight:.72, en:"heavy operation", pl:"ciężka operacja"},
+  aiin:{role:"END", weight:.91, en:"close step", pl:"zamknięcie kroku"},
+  iin:{role:"END", weight:.80, en:"local end", pl:"lokalne zakończenie"},
+  daiin:{role:"END", weight:.83, en:"complete closure", pl:"pełne zamknięcie"},
+  kair:{role:"DATA", weight:.76, en:"carrier/material object", pl:"nośnik/obiekt materiałowy"},
+  kor:{role:"DATA", weight:.74, en:"object reference", pl:"odniesienie do obiektu"},
+  chear:{role:"DATA", weight:.70, en:"processed material", pl:"przetworzony materiał"},
+  ol:{role:"RESULT", weight:.82, en:"resulting state", pl:"stan wynikowy"},
+  dy:{role:"RESULT", weight:.65, en:"result marker", pl:"znacznik wyniku"}
 };
 
-function setLanguage() {
-  const lang = document.getElementById("language").value;
-  const t = translations[lang];
-
-  document.documentElement.lang = lang;
-  document.getElementById("title").innerText = t.title;
-  document.getElementById("subtitle").innerText = t.subtitle;
-  document.getElementById("languageLabel").innerText = t.languageLabel;
-  document.getElementById("disclaimer").innerText = t.disclaimer;
-  document.getElementById("inputTitle").innerText = t.inputTitle;
-  document.getElementById("procedureTitle").innerText = t.procedureTitle;
-  document.getElementById("finalTitle").innerText = t.finalTitle;
-  document.getElementById("probabilityTitle").innerText = t.probabilityTitle;
-  document.getElementById("modelTitle").innerText = t.modelTitle;
-  document.getElementById("authorTitle").innerText = t.authorTitle;
-  document.getElementById("runButton").innerText = t.runButton;
-  document.getElementById("evaInput").placeholder = t.placeholder;
-  document.getElementById("modelText").innerHTML = t.modelText;
-  document.getElementById("authorText").innerHTML = t.authorText;
-
+function setLanguage(){
+  const lang=document.getElementById("language").value;
+  document.documentElement.lang=lang;
+  document.getElementById("disclaimer").innerText=ui[lang].disclaimer;
+  document.getElementById("inputTitle").innerText=ui[lang].inputTitle;
+  document.getElementById("procedureTitle").innerText=ui[lang].procedureTitle;
+  document.getElementById("finalTitle").innerText=ui[lang].finalTitle;
+  document.getElementById("probabilityTitle").innerText=ui[lang].probabilityTitle;
+  document.getElementById("runButton").innerText=ui[lang].runButton;
+  document.getElementById("evaInput").placeholder=ui[lang].placeholder;
+  document.getElementById("modelText").innerHTML=ui[lang].modelText;
+  document.getElementById("authorText").innerHTML=ui[lang].authorText;
   interpretText();
 }
 
-function normalizeToken(token) {
-  return token.toLowerCase().replace(/[^a-z]/g, "");
-}
+function cleanToken(t){return t.toLowerCase().replace(/[^a-z]/g,"");}
+function uncertain(t){return t.includes("*")||t.includes("?");}
 
-function isUncertain(token) {
-  return token.includes("*") || token.includes("?");
-}
+function interpretToken(raw,lang){
+  const clean=cleanToken(raw);
+  const isUncertain=uncertain(raw);
 
-function interpretToken(token, lang) {
-  const clean = normalizeToken(token);
-  const uncertain = isUncertain(token);
-
-  if (dictionary[clean]) {
-    const base = dictionary[clean];
+  if(dictionary[clean]){
+    const d=dictionary[clean];
     return {
-      token,
-      clean,
-      uncertain,
-      known: !uncertain,
-      role: uncertain ? "UNCERTAIN " + base.role : base.role,
-      meaning: base[lang],
-      dry: uncertain ? "[" + base["dry_" + lang] + "]" : base["dry_" + lang],
-      probability: uncertain ? base.weight * 0.65 : base.weight,
-      evidence: base.evidence + (uncertain ? " Original token contains uncertainty marker." : "")
+      raw, clean, role:d.role, known:!isUncertain, uncertain:isUncertain,
+      meaning:d[lang], probability:isUncertain?d.weight*.65:d.weight
     };
   }
 
-  if (clean.endsWith("dy")) {
-    return {
-      token, clean, uncertain: true, known: false,
-      role: "PROBABLE RESULT",
-      meaning: lang === "en" ? "uncertain result-form token" : "niepewny token formy wynikowej",
-      dry: "[" + clean + "]",
-      probability: 0.42,
-      evidence: "Suffix -dy suggests possible result/output behaviour, but the full token is not confirmed."
-    };
-  }
+  if(clean.endsWith("dy")) return {raw,clean,role:"RESULT?",known:false,uncertain:true,meaning:lang==="pl"?"niepewny wynik":"uncertain result",probability:.42};
+  if(clean.startsWith("sh")) return {raw,clean,role:"STATE?",known:false,uncertain:true,meaning:lang==="pl"?"niepewny stan":"uncertain state",probability:.40};
+  if(clean.startsWith("cth")) return {raw,clean,role:"HEAVY_OPERATION?",known:false,uncertain:true,meaning:lang==="pl"?"niepewna ciężka operacja":"uncertain heavy operation",probability:.38};
+  if(clean.endsWith("iin")) return {raw,clean,role:"END?",known:false,uncertain:true,meaning:lang==="pl"?"niepewne zakończenie":"uncertain end",probability:.45};
 
-  if (clean.startsWith("sh")) {
-    return {
-      token, clean, uncertain: true, known: false,
-      role: "PROBABLE LIGHT STATE",
-      meaning: lang === "en" ? "uncertain light-state token" : "niepewny token stanu lekkiego",
-      dry: "[" + clean + "]",
-      probability: 0.40,
-      evidence: "Prefix sh- suggests possible light-state behaviour, but the full token is not confirmed."
-    };
-  }
-
-  if (clean.startsWith("cth")) {
-    return {
-      token, clean, uncertain: true, known: false,
-      role: "PROBABLE HEAVY OPERATION",
-      meaning: lang === "en" ? "uncertain heavy-operation token" : "niepewny token ciężkiej operacji",
-      dry: "[" + clean + "]",
-      probability: 0.38,
-      evidence: "Prefix cth- suggests possible heavy/process-intensive operation, but the full token is not confirmed."
-    };
-  }
-
-  if (clean.endsWith("iin")) {
-    return {
-      token, clean, uncertain: true, known: false,
-      role: "PROBABLE END MARKER",
-      meaning: lang === "en" ? "uncertain end marker" : "niepewny znacznik zakończenia",
-      dry: "[" + clean + "]",
-      probability: 0.45,
-      evidence: "Suffix -iin belongs to the aiin/iin termination family, but the exact token is not confirmed."
-    };
-  }
-
-  return {
-    token, clean, uncertain: true, known: false,
-    role: "UNKNOWN",
-    meaning: lang === "en" ? "unknown token" : "nieznany token",
-    dry: "[" + clean + "]",
-    probability: 0.15,
-    evidence: "No stable mapping yet in the current PUM/VSM dictionary."
-  };
+  return {raw,clean,role:"UNKNOWN",known:false,uncertain:true,meaning:lang==="pl"?"nieznane":"unknown",probability:.15};
 }
 
-function buildFinalTranslation(interpreted, lang) {
-  const tokens = interpreted.map(i => i.clean);
-  const sentences = [];
-  let i = 0;
-
-  while (i < tokens.length) {
-    const a = tokens[i];
-    const b = tokens[i + 1];
-    const c = tokens[i + 2];
-    const d = tokens[i + 3];
-    const e = tokens[i + 4];
-
-    if (a === "qokedy" && b === "qokedy" && c === "chedy" && d === "chedy" && e === "shol") {
-      sentences.push(lang === "en"
-        ? "Begin a repeated material-processing sequence and maintain the active state"
-        : "Rozpocznij powtórzoną sekwencję przetwarzania materiału i utrzymaj stan aktywny");
-      i += 5;
-      continue;
-    }
-
-    if (a === "qokedy" && b === "qokedy" && c === "chedy") {
-      sentences.push(lang === "en"
-        ? "Begin a repeated material-processing sequence"
-        : "Rozpocznij powtórzoną sekwencję przetwarzania materiału");
-      i += 3;
-      continue;
-    }
-
-    if (a === "qokedy" && b === "chedy" && c === "shol" && d === "aiin") {
-      sentences.push(lang === "en"
-        ? "Start processing the material, maintain the active state, then close the step"
-        : "Rozpocznij przetwarzanie materiału, utrzymaj stan aktywny, następnie zamknij krok");
-      i += 4;
-      continue;
-    }
-
-    if (a === "qokedy" && b === "chedy" && c === "shor" && d === "kair" && e === "aiin") {
-      sentences.push(lang === "en"
-        ? "Start the process and direct the material flow into the carrier, then close the step"
-        : "Rozpocznij proces i skieruj przepływ materiału do nośnika, następnie zamknij krok");
-      i += 5;
-      continue;
-    }
-
-    if (a === "shor" && b === "kair" && c === "ol" && d === "aiin") {
-      sentences.push(lang === "en"
-        ? "Direct the material flow toward the resulting state and close the step"
-        : "Skieruj przepływ materiału do stanu wynikowego i zamknij krok");
-      i += 4;
-      continue;
-    }
-
-    if (a === "cthy" && b === "chedy") {
-      sentences.push(lang === "en"
-        ? "Apply a heavy operation to the processed material"
-        : "Zastosuj ciężką operację na przetwarzanym materiale");
-      i += 2;
-      continue;
-    }
-
-    if (a === "chedy" && b === "chedy") {
-      sentences.push(lang === "en"
-        ? "Repeat the material-processing operation"
-        : "Powtórz operację przetwarzania materiału");
-      i += 2;
-      continue;
-    }
-
-    if (a === "shol" && b === "shol") {
-      sentences.push(lang === "en"
-        ? "Maintain the active state continuously"
-        : "Utrzymuj stan aktywny w sposób ciągły");
-      i += 2;
-      continue;
-    }
-
-    if (a === "aiin") {
-      sentences.push(lang === "en"
-        ? "Close the current step"
-        : "Zamknij bieżący krok");
-      i += 1;
-      continue;
-    }
-
-    if (a === "daiin") {
-      sentences.push(lang === "en"
-        ? "Complete and seal the procedure"
-        : "Zakończ i zamknij procedurę");
-      i += 1;
-      continue;
-    }
-
-    if (!interpreted[i].known) {
-      sentences.push(lang === "en"
-        ? "An uncertain element remains unresolved: [" + interpreted[i].clean + "]"
-        : "Pozostaje niepewny element nierozwiązany: [" + interpreted[i].clean + "]");
-      i += 1;
-      continue;
-    }
-
-    sentences.push(interpreted[i].dry);
-    i += 1;
-  }
-
-  let text = sentences.join(". ");
-  if (!text.endsWith(".")) text += ".";
-  return text;
-}
-
-function calculateProbability(interpreted, finalText, lang) {
-  if (interpreted.length === 0) return { percent: 0, report: "" };
-
-  const tokenAverage =
-    interpreted.reduce((sum, item) => sum + item.probability, 0) / interpreted.length;
-
-  const knownCount = interpreted.filter(i => i.known).length;
-  const uncertainCount = interpreted.filter(i => i.uncertain).length;
-  const unknownCount = interpreted.filter(i => i.role === "UNKNOWN").length;
-
-  const knownRatio = knownCount / interpreted.length;
-  const uncertaintyPenalty = uncertainCount * 0.025;
-  const unknownPenalty = unknownCount * 0.06;
-
-  const phraseBonus =
-    finalText.includes(".") ? 0.08 : 0.02;
-
-  let score = tokenAverage * 0.65 + knownRatio * 0.25 + phraseBonus;
-  score -= uncertaintyPenalty;
-  score -= unknownPenalty;
-
-  score = Math.max(0.05, Math.min(score, 0.97));
-  const percent = Math.round(score * 100);
-
-  const report = lang === "en"
-    ? `Estimated translation confidence: ${percent}%\n\nKnown tokens: ${knownCount}/${interpreted.length}\nUncertain tokens: ${uncertainCount}\nUnknown tokens: ${unknownCount}\n\nMethod:\nConfidence is calculated from token recognition weights, uncertainty markers, unknown-token penalties, and phrase-structure recognition.\n\nImportant: this is not proof of linguistic decipherment. It is a probability estimate inside the PUM/VSM functional model.`
-    : `Szacowane prawdopodobieństwo tłumaczenia: ${percent}%\n\nZnane tokeny: ${knownCount}/${interpreted.length}\nNiepewne tokeny: ${uncertainCount}\nNieznane tokeny: ${unknownCount}\n\nMetoda:\nWynik liczony jest z wag rozpoznania tokenów, markerów niepewności, kar za tokeny nieznane oraz rozpoznania struktury fraz.\n\nWażne: to nie jest dowód odszyfrowania językowego. To szacunek prawdopodobieństwa wewnątrz funkcjonalnego modelu PUM/VSM.`;
-
-  return { percent, report };
-}
-
-function buildProcedure(interpreted, lang) {
-  let output = "";
-
-  interpreted.forEach((item, index) => {
-    output += `${index + 1}. TOKEN: ${item.token}\n`;
-    output += `   NORMALIZED: ${item.clean}\n`;
-    output += `   STATUS: ${item.known ? translations[lang].known : translations[lang].unknown}\n`;
-    output += `   ROLE: ${item.role}\n`;
-    output += `   TOKEN PROBABILITY: ${Math.round(item.probability * 100)}%\n`;
-    output += `   METHOD: ${item.evidence}\n`;
-    output += `   FUNCTIONAL OUTPUT: ${item.meaning}\n\n`;
+function countRoles(items){
+  const c={ENTRY:0,PROCESS:0,STATE:0,FLOW:0,DATA:0,RESULT:0,END:0,HEAVY:0,UNKNOWN:0,UNCERTAIN:0};
+  items.forEach(x=>{
+    if(x.role.includes("ENTRY")) c.ENTRY++;
+    else if(x.role.includes("PROCESS")) c.PROCESS++;
+    else if(x.role.includes("STATE")) c.STATE++;
+    else if(x.role.includes("FLOW")) c.FLOW++;
+    else if(x.role.includes("DATA")) c.DATA++;
+    else if(x.role.includes("RESULT")) c.RESULT++;
+    else if(x.role.includes("END")) c.END++;
+    else if(x.role.includes("HEAVY")) c.HEAVY++;
+    else c.UNKNOWN++;
+    if(x.uncertain) c.UNCERTAIN++;
   });
-
-  return output;
+  return c;
 }
 
-function interpretText() {
-  const lang = document.getElementById("language").value;
-  const input = document.getElementById("evaInput").value.trim();
+function ratio(a,b){
+  if(!b) return "0";
+  return (a/b).toFixed(2);
+}
 
-  if (!input) {
-    document.getElementById("procedureOutput").innerText = "";
-    document.getElementById("finalOutput").innerText = "";
-    document.getElementById("probabilityOutput").innerText = "";
-    document.getElementById("probabilityFill").style.width = "0%";
+function buildFinalReading(items,lang){
+  const total=items.length;
+  const c=countRoles(items);
+  const unknowns=[...new Set(items.filter(x=>!x.known).map(x=>x.clean))].filter(Boolean).join(", ") || (lang==="pl"?"brak":"none");
+
+  const processPerData=ratio(c.PROCESS+c.HEAVY, Math.max(1,c.DATA));
+  const statePerProcess=ratio(c.STATE, Math.max(1,c.PROCESS+c.HEAVY));
+  const flowPerData=ratio(c.FLOW, Math.max(1,c.DATA));
+  const endDensity=ratio(c.END,total);
+
+  if(lang==="pl"){
+    return `
+KONTEKST WIZUALNY / POWIĄZANIE Z RYSUNKIEM:
+Ten odczyt zakłada, że tekst jest powiązany z obiektem widocznym na folio.
+Jeżeli folio pokazuje roślinę, tokeny DATA mogą odnosić się do części rośliny: korzenia, łodygi, liści, kwiatu, materiału miękkiego, materiału twardego albo ekstraktu.
+Jeżeli folio pokazuje słoiki, pojemniki, rurki, kąpiel lub scenę procesu, tokeny DATA/FLOW/RESULT mogą odnosić się do nośnika, naczynia, płynu, przeniesienia, przechowywania albo stanu procesu.
+
+OSTATECZNY ODCZYT FUNKCJONALNY:
+Tekst wygląda jak instrukcja etapowego przygotowania materiału. Rozpocznij procedurę od pobrania materiału związanego z rysunkiem. Część miękką lub liściastą rozdrobnij i przetwarzaj wielokrotnie. Jeżeli rysunek wskazuje korzeń lub część twardą, traktuj ciężkie operacje jako ucieranie, zgniatanie albo długie rozdrabnianie. Utrzymuj materiał w stanie aktywnym przez czas wynikający z liczby tokenów STATE. Następnie skieruj część przetworzonego materiału do nośnika, naczynia albo stanu wynikowego. Każdy etap zamykaj tam, gdzie występują znaczniki END.
+
+PROPORCJE OPERACYJNE:
+- Materiał / DATA: ${c.DATA} jednostek
+- Przetwarzanie / PROCESS + HEAVY: ${c.PROCESS+c.HEAVY} jednostek
+- Utrzymanie stanu / STATE: ${c.STATE} jednostek
+- Przepływ / FLOW: ${c.FLOW} jednostek
+- Wynik / RESULT: ${c.RESULT} jednostek
+- Zakończenia etapów / END: ${c.END} jednostek
+
+SZACUNEK PRAKTYCZNY:
+- Przetwarzanie względem materiału: około ${processPerData} jednostki pracy na 1 jednostkę materiału.
+- Utrzymanie stanu względem przetwarzania: około ${statePerProcess} jednostki czasu/stanu na 1 jednostkę pracy.
+- Przepływ względem materiału: około ${flowPerData} jednostki przeniesienia na 1 jednostkę materiału.
+- Gęstość zakończeń: ${endDensity} zakończenia na token.
+
+MIEJSCA NIEPEWNE:
+${unknowns}
+`.trim();
+  }
+
+  return `
+VISUAL CONTEXT / LINK TO THE DRAWING:
+This reading assumes that the text is linked to the visual object on the folio.
+If the folio shows a plant, DATA tokens may refer to plant parts: root, stem, leaves, flower, soft material, hard material, or extract.
+If the folio shows jars, vessels, tubes, bathing/process imagery, DATA/FLOW/RESULT tokens may refer to carrier, vessel, liquid, transfer, storage, or process state.
+
+FINAL FUNCTIONAL READING:
+The text behaves like a staged preparation instruction. Begin by taking the material linked to the drawing. Cut or break down the soft or leafy part and process it repeatedly. If the drawing indicates a root or hard part, treat heavy operations as grinding, crushing, or long processing. Maintain the material in an active state according to the number of STATE tokens. Then direct part of the processed material into a carrier, vessel, or resulting state. Close each stage where END markers appear.
+
+OPERATIONAL PROPORTIONS:
+- Material / DATA: ${c.DATA} units
+- Processing / PROCESS + HEAVY: ${c.PROCESS+c.HEAVY} units
+- State maintenance / STATE: ${c.STATE} units
+- Flow / FLOW: ${c.FLOW} units
+- Result / RESULT: ${c.RESULT} units
+- Step closures / END: ${c.END} units
+
+PRACTICAL ESTIMATE:
+- Processing-to-material ratio: about ${processPerData} work units per 1 material unit.
+- State-to-processing ratio: about ${statePerProcess} state/time units per 1 work unit.
+- Flow-to-material ratio: about ${flowPerData} transfer units per 1 material unit.
+- Closure density: ${endDensity} closures per token.
+
+UNCERTAIN POINTS:
+${unknowns}
+`.trim();
+}
+
+function buildProcedure(items,lang){
+  return items.map((x,i)=>
+`${i+1}. TOKEN: ${x.raw}
+   NORMALIZED: ${x.clean}
+   STATUS: ${x.known?ui[lang].known:ui[lang].unknown}
+   ROLE: ${x.role}
+   TOKEN PROBABILITY: ${Math.round(x.probability*100)}%
+   FUNCTIONAL OUTPUT: ${x.meaning}`
+  ).join("\n\n");
+}
+
+function calculateProbability(items,lang){
+  if(!items.length) return {percent:0,text:""};
+  const c=countRoles(items);
+  const avg=items.reduce((s,x)=>s+x.probability,0)/items.length;
+  const known=items.filter(x=>x.known).length;
+  const knownRatio=known/items.length;
+  const unknownPenalty=c.UNKNOWN*.05;
+  const uncertaintyPenalty=c.UNCERTAIN*.025;
+  const structureBonus=(c.ENTRY&&c.PROCESS&&c.END)?.10:.03;
+
+  let score=avg*.55+knownRatio*.25+structureBonus-unknownPenalty-uncertaintyPenalty;
+  score=Math.max(.05,Math.min(.97,score));
+  const percent=Math.round(score*100);
+
+  const text=lang==="pl"
+?`Szacowane prawdopodobieństwo tłumaczenia: ${percent}%
+
+Znane tokeny: ${known}/${items.length}
+Niepewne tokeny: ${c.UNCERTAIN}
+Nieznane tokeny: ${c.UNKNOWN}
+
+Metoda:
+Wynik liczony jest z wag tokenów, liczby tokenów znanych, kar za niepewność/nieznane oraz bonusu za rozpoznaną strukturę ENTRY → PROCESS → END.
+
+Ważne: to szacunek wewnątrz modelu PUM/VSM, nie dowód pełnego odszyfrowania.`
+:`Estimated translation confidence: ${percent}%
+
+Known tokens: ${known}/${items.length}
+Uncertain tokens: ${c.UNCERTAIN}
+Unknown tokens: ${c.UNKNOWN}
+
+Method:
+The score uses token weights, known-token ratio, penalties for uncertainty/unknowns, and a bonus for recognized ENTRY → PROCESS → END structure.
+
+Important: this is an estimate inside the PUM/VSM model, not proof of full decipherment.`;
+
+  return {percent,text};
+}
+
+function interpretText(){
+  const lang=document.getElementById("language").value;
+  const input=document.getElementById("evaInput").value.trim();
+
+  if(!input){
+    procedureOutput.innerText="";
+    finalOutput.innerText="";
+    probabilityOutput.innerText="";
+    probabilityFill.style.width="0%";
     return;
   }
 
-  const tokens = input.split(/\s+/);
-  const interpreted = tokens.map(t => interpretToken(t, lang));
+  const items=input.split(/\s+/).map(t=>interpretToken(t,lang));
+  const prob=calculateProbability(items,lang);
 
-  const finalTranslation = buildFinalTranslation(interpreted, lang);
-  const probability = calculateProbability(interpreted, finalTranslation, lang);
-
-  document.getElementById("procedureOutput").innerText = buildProcedure(interpreted, lang);
-  document.getElementById("finalOutput").innerText = finalTranslation;
-  document.getElementById("probabilityOutput").innerText = probability.report;
-  document.getElementById("probabilityFill").style.width = probability.percent + "%";
+  procedureOutput.innerText=buildProcedure(items,lang);
+  finalOutput.innerText=buildFinalReading(items,lang);
+  probabilityOutput.innerText=prob.text;
+  probabilityFill.style.width=prob.percent+"%";
 }
 
-document.getElementById("language").value = "en";
+document.getElementById("language").value="en";
 setLanguage();
 </script>
-
 </body>
 </html>
