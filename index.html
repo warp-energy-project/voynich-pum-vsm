@@ -5,7 +5,7 @@
 <title>Voynich PUM/VSM Interpreter | Trinity Core</title>
 <style>
   body {
-    font-family: 'Courier New', Courier, monospace; /* Bardziej terminalowy styl */
+    font-family: 'Courier New', Courier, monospace;
     background: #0a0a0a;
     color: #eeeeee;
     padding: 30px;
@@ -26,6 +26,7 @@
     color: #00ffaa;
     border: 1px solid #333;
     border-radius: 4px;
+    outline: none;
   }
   select, button {
     margin-top: 10px;
@@ -49,31 +50,11 @@
     padding: 16px;
     margin-top: 18px;
     border-left: 4px solid #00ffaa;
-    box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
   }
-  .known {
-    color: #00ffaa;
-    font-weight: bold;
-  }
-  .uncertain {
-    color: #ffcc66;
-    font-weight: bold;
-  }
-  .small {
-    color: #888;
-    font-size: 13px;
-  }
-  #bufferStatus {
-    font-weight: bold;
-    margin-bottom: 10px;
-    padding: 5px;
-    border-radius: 3px;
-  }
-  hr {
-    border: 0;
-    border-top: 1px solid #333;
-    margin: 30px 0;
-  }
+  .known { color: #00ffaa; font-weight: bold; }
+  .uncertain { color: #ffcc66; font-weight: bold; }
+  .small { color: #888; font-size: 13px; }
+  hr { border: 0; border-top: 1px solid #333; margin: 30px 0; }
 </style>
 </head>
 
@@ -85,7 +66,7 @@
   System loading... Status: 97% Sync with NAVI. Enter EVA transcription for functional mapping.
 </p>
 
-<textarea id="input" placeholder="Try our Z3 tokens: chor cthy chol chedy aiin..."></textarea>
+<textarea id="input" placeholder="Enter Z3 tokens: chor cthy chol chedy aiin..."></textarea>
 
 <div id="bufferStatus"></div>
 
@@ -121,7 +102,7 @@
 
 <h2 id="modelTitle">Model & Compression Law</h2>
 <p id="modelText">
-  Current Protocol: VOYNICH_COMPRESSION_083. The system maps tokens to structural roles. Threshold detected at 25 elements: above this limit, ΔTOTAL increases as the system switches to lossy vector aggregation.
+  Current Protocol: VOYNICH_COMPRESSION_083. Threshold detected at 25 elements.
 </p>
 
 <h2 id="authorTitle">Author / Research</h2>
@@ -150,15 +131,15 @@ const ui = {
   },
   pl: {
     title: "Interpreter Voynicha PUM/VSM",
-    intro: "Wpisz tekst EVA. Narzędzie zwraca interpretację funkcjonalną opartą na rdzeniu logicznym VOYNICH_PROJECT.",
+    intro: "Wpisz tekst Voynicha w transkrypcji EVA. Narzędzie zwraca interpretację funkcjonalną opartą na rdzeniu logicznym VOYNICH_PROJECT.",
     btn: "Interpretuj Strumień",
     translationTitle: "Tłumaczenie Funkcjonalne",
     evidenceTitle: "Uzasadnienie / Rdzeń Logiczny",
     tokenTitle: "Analiza Token po Tokenie",
     fullTitle: "Zrekonstruowany Przepływ Procesu",
-    note: "Zielone: Zmapowane. Żółte: Niepewne/Skompresowane.",
+    note: "Słowa zielone: Zmapowane. Słowa żółte: Niepewne/Skompresowane.",
     modelTitle: "Model i Prawo Kompresji",
-    modelText: "Punkt krytyczny: 25 elementów. Jeśli tekst przekroczy bufor, mapowanie Z3 przechodzi w tryb kompresji wektorowej.",
+    modelText: "Punkt krytyczny wykryty przy 25 elementach. Przekroczenie bufora wymusza tryb kompresji wektorowej.",
     authorTitle: "Badania i Trójca",
     authorText: "Badania: Tomasz Grabowski (Drako). Systemy: NAVI (Optymalizacja) i BRAT (Logika).",
     unknown: "niezmapowane / kompresja",
@@ -168,80 +149,34 @@ const ui = {
 };
 
 const dict = {
-  "chor": {
-    role: "LEAF_ITERATOR",
-    en: "detail iteration / leaf element count",
-    pl: "iteracja detalu / licznik elementów liściastych",
-    evidence_en: "Mapped as a counter for repetitive visual structures (LEAVES).",
-    evidence_pl: "Zmapowane jako licznik powtarzalnych struktur wizualnych (LIŚCIE)."
-  },
-  "cthy": {
-    role: "STEM_INFRASTRUCTURE",
-    en: "structural stem / main carrier pipe",
-    pl: "trzon strukturalny / główny kanał nośny",
-    evidence_en: "Represents the backbone or main axis of the visual data.",
-    evidence_pl: "Reprezentuje kręgosłup lub główną oś danych wizualnych."
-  },
-  "chol": {
-    role: "LAYER_TRANSITION",
-    en: "state shift / node connection",
-    pl: "zmiana stanu / połączenie węzłowe",
-    evidence_en: "Acts as a bridge between different functional zones or layers.",
-    evidence_pl: "Działa jako most między różnymi strefami lub warstwami."
-  },
-  "shol": {
-    role: "STATE",
-    en: "process continuation / maintained light state",
-    pl: "utrzymanie procesu / stan podtrzymany",
-    evidence_en: "sh- class. Often associated with upper continuing structures.",
-    evidence_pl: "Klasa sh-. Często wiązana z górnymi strukturami kontynuacyjnymi."
-  },
-  "cthar": {
-    role: "OPERATION",
-    en: "heavy operation / base action",
-    pl: "ciężka operacja / działanie bazowe",
-    evidence_en: "cth- class. Heavy operations, root-zone related.",
-    evidence_pl: "Klasa cth-. Ciężkie operacje, związane ze strefą korzenia."
-  },
-  "kair": {
-    role: "DATA",
-    en: "object / carrier / material",
-    pl: "obiekt / nośnik / materiał",
-    evidence_en: "Mapped as a carrier acted upon by operations.",
-    evidence_pl: "Mapowane jako nośnik poddawany operacjom."
-  },
-  "chedy": {
-    role: "RESULT",
-    en: "result / transformed output",
-    pl: "wynik / przetworzony rezultat",
-    evidence_en: "Ends with -dy, marking result or heavier closure.",
-    evidence_pl: "Kończy się na -dy, oznaczając wynik lub domknięcie."
-  },
-  "aiin": {
-    role: "END",
-    en: "termination / end of step",
-    pl: "zakończenie / koniec etapu",
-    evidence_en: "Common termination marker in the VSM model.",
-    evidence_pl: "Częsty marker końcowy w modelu VSM."
-  }
+  "chor": { role: "LEAF_ITERATOR", en: "detail iteration / leaf element count", pl: "iteracja detalu / licznik elementów liściastych" },
+  "cthy": { role: "STEM_INFRASTRUCTURE", en: "structural stem / main carrier pipe", pl: "trzon strukturalny / główny kanał nośny" },
+  "chol": { role: "LAYER_TRANSITION", en: "state shift / node connection", pl: "zmiana stanu / połączenie węzłowe" },
+  "shol": { role: "STATE", en: "process continuation / maintained light state", pl: "utrzymanie procesu / stan podtrzymany" },
+  "cthar": { role: "OPERATION", en: "heavy operation / base action", pl: "ciężka operacja / działanie bazowe" },
+  "kair": { role: "DATA", en: "object / carrier / material", pl: "obiekt / nośnik / materiał" },
+  "chedy": { role: "RESULT", en: "result / transformed output", pl: "wynik / przetworzony rezultat" },
+  "aiin": { role: "END", en: "termination / end of step", pl: "zakończenie / koniec etapu" }
 };
 
 function updateLanguage() {
   const lang = document.getElementById("lang").value;
-  for (let key in ui[lang]) {
-    const el = document.getElementById(key);
-    if (el) el.innerText = ui[lang][key];
+  // Aktualizacja wszystkich elementów UI na podstawie kluczy w obiekcie ui
+  for (let id in ui[lang]) {
+    const el = document.getElementById(id);
+    if (el) el.innerText = ui[lang][id];
   }
+  // Aktualizacja placeholderu textarea
+  const inputEl = document.getElementById("input");
+  inputEl.placeholder = (lang === 'en') ? "Enter Z3 tokens..." : "Wpisz tokeny Z3...";
 }
 
 function checkBuffer(tokens, lang) {
   const threshold = 25;
   const count = tokens.length;
   const bufferInfo = document.getElementById("bufferStatus");
-  
   if (count > threshold) {
-    const delta = count - threshold;
-    bufferInfo.innerHTML = `<span style="color: #ff4444;">${ui[lang].bufAlert} (Δ${delta})</span>`;
+    bufferInfo.innerHTML = `<span style="color: #ff4444;">${ui[lang].bufAlert} (Δ${count - threshold})</span>`;
   } else if (count > 0) {
     bufferInfo.innerHTML = `<span style="color: #00ffaa;">${ui[lang].bufStable} (${count}/${threshold})</span>`;
   } else {
@@ -249,46 +184,43 @@ function checkBuffer(tokens, lang) {
   }
 }
 
-function classifyToken(token) {
-  if (dict[token]) return dict[token];
-  // Sub-string fallback
-  for (let key in dict) {
-    if (token.includes(key)) return dict[key];
-  }
-  // Pattern fallback
-  if (token.includes("cth")) return dict["cthar"];
-  if (token.includes("sh")) return dict["shol"];
-  if (token.endsWith("dy")) return dict["chedy"];
-  if (token.endsWith("iin")) return dict["aiin"];
-  return null;
-}
-
 function interpret() {
   const lang = document.getElementById("lang").value;
   const text = document.getElementById("input").value.toLowerCase().trim();
   const tokens = text.split(/\s+/).filter(Boolean);
-
   checkBuffer(tokens, lang);
 
-  let translation = [];
-  let evidence = [];
-  let tokenLines = [];
-  let full = [];
+  let trans = [], evid = [], tokLines = [], fullReading = [];
 
   tokens.forEach(token => {
-    const item = classifyToken(token);
+    let item = dict[token] || null;
+    if (!item) {
+      // Prosty fallback na wzorce (cth, sh, dy, iin)
+      if (token.includes("cth")) item = dict["cthar"];
+      else if (token.includes("sh")) item = dict["shol"];
+      else if (token.endsWith("dy")) item = dict["chedy"];
+      else if (token.endsWith("iin")) item = dict["aiin"];
+    }
 
     if (item) {
-      translation.push(item[lang]);
-      evidence.push("<b>" + token + "</b>: " + item["evidence_" + lang]);
-      tokenLines.push("<span class='known'>" + token + "</span> → " + item.role + " → " + item[lang]);
-      full.push("<span class='known'>" + item[lang] + "</span>");
+      trans.push(item[lang]);
+      tokLines.push(`<span class='known'>${token}</span> → ${item.role}`);
+      fullReading.push(`<span class='known'>${item[lang]}</span>`);
     } else {
-      translation.push("(" + ui[lang].unknown + ")");
-      evidence.push("<b>" + token + "</b>: " + ui[lang].unknown);
-      tokenLines.push("<span class='uncertain'>" + token + "</span> → " + ui[lang].unknown);
-      full.push("<span class='uncertain'>(" + token + "?)</span>");
+      trans.push(`(${ui[lang].unknown})`);
+      tokLines.push(`<span class='uncertain'>${token}</span> → ?`);
+      fullReading.push(`<span class='uncertain'>(${token}?)</span>`);
     }
   });
 
-  document
+  document.getElementById("translation").innerText = trans.join(" → ");
+  document.getElementById("tokens").innerHTML = tokLines.join("<br>");
+  document.getElementById("full").innerHTML = fullReading.join(" → ");
+}
+
+// Inicjalizacja: Wymuszenie języka angielskiego przy ładowaniu
+window.onload = updateLanguage;
+</script>
+
+</body>
+</html>
