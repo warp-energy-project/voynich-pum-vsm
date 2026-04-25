@@ -1017,5 +1017,155 @@ The illustrated plant does not have to represent one single species. It may be a
 })();
 </script>
 <!-- NAVI PATCH 002 END -->
+  <!-- NAVI PATCH 003 START -->
+<script>
+(function(){
+
+    // SYSTEM PATCHY — brak duplikacji
+    window.NAVI_PATCHES = window.NAVI_PATCHES || {};
+    if(window.NAVI_PATCHES["NAVI_PATCH_003"]) return;
+    window.NAVI_PATCHES["NAVI_PATCH_003"] = true;
+
+    console.log("NAVI_PATCH_003: Natural Translation Engine v3");
+
+    const NATURAL_TOKEN_DB = {
+        qokedy:{role:"ENTRY"},
+        qokeedy:{role:"ENTRY"},
+        chedy:{role:"PROCESS"},
+        shedy:{role:"PROCESS"},
+        cthy:{role:"HEAVY"},
+        shol:{role:"STATE"},
+        shor:{role:"FLOW"},
+        kair:{role:"DATA"},
+        kor:{role:"DATA"},
+        ol:{role:"RESULT"},
+        dy:{role:"RESULT"},
+        aiin:{role:"END"},
+        daiin:{role:"END"}
+    };
+
+    function lang(){ return document.getElementById("language")?.value || "en"; }
+    function context(){ return document.getElementById("visualContext")?.value || "plant"; }
+    function clean(t){ return String(t).toLowerCase().replace(/[^a-z]/g,""); }
+
+    function countRoles(tokens){
+        const c = {ENTRY:0, DATA:0, PROCESS:0, HEAVY:0, STATE:0, FLOW:0, RESULT:0, END:0};
+
+        tokens.forEach(t=>{
+            const key = clean(t);
+            const entry = NATURAL_TOKEN_DB[key];
+            if(entry){
+                const role = entry.role;
+                c[role] = (c[role] || 0) + 1;
+            }
+        });
+
+        return c;
+    }
+
+    function buildPlantContext(l){
+        if(l==="pl"){
+            return `KONTEKST ROŚLINNY:
+Rysunek nie przedstawia jednej konkretnej rośliny.
+Jest to schemat złożony z różnych części: korzenia, łodygi, liści i kwiatu.
+
+Oznacza to, że użytkownik (np. botanik) sam identyfikuje rzeczywistą roślinę.
+Tekst opisuje proces wykonywany na materiale roślinnym, a nie nazwę rośliny.`;
+        }
+        return `BOTANICAL CONTEXT:
+The drawing does not represent a single plant.
+It is a composite diagram of root, stem, leaves and flower.
+
+The reader must identify the real plant.
+The text describes a process applied to plant material, not a plant name.`;
+    }
+
+    function buildNaturalTranslation(tokens, l, ctx){
+
+        const c = countRoles(tokens);
+
+        if(l==="pl"){
+
+            let subject = "materiał";
+            if(ctx==="plant") subject = "materiał roślinny";
+            if(ctx==="process") subject = "obiekt procesu";
+            if(ctx==="jars") subject = "zawartość naczynia";
+            if(ctx==="astro") subject = "element diagramu";
+
+            let out = "";
+
+            if(c.ENTRY) out += "Rozpocznij proces. ";
+            if(c.DATA) out += `Przygotuj ${subject}. `;
+            if(c.PROCESS || c.HEAVY) out += `Przetwarzaj ${subject} zgodnie z instrukcją. `;
+            if(c.STATE) out += "Utrzymuj stabilny stan procesu. ";
+            if(c.FLOW) out += "Przenieś materiał do kolejnego etapu. ";
+            if(c.RESULT) out += "Doprowadź do uzyskania wyniku. ";
+            if(c.END) out += "Zamknij etap procesu.";
+
+            return out.trim();
+        }
+
+        let subject = "material";
+        if(ctx==="plant") subject = "plant material";
+        if(ctx==="process") subject = "process object";
+        if(ctx==="jars") subject = "container content";
+        if(ctx==="astro") subject = "diagram element";
+
+        let out = "";
+
+        if(c.ENTRY) out += "Begin the process. ";
+        if(c.DATA) out += `Prepare the ${subject}. `;
+        if(c.PROCESS || c.HEAVY) out += `Process the ${subject} according to the steps. `;
+        if(c.STATE) out += "Maintain stable conditions. ";
+        if(c.FLOW) out += "Move the material to the next stage. ";
+        if(c.RESULT) out += "Bring it to the final state. ";
+        if(c.END) out += "Close the step.";
+
+        return out.trim();
+    }
+
+    // NADPISANIE interpretText
+    const originalInterpret = window.interpretText;
+
+    window.interpretText = function(){
+
+        if(typeof originalInterpret === "function"){
+            originalInterpret();
+        }
+
+        const eva = document.getElementById("evaInput")?.value.trim();
+        const finalBox = document.getElementById("finalOutput");
+
+        if(!eva || !finalBox) return;
+
+        const tokens = eva.split(/\s+/);
+        const l = lang();
+        const ctx = context();
+
+        let output = "";
+
+        // 🔥 DODAJ KONTEKST ROŚLIN
+        if(ctx==="plant"){
+            output += buildPlantContext(l) + "\n\n";
+        }
+
+        const title = l==="pl"
+            ? "ODCZYT PŁYNNY (NATURALNY):"
+            : "NATURAL READING:";
+
+        const translation = buildNaturalTranslation(tokens, l, ctx);
+
+        output += title + "\n" + translation;
+
+        // 🔥 NIE DUPELIKUJEMY — ZAMIENIAMY
+        const parts = finalBox.innerText.split(title);
+        finalBox.innerText = parts[0] + output;
+    };
+
+    console.log("NAVI_PATCH_003 READY");
+
+})();
+</script>
+<!-- NAVI PATCH 003 END -->
 </body>
 </html>
