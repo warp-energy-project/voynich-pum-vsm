@@ -754,5 +754,128 @@ document.addEventListener("DOMContentLoaded",()=>{
 })();
 </script>
 <!-- NAVI PATCH: EVA PANEL UNDER IMAGE END -->
+  <!-- NAVI PATCH: OCR IMAGE TO EVA START -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<script>
+(function(){
+  function ready(fn){
+    if(document.readyState !== "loading") fn();
+    else document.addEventListener("DOMContentLoaded", fn);
+  }
+
+  function cleanEvaText(text){
+    return text
+      .toLowerCase()
+      .replace(/[^a-z\s\*\?]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  ready(function(){
+    const lang = document.getElementById("language")?.value || "en";
+    const imageWrap = document.getElementById("imageWrap");
+    const evaInput = document.getElementById("evaInput");
+    const folioImage = document.getElementById("folioImage");
+
+    if(!imageWrap || !evaInput || !folioImage) return;
+
+    let panel = document.getElementById("naviEvaPanel");
+
+    if(!panel){
+      panel = document.createElement("div");
+      panel.id = "naviEvaPanel";
+      panel.className = "result-box";
+      panel.style.marginTop = "15px";
+
+      panel.innerHTML = `
+        <h3>${lang === "pl" ? "Tekst EVA odczytany z obrazu" : "EVA text extracted from image"}</h3>
+        <p class="small-note">
+          ${lang === "pl"
+            ? "Kliknij OCR, aby spróbować odczytać tekst z obrazka. Działa najlepiej na screenach transkrypcji EVA, nie na surowych znakach Voynicha."
+            : "Click OCR to try extracting text from the image. Works best on EVA transcription screenshots, not raw Voynich glyphs."}
+        </p>
+        <textarea id="naviExtractedEva" style="min-height:120px;" placeholder="${lang === "pl" ? "Tu pojawi się odczytany tekst EVA..." : "Extracted EVA text will appear here..."}"></textarea>
+        <div class="controls">
+          <button type="button" id="naviOcrBtn">${lang === "pl" ? "Odczytaj tekst z obrazka OCR" : "Read text from image OCR"}</button>
+          <button type="button" id="naviCopyEvaBtn">${lang === "pl" ? "Przenieś EVA do tłumacza" : "Move EVA to translator"}</button>
+          <button type="button" id="naviClearEvaBtn">${lang === "pl" ? "Wyczyść" : "Clear"}</button>
+        </div>
+        <div id="naviOcrStatus" class="small-note"></div>
+      `;
+
+      imageWrap.insertAdjacentElement("afterend", panel);
+    }
+
+    const extracted = document.getElementById("naviExtractedEva");
+    const status = document.getElementById("naviOcrStatus");
+
+    document.getElementById("naviOcrBtn").addEventListener("click", async function(){
+      if(!folioImage.src){
+        alert(lang === "pl"
+          ? "Najpierw wklej albo uploaduj obraz."
+          : "First paste or upload an image.");
+        return;
+      }
+
+      status.innerText = lang === "pl"
+        ? "OCR pracuje... poczekaj chwilę."
+        : "OCR running... please wait.";
+
+      try{
+        const result = await Tesseract.recognize(
+          folioImage.src,
+          "eng",
+          {
+            logger: m => {
+              if(m.status){
+                status.innerText = (lang === "pl" ? "OCR: " : "OCR: ") + m.status;
+              }
+            }
+          }
+        );
+
+        const rawText = result.data.text || "";
+        const evaText = cleanEvaText(rawText);
+
+        extracted.value = evaText;
+
+        status.innerText = lang === "pl"
+          ? "OCR zakończony. Sprawdź i popraw tekst przed tłumaczeniem."
+          : "OCR complete. Check and correct the text before translation.";
+
+      }catch(err){
+        console.error(err);
+        status.innerText = lang === "pl"
+          ? "OCR nie zadziałał na tym obrazie."
+          : "OCR failed on this image.";
+      }
+    });
+
+    document.getElementById("naviCopyEvaBtn").addEventListener("click", function(){
+      const text = extracted.value.trim();
+
+      if(!text){
+        alert(lang === "pl"
+          ? "Najpierw odczytaj albo wklej tekst EVA."
+          : "First OCR or paste EVA text.");
+        return;
+      }
+
+      evaInput.value = text;
+
+      if(typeof interpretText === "function"){
+        interpretText();
+      }
+    });
+
+    document.getElementById("naviClearEvaBtn").addEventListener("click", function(){
+      extracted.value = "";
+      status.innerText = "";
+    });
+  });
+})();
+</script>
+<!-- NAVI PATCH: OCR IMAGE TO EVA END -->
 </body>
 </html>
