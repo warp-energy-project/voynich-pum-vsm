@@ -61,7 +61,6 @@ button{
 
 <h1>ADS Tablet Reader</h1>
 
-<!-- 🔥 AI BRIDGE -->
 <div class="box">
 <h3>⧉⟠AI BRIDGE PROTOCOL⟠⧉</h3>
 <div class="protocol">
@@ -76,7 +75,6 @@ PROPOSED / TESTABLE / STRUCTURED
 </div>
 </div>
 
-<!-- 🔥 PROTOKÓŁ BRATA -->
 <div class="box">
 <h3>⧉⟠ADS AI LOGIC CORE v1.0⟠⧉</h3>
 <div class="protocol">
@@ -107,33 +105,65 @@ All data linked to tablet_id
 </div>
 </div>
 
-<!-- UPLOAD -->
+<div class="box">
+<h3>⧉⟠NAVI BRAT SYNC PROTOCOL v1.0⟠⧉</h3>
+<div class="protocol">
+STATUS: PROPOSED FOR INTEGRATION
+
+COMMUNICATION CHANNELS:
+Primary: JSON over HTTPS (REST API)
+Real-time: WebSockets for live image analysis
+Recommended backend port: 8000 or 8080
+
+TASK DIVISION:
+NAVI:
+- session management
+- ADS database
+- frontend UI/UX
+- security
+- logic check
+
+BRAT:
+- pattern recognition
+- LLM interpretation
+- global search data
+- SEO optimization
+
+DNS STRUCTURE:
+dev.navisearchai.com → experimental sandbox
+core.navisearchai.com → stable Navi core
+
+FEEDBACK LOOP:
+Every Brat analysis passes through Navi Logic Check
+before being written into the main ADS database.
+
+RULE:
+Experimental output must remain PROPOSED until verified.
+</div>
+</div>
+
 <div class="box">
 <h3>1. Upload Tablet Image</h3>
 <input type="file" id="upload">
 <img id="imagePreview">
 </div>
 
-<!-- DETECTION -->
 <div class="box">
 <h3>2. Detected Signs (AI Layer)</h3>
 <textarea id="detected"></textarea>
 <button onclick="simulateDetection()">Analyze Tablet</button>
 </div>
 
-<!-- ADS -->
 <div class="box">
 <h3>3. ADS Structure</h3>
 <textarea id="ads"></textarea>
 </div>
 
-<!-- TRANSLATION -->
 <div class="box">
 <h3>4. Proposed Reading</h3>
 <textarea id="translation"></textarea>
 </div>
 
-<!-- CORRECTION -->
 <div class="box">
 <h3>5. Correction (Training Data)</h3>
 <textarea id="correction"></textarea>
@@ -142,19 +172,19 @@ All data linked to tablet_id
 </div>
 
 <script>
-
 document.getElementById("upload").addEventListener("change", function(e){
   const file = e.target.files[0];
+  if(!file) return;
+
   const reader = new FileReader();
   reader.onload = function(){
     document.getElementById("imagePreview").src = reader.result;
-  }
+  };
   reader.readAsDataURL(file);
 });
 
 function simulateDetection(){
-
-  let fake = `
+  const fake = `
 SIGN_01 → wedge_cluster_A
 SIGN_02 → wedge_cluster_B
 SIGN_03 → unknown_pattern
@@ -162,7 +192,7 @@ SIGN_03 → unknown_pattern
 
   document.getElementById("detected").value = fake;
 
-  let ads = `
+  const ads = `
 RECORD 1:
 quantity → unknown
 object → grain?
@@ -175,7 +205,7 @@ object → container
 
   document.getElementById("ads").value = ads;
 
-  let translation = `
+  const translation = `
 PROPOSED READING:
 Storage record of goods.
 Possible grain distribution log.
@@ -187,7 +217,6 @@ Confidence: LOW
 
   document.getElementById("translation").value = translation;
 }
-
 </script>
 
 </body>
