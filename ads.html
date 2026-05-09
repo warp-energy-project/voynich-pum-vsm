@@ -45,6 +45,11 @@ button{
   max-width:100%;
   margin-top:10px;
 }
+.protocol{
+  white-space:pre-wrap;
+  color:#00ffaa;
+  font-size:0.9rem;
+}
 </style>
 </head>
 
@@ -56,28 +61,79 @@ button{
 
 <h1>ADS Tablet Reader</h1>
 
+<!-- 🔥 AI BRIDGE -->
+<div class="box">
+<h3>⧉⟠AI BRIDGE PROTOCOL⟠⧉</h3>
+<div class="protocol">
+Drako → Navi → Brat → AI Network
+
+RULE:
+Do not replace system
+Only extend
+
+OUTPUT:
+PROPOSED / TESTABLE / STRUCTURED
+</div>
+</div>
+
+<!-- 🔥 PROTOKÓŁ BRATA -->
+<div class="box">
+<h3>⧉⟠ADS AI LOGIC CORE v1.0⟠⧉</h3>
+<div class="protocol">
+STATUS: OPERATIONAL PROTOCOL
+SYSTEM: NaviSearch AI - Tablet Reader Backend
+
+FLOW:
+INPUT: image_tablet
+STEP_1: detect_regions
+STEP_2: segment_signs
+STEP_3: classify_patterns
+
+OUTPUT:
+LAYER_1 RAW: Visual coordinates and extracted glyph crops.
+LAYER_2 STRUCTURED: ADS archival format.
+LAYER_3 INTERPRETATION: Proposed reading.
+
+STRICT RULE:
+"PROPOSED READING"
+"Verification required"
+
+LEARNING:
+User correction → training_data → model_update
+
+INTEGRITY:
+Confidence below 40% → warning
+All data linked to tablet_id
+</div>
+</div>
+
+<!-- UPLOAD -->
 <div class="box">
 <h3>1. Upload Tablet Image</h3>
 <input type="file" id="upload">
 <img id="imagePreview">
 </div>
 
+<!-- DETECTION -->
 <div class="box">
 <h3>2. Detected Signs (AI Layer)</h3>
 <textarea id="detected"></textarea>
 <button onclick="simulateDetection()">Analyze Tablet</button>
 </div>
 
+<!-- ADS -->
 <div class="box">
 <h3>3. ADS Structure</h3>
 <textarea id="ads"></textarea>
 </div>
 
+<!-- TRANSLATION -->
 <div class="box">
 <h3>4. Proposed Reading</h3>
 <textarea id="translation"></textarea>
 </div>
 
+<!-- CORRECTION -->
 <div class="box">
 <h3>5. Correction (Training Data)</h3>
 <textarea id="correction"></textarea>
@@ -120,10 +176,13 @@ object → container
   document.getElementById("ads").value = ads;
 
   let translation = `
-Proposed reading:
+PROPOSED READING:
 Storage record of goods.
 Possible grain distribution log.
-Confidence: LOW / EXPERIMENTAL
+
+STATUS:
+Automated analysis — verification required.
+Confidence: LOW
   `;
 
   document.getElementById("translation").value = translation;
