@@ -207,7 +207,7 @@ async function simulateDetection(){
     const formData = new FormData();
     formData.append("file", file);
 
-    const uploadRes = await fetch("http://127.0.0.1:8000/api/v1/tablet/upload", {
+    const uploadRes = await fetch("https://poem-cornmeal-chowder.ngrok-free.dev/api/v1/tablet/upload", {
       method: "POST",
       body: formData
     });
@@ -220,7 +220,7 @@ async function simulateDetection(){
 
     statusBox.innerText = "Image uploaded. Running ADS analysis...";
 
-    const analyzeRes = await fetch("http://127.0.0.1:8000/api/v1/tablet/analyze", {
+    const analyzeRes = await fetch("https://poem-cornmeal-chowder.ngrok-free.dev/api/v1/tablet/analyze", {
       method: "POST"
     });
 
