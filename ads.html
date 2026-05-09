@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADS Tablet Reader</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#07111f;
+  color:#e5e7eb;
+}
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:20px;
+}
+h1{color:#38bdf8}
+.box{
+  background:#111827;
+  border:1px solid #334155;
+  border-radius:12px;
+  padding:15px;
+  margin-bottom:20px;
+}
+textarea{
+  width:100%;
+  min-height:120px;
+  background:#020617;
+  color:#fff;
+  border:1px solid #334155;
+  border-radius:8px;
+  padding:10px;
+}
+button{
+  padding:10px 15px;
+  background:#38bdf8;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+}
+#imagePreview{
+  max-width:100%;
+  margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<a href="index.html" style="color:#00ffaa;">← Back</a>
+
+<h1>ADS Tablet Reader</h1>
+
+<div class="box">
+<h3>1. Upload Tablet Image</h3>
+<input type="file" id="upload">
+<img id="imagePreview">
+</div>
+
+<div class="box">
+<h3>2. Detected Signs (AI Layer)</h3>
+<textarea id="detected"></textarea>
+<button onclick="simulateDetection()">Analyze Tablet</button>
+</div>
+
+<div class="box">
+<h3>3. ADS Structure</h3>
+<textarea id="ads"></textarea>
+</div>
+
+<div class="box">
+<h3>4. Proposed Reading</h3>
+<textarea id="translation"></textarea>
+</div>
+
+<div class="box">
+<h3>5. Correction (Training Data)</h3>
+<textarea id="correction"></textarea>
+</div>
+
+</div>
+
+<script>
+
+document.getElementById("upload").addEventListener("change", function(e){
+  const file = e.target.files[0];
+  const reader = new FileReader();
+  reader.onload = function(){
+    document.getElementById("imagePreview").src = reader.result;
+  }
+  reader.readAsDataURL(file);
+});
+
+function simulateDetection(){
+
+  let fake = `
+SIGN_01 → wedge_cluster_A
+SIGN_02 → wedge_cluster_B
+SIGN_03 → unknown_pattern
+  `;
+
+  document.getElementById("detected").value = fake;
+
+  let ads = `
+RECORD 1:
+quantity → unknown
+object → grain?
+context → storage
+
+RECORD 2:
+quantity → 3
+object → container
+  `;
+
+  document.getElementById("ads").value = ads;
+
+  let translation = `
+Proposed reading:
+Storage record of goods.
+Possible grain distribution log.
+Confidence: LOW / EXPERIMENTAL
+  `;
+
+  document.getElementById("translation").value = translation;
+}
+
+</script>
+
+</body>
+</html>
