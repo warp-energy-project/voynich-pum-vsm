@@ -5,33 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>NaviSearch AI | Research Lab</title>
 <meta name="description" content="NaviSearch AI is a bilingual research portal for Voynich PUM/VSM, Ancient Data Systems, AI-assisted decoding, symbolic systems and experimental research." />
-<meta name="keywords" content="Voynich manuscript translation, Voynich PUM VSM, ancient data systems, Indus script decoding, AI ancient script decoding, symbolic systems, NaviSearch AI" />
 <style>
-:root{--bg:#07111f;--card:#111827;--soft:#1f2937;--text:#e5e7eb;--muted:#9ca3af;--accent:#38bdf8;--green:#00ffaa;--danger:#f87171;--gold:#facc15;--line:#334155}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(circle at top,#12324d 0,#020617 45%,#07111f 100%);color:var(--text);line-height:1.6}
-.topbar{position:sticky;top:0;z-index:20;background:rgba(2,6,23,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
-.nav{max-width:1250px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px}
-.brand{font-weight:900;color:var(--green);letter-spacing:.4px;text-decoration:none;font-size:1.12rem}
-.navlinks{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
-.navlinks a{color:var(--text);text-decoration:none;font-size:.95rem;padding:7px 9px;border-radius:10px}
-.navlinks a:hover{background:var(--soft);color:var(--accent)}
-.lang-switch{display:flex;gap:8px}
-.lang-switch button{margin:0;padding:7px 10px;border-radius:10px;border:1px solid var(--line);background:var(--soft);color:var(--text);cursor:pointer;font-weight:bold}
-.lang-switch button.active{background:var(--accent);color:#020617}
-.hero{padding:72px 20px 52px;text-align:center}
-.hero h1{margin:0;font-size:clamp(2.3rem,5vw,4.3rem);color:var(--accent);line-height:1.08}
-.hero p{max-width:920px;margin:18px auto;color:var(--muted);font-size:1.1rem}
-.hero-actions{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:26px}
-.btn{display:inline-block;background:var(--accent);color:#020617;text-decoration:none;padding:12px 18px;border-radius:12px;font-weight:800;border:none;cursor:pointer}
-.btn.secondary{background:transparent;color:var(--text);border:1px solid var(--line)}
-main{max-width:1250px;margin:auto;padding:20px}
-.section{background:rgba(17,24,39,.94);border:1px solid var(--line);border-radius:18px;padding:24px;margin-bottom:22px}
-h2,h3{color:var(--accent);margin-top:0}.muted{color:var(--muted)}
-.notice{border-left:5px solid var(--green);padding:14px 16px;background:rgba(0,255,170,.06);border-radius:12px}
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:#020617;border:1px solid var(--line);border-radius:16px;padding:18px}.card h3{margin-bottom:8px}.card a.project-link{display:inline-block;margin-top:12px;background:var(--green);color:#021018;text-decoration:none;padding:10px 14px;border-radius:10px;font-weight:800}.tag{display:inline-block;font-size:.78rem;border:1px solid var(--line);border-radius:999px;padding:4px 8px;color:#bae6fd;margin:4px 4px 0 0}.log-list{display:grid;gap:12px}.log-item{border:1px solid var(--line);border-radius:14px;padding:14px;background:#020617}footer{text-align:center;padding:28px;color:var(--muted);border-top:1px solid var(--line)}
-@media(max-width:900px){.cards{grid-template-columns:1fr}.nav{align-items:flex-start;flex-direction:column}}
+:root{--bg:#07111f;--card:#111827;--soft:#1f2937;--text:#e5e7eb;--muted:#9ca3af;--accent:#38bdf8;--green:#00ffaa;--line:#334155;--gold:#facc15}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:radial-gradient(circle at top,#12324d 0,#020617 45%,#07111f 100%);color:var(--text);line-height:1.6}.topbar{position:sticky;top:0;z-index:20;background:rgba(2,6,23,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}.nav{max-width:1250px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 20px}.brand{font-weight:900;color:var(--green);letter-spacing:.4px;text-decoration:none;font-size:1.12rem}.navlinks{display:flex;gap:14px;flex-wrap:wrap;align-items:center}.navlinks a{color:var(--text);text-decoration:none;font-size:.95rem;padding:7px 9px;border-radius:10px}.navlinks a:hover{background:var(--soft);color:var(--accent)}.lang-switch{display:flex;gap:8px}.lang-switch button{margin:0;padding:7px 10px;border-radius:10px;border:1px solid var(--line);background:var(--soft);color:var(--text);cursor:pointer;font-weight:bold}.lang-switch button.active{background:var(--accent);color:#020617}.hero{padding:72px 20px 52px;text-align:center}.hero h1{margin:0;font-size:clamp(2.3rem,5vw,4.3rem);color:var(--accent);line-height:1.08}.hero p{max-width:920px;margin:18px auto;color:var(--muted);font-size:1.1rem}.hero-actions{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin-top:26px}.btn{display:inline-block;background:var(--accent);color:#020617;text-decoration:none;padding:12px 18px;border-radius:12px;font-weight:800;border:none;cursor:pointer}.btn.secondary{background:transparent;color:var(--text);border:1px solid var(--line)}main{max-width:1250px;margin:auto;padding:20px}.section{background:rgba(17,24,39,.94);border:1px solid var(--line);border-radius:18px;padding:24px;margin-bottom:22px}h2,h3{color:var(--accent);margin-top:0}.muted{color:var(--muted)}.notice{border-left:5px solid var(--green);padding:14px 16px;background:rgba(0,255,170,.06);border-radius:12px}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}.card{background:#020617;border:1px solid var(--line);border-radius:16px;padding:18px}.card h3{margin-bottom:8px}.card a.project-link{display:inline-block;margin-top:12px;background:var(--green);color:#021018;text-decoration:none;padding:10px 14px;border-radius:10px;font-weight:800}.tag{display:inline-block;font-size:.78rem;border:1px solid var(--line);border-radius:999px;padding:4px 8px;color:#bae6fd;margin:4px 4px 0 0}.support-box{background:linear-gradient(135deg,rgba(56,189,248,.12),rgba(0,255,170,.09));border:1px solid var(--line);border-radius:18px;padding:24px}.support-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}.support-actions a{display:inline-block;text-decoration:none;border-radius:12px;padding:11px 16px;font-weight:800}.coffee{background:var(--gold);color:#111827}.donate{background:var(--green);color:#021018}.affiliate{background:transparent;color:var(--text);border:1px solid var(--line)}footer{text-align:center;padding:28px;color:var(--muted);border-top:1px solid var(--line)}@media(max-width:900px){.cards{grid-template-columns:1fr}.nav{align-items:flex-start;flex-direction:column}}
 </style>
 </head>
 <body>
@@ -40,23 +16,23 @@ h2,h3{color:var(--accent);margin-top:0}.muted{color:var(--muted)}
     <a class="brand" href="index.html">NaviSearch AI</a>
     <div class="navlinks">
       <a href="index.html" data-i18n="navHome">Home</a>
-      <a href="#projects" data-i18n="navProjects">Projects</a>
       <a href="voynich.html" data-i18n="navVoynich">Voynich</a>
-      <a href="#ads" data-i18n="navAds">ADS</a>
-      <a href="#warp" data-i18n="navWarp">Warp</a>
-      <a href="#logs" data-i18n="navLogs">Logs</a>
-      <a href="#about" data-i18n="navAbout">About</a>
+      <a href="ads.html" data-i18n="navAds">ADS / Tablets</a>
+      <a href="warp.html" data-i18n="navWarp">Warp</a>
+      <a href="logs.html" data-i18n="navLogs">Logs</a>
+      <a href="about.html" data-i18n="navAbout">About</a>
+      <a href="support.html" data-i18n="navSupport">Support</a>
     </div>
     <div class="lang-switch"><button id="langEN" class="active">EN</button><button id="langPL">PL</button></div>
   </div>
 </nav>
 
-<header class="hero" id="home">
+<header class="hero">
   <h1 data-i18n="heroTitle">NaviSearch AI Research Lab</h1>
   <p data-i18n="heroSubtitle">A bilingual research portal for hidden data systems, symbolic structures, ancient records, the Voynich Manuscript, AI-assisted analysis and experimental models.</p>
   <div class="hero-actions">
     <a class="btn" href="voynich.html" data-i18n="heroBtn1">Open Voynich Interpreter</a>
-    <a class="btn secondary" href="#projects" data-i18n="heroBtn2">Explore Projects</a>
+    <a class="btn secondary" href="ads.html" data-i18n="heroBtn2">Open ADS / Tablets</a>
   </div>
 </header>
 
@@ -65,57 +41,46 @@ h2,h3{color:var(--accent);margin-top:0}.muted{color:var(--muted)}
   <div class="notice" data-i18n="mission">Mission: combine human intuition, AI-assisted structural analysis and public research logs to test whether difficult manuscripts, tablets and symbolic records behave like data systems rather than ordinary text.</div>
 </section>
 
-<section class="section" id="projects">
-  <h2 data-i18n="projectsTitle">Projects</h2>
-  <p class="muted" data-i18n="projectsIntro">The portal is built as a research hub. Each project can grow into its own tool, article series and public evidence archive.</p>
-
+<section class="section">
+  <h2 data-i18n="projectsTitle">Research Areas</h2>
+  <p class="muted" data-i18n="projectsIntro">Each topic opens as its own page. The home page stays clean and readable.</p>
   <div class="cards">
     <div class="card">
       <h3>Voynich PUM/VSM</h3>
       <p data-i18n="voynichCard">Procedural reading of EVA text as token roles, visual parameters and local echo patterns.</p>
       <span class="tag">Voynich</span><span class="tag">PUM/VSM</span><span class="tag">Interpreter</span><br>
-      <a class="project-link" href="voynich.html" data-i18n="openVoynich">Open Interpreter →</a>
+      <a class="project-link" href="voynich.html" data-i18n="openVoynich">Open Voynich →</a>
     </div>
-
-    <div class="card" id="ads">
+    <div class="card">
       <h3>ADS — Ancient Data Systems</h3>
       <p data-i18n="adsCard">Tablets, seals and old records tested as structured RECORD + SUMMARY + META systems.</p>
       <span class="tag">Cuneiform</span><span class="tag">Indus</span><span class="tag">Data Systems</span><br>
-      <a class="project-link" href="#adsDetails" data-i18n="openAds">Open ADS Section →</a>
+      <a class="project-link" href="ads.html" data-i18n="openAds">Open ADS →</a>
     </div>
-
-    <div class="card" id="warp">
+    <div class="card">
       <h3>Warp Research</h3>
       <p data-i18n="warpCard">Experimental archive for technical concepts, models and research documentation connected with Warp work.</p>
       <span class="tag">Engineering</span><span class="tag">Models</span><span class="tag">Archive</span><br>
-      <a class="project-link" href="#warpDetails" data-i18n="openWarp">Open Warp Section →</a>
+      <a class="project-link" href="warp.html" data-i18n="openWarp">Open Warp →</a>
     </div>
   </div>
 </section>
 
-<section class="section" id="adsDetails">
-  <h2>ADS — Ancient Data Systems</h2>
-  <p data-i18n="adsText">ADS studies ancient records as possible data structures. The working schema is: TABLET = RECORDS + SUMMARY + META. This section will store tests on CDLI tablets, Indus seals, proto-writing systems and statistical validation.</p>
-</section>
-
-<section class="section" id="warpDetails">
-  <h2>Warp Research</h2>
-  <p data-i18n="warpText">This section is reserved for experimental technical documentation, conceptual models, build notes and safe public summaries.</p>
-</section>
-
-<section class="section" id="logs">
-  <h2 data-i18n="logsTitle">Research Logs</h2>
-  <div class="log-list">
-    <div class="log-item"><strong>2026 — NaviSearch AI launch</strong><br><span data-i18n="log1">Domain connected. Portal structure created. Voynich interpreter moved to its own page.</span></div>
-    <div class="log-item"><strong>Voynich PUM/VSM</strong><br><span data-i18n="log2">Current model: visual parameters, Y-axis gradient, token roles and local echo patterns.</span></div>
-    <div class="log-item"><strong>ADS</strong><br><span data-i18n="log3">Current model: ancient records tested as RECORDS + SUMMARY + META systems.</span></div>
+<section class="section">
+  <div class="support-box">
+    <h2 data-i18n="supportTitle">Support the research</h2>
+    <p data-i18n="supportText">This project is independent. Support links, coffee donations, affiliate tools and future monetization ideas will be placed here after review.</p>
+    <div class="support-actions">
+      <a class="coffee" href="support.html" data-i18n="coffeeBtn">Buy us a coffee</a>
+      <a class="donate" href="support.html" data-i18n="supportBtn">Support NaviSearch AI</a>
+      <a class="affiliate" href="support.html" data-i18n="brotherBtn">Brother’s monetization ideas</a>
+    </div>
   </div>
 </section>
 
-<section class="section" id="about">
-  <h2 data-i18n="aboutTitle">Author / Research</h2>
-  <p data-i18n="aboutText">Research concept and analytical direction: Tomasz Grabowski (Drako). Analytical support: Navi / ChatGPT + Gemini / Brat.</p>
-  <p class="muted" data-i18n="aboutExtra">This portal presents ongoing research. It separates hypotheses from confirmed results and treats the work as open, testable and evolving.</p>
+<section class="section">
+  <h2 data-i18n="nextTitle">Next public modules</h2>
+  <p data-i18n="nextText">ADS page, Warp page, logs page, support page and later monetization blocks will be added as separate files so the site stays clean.</p>
 </section>
 </main>
 
@@ -123,18 +88,10 @@ h2,h3{color:var(--accent);margin-top:0}.muted{color:var(--muted)}
 
 <script>
 const SITE={
-  en:{navHome:'Home',navProjects:'Projects',navVoynich:'Voynich',navAds:'ADS',navWarp:'Warp',navLogs:'Logs',navAbout:'About',heroTitle:'NaviSearch AI Research Lab',heroSubtitle:'A bilingual research portal for hidden data systems, symbolic structures, ancient records, the Voynich Manuscript, AI-assisted analysis and experimental models.',heroBtn1:'Open Voynich Interpreter',heroBtn2:'Explore Projects',mission:'Mission: combine human intuition, AI-assisted structural analysis and public research logs to test whether difficult manuscripts, tablets and symbolic records behave like data systems rather than ordinary text.',projectsTitle:'Projects',projectsIntro:'The portal is built as a research hub. Each project can grow into its own tool, article series and public evidence archive.',voynichCard:'Procedural reading of EVA text as token roles, visual parameters and local echo patterns.',adsCard:'Tablets, seals and old records tested as structured RECORD + SUMMARY + META systems.',warpCard:'Experimental archive for technical concepts, models and research documentation connected with Warp work.',openVoynich:'Open Interpreter →',openAds:'Open ADS Section →',openWarp:'Open Warp Section →',adsText:'ADS studies ancient records as possible data structures. The working schema is: TABLET = RECORDS + SUMMARY + META. This section will store tests on CDLI tablets, Indus seals, proto-writing systems and statistical validation.',warpText:'This section is reserved for experimental technical documentation, conceptual models, build notes and safe public summaries.',logsTitle:'Research Logs',log1:'Domain connected. Portal structure created. Voynich interpreter moved to its own page.',log2:'Current model: visual parameters, Y-axis gradient, token roles and local echo patterns.',log3:'Current model: ancient records tested as RECORDS + SUMMARY + META systems.',aboutTitle:'Author / Research',aboutText:'Research concept and analytical direction: Tomasz Grabowski (Drako). Analytical support: Navi / ChatGPT + Gemini / Brat.',aboutExtra:'This portal presents ongoing research. It separates hypotheses from confirmed results and treats the work as open, testable and evolving.'},
-  pl:{navHome:'Start',navProjects:'Projekty',navVoynich:'Voynich',navAds:'ADS',navWarp:'Warp',navLogs:'Dziennik',navAbout:'O projekcie',heroTitle:'NaviSearch AI — Laboratorium Badawcze',heroSubtitle:'Dwujęzyczny portal badań nad ukrytymi systemami danych, strukturami symbolicznymi, dawnymi zapisami, Manuskryptem Voynicha, analizą AI i modelami eksperymentalnymi.',heroBtn1:'Otwórz interpreter Voynicha',heroBtn2:'Zobacz projekty',mission:'Misja: połączyć intuicję człowieka, analizę strukturalną wspieraną przez AI i publiczne logi badań, aby testować, czy trudne manuskrypty, tabliczki i zapisy symboliczne zachowują się jak systemy danych, a nie zwykły tekst.',projectsTitle:'Projekty',projectsIntro:'Portal jest budowany jako centrum badań. Każdy projekt może rozrosnąć się w osobne narzędzie, serię artykułów i publiczne archiwum dowodów.',voynichCard:'Proceduralny odczyt tekstu EVA jako ról tokenów, parametrów wizualnych i lokalnych wzorców echo.',adsCard:'Tabliczki, pieczęcie i dawne zapisy testowane jako systemy RECORD + SUMMARY + META.',warpCard:'Archiwum eksperymentalne dla koncepcji technicznych, modeli i dokumentacji związanej z pracą Warp.',openVoynich:'Otwórz interpreter →',openAds:'Otwórz sekcję ADS →',openWarp:'Otwórz sekcję Warp →',adsText:'ADS bada dawne zapisy jako możliwe struktury danych. Schemat roboczy: TABLET = RECORDS + SUMMARY + META. Ta sekcja będzie przechowywać testy na tabliczkach CDLI, pieczęciach Indusu, proto-pismach i walidacji statystycznej.',warpText:'Ta sekcja jest zarezerwowana na eksperymentalną dokumentację techniczną, modele koncepcyjne, notatki budowy i bezpieczne publiczne podsumowania.',logsTitle:'Dziennik badań',log1:'Domena podłączona. Struktura portalu utworzona. Interpreter Voynicha przeniesiony na osobną stronę.',log2:'Aktualny model: parametry wizualne, gradient osi Y, role tokenów i lokalne wzorce echo.',log3:'Aktualny model: dawne zapisy testowane jako systemy RECORDS + SUMMARY + META.',aboutTitle:'Autor / badanie',aboutText:'Koncepcja badawcza i kierunek analizy: Tomasz Grabowski (Drako). Wsparcie analityczne: Navi / ChatGPT + Gemini / Brat.',aboutExtra:'Portal prezentuje badania w toku. Oddziela hipotezy od wyników potwierdzonych i traktuje pracę jako otwartą, testowalną i rozwijającą się.'}
+  en:{navHome:'Home',navVoynich:'Voynich',navAds:'ADS / Tablets',navWarp:'Warp',navLogs:'Logs',navAbout:'About',navSupport:'Support',heroTitle:'NaviSearch AI Research Lab',heroSubtitle:'A bilingual research portal for hidden data systems, symbolic structures, ancient records, the Voynich Manuscript, AI-assisted analysis and experimental models.',heroBtn1:'Open Voynich Interpreter',heroBtn2:'Open ADS / Tablets',mission:'Mission: combine human intuition, AI-assisted structural analysis and public research logs to test whether difficult manuscripts, tablets and symbolic records behave like data systems rather than ordinary text.',projectsTitle:'Research Areas',projectsIntro:'Each topic opens as its own page. The home page stays clean and readable.',voynichCard:'Procedural reading of EVA text as token roles, visual parameters and local echo patterns.',adsCard:'Tablets, seals and old records tested as structured RECORD + SUMMARY + META systems.',warpCard:'Experimental archive for technical concepts, models and research documentation connected with Warp work.',openVoynich:'Open Voynich →',openAds:'Open ADS →',openWarp:'Open Warp →',supportTitle:'Support the research',supportText:'This project is independent. Support links, coffee donations, affiliate tools and future monetization ideas will be placed here after review.',coffeeBtn:'Buy us a coffee',supportBtn:'Support NaviSearch AI',brotherBtn:'Brother’s monetization ideas',nextTitle:'Next public modules',nextText:'ADS page, Warp page, logs page, support page and later monetization blocks will be added as separate files so the site stays clean.'},
+  pl:{navHome:'Start',navVoynich:'Voynich',navAds:'ADS / Tabliczki',navWarp:'Warp',navLogs:'Dziennik',navAbout:'O projekcie',navSupport:'Wsparcie',heroTitle:'NaviSearch AI — Laboratorium Badawcze',heroSubtitle:'Dwujęzyczny portal badań nad ukrytymi systemami danych, strukturami symbolicznymi, dawnymi zapisami, Manuskryptem Voynicha, analizą AI i modelami eksperymentalnymi.',heroBtn1:'Otwórz interpreter Voynicha',heroBtn2:'Otwórz ADS / Tabliczki',mission:'Misja: połączyć intuicję człowieka, analizę strukturalną wspieraną przez AI i publiczne logi badań, aby testować, czy trudne manuskrypty, tabliczki i zapisy symboliczne zachowują się jak systemy danych, a nie zwykły tekst.',projectsTitle:'Obszary badań',projectsIntro:'Każdy temat otwiera się jako osobna strona. Strona główna zostaje czysta i czytelna.',voynichCard:'Proceduralny odczyt tekstu EVA jako ról tokenów, parametrów wizualnych i lokalnych wzorców echo.',adsCard:'Tabliczki, pieczęcie i dawne zapisy testowane jako systemy RECORD + SUMMARY + META.',warpCard:'Archiwum eksperymentalne dla koncepcji technicznych, modeli i dokumentacji związanej z pracą Warp.',openVoynich:'Otwórz Voynich →',openAds:'Otwórz ADS →',openWarp:'Otwórz Warp →',supportTitle:'Wesprzyj badania',supportText:'Projekt jest niezależny. Linki wsparcia, kawa, narzędzia afiliacyjne i pomysły monetyzacji Brata będą tutaj dodawane po sprawdzeniu.',coffeeBtn:'Postaw kawę',supportBtn:'Wesprzyj NaviSearch AI',brotherBtn:'Pomysły monetyzacji Brata',nextTitle:'Następne moduły publiczne',nextText:'Strona ADS, Warp, dziennik, wsparcie i późniejsze bloki monetyzacji będą dodawane jako osobne pliki, żeby portal pozostał czytelny.'}
 };
-function setLang(lang){
-  document.documentElement.lang=lang;
-  document.getElementById('langEN').classList.toggle('active',lang==='en');
-  document.getElementById('langPL').classList.toggle('active',lang==='pl');
-  document.querySelectorAll('[data-i18n]').forEach(el=>{
-    const key=el.getAttribute('data-i18n');
-    if(SITE[lang][key]) el.innerText=SITE[lang][key];
-  });
-}
+function setLang(lang){document.documentElement.lang=lang;document.getElementById('langEN').classList.toggle('active',lang==='en');document.getElementById('langPL').classList.toggle('active',lang==='pl');document.querySelectorAll('[data-i18n]').forEach(el=>{const key=el.getAttribute('data-i18n');if(SITE[lang][key])el.innerText=SITE[lang][key];});}
 document.getElementById('langEN').addEventListener('click',()=>setLang('en'));
 document.getElementById('langPL').addEventListener('click',()=>setLang('pl'));
 </script>
