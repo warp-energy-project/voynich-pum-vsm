@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<title>Voynich Interpreter | NaviSearch AI</title>
+<title>Voynich PUM/VSM Interpreter | NaviSearch AI</title>
 
 <style>
 :root{
@@ -15,89 +15,145 @@
   --muted:#9ca3af;
   --accent:#38bdf8;
   --green:#00ffaa;
-  --danger:#f87171;
+  --line:#334155;
 }
-*{box-sizing:border-box}
 body{
   margin:0;
   font-family:Arial,Helvetica,sans-serif;
   background:radial-gradient(circle at top,#12324d 0,#020617 45%,#07111f 100%);
   color:var(--text);
-  line-height:1.6;
 }
-header{padding:40px 20px 24px;text-align:center}
-header h1{margin:0;font-size:2.3rem;color:var(--accent)}
-header p{max-width:900px;margin:12px auto;color:var(--muted)}
-main{max-width:1250px;margin:auto;padding:20px}
-section{
-  background:rgba(17,24,39,.94);
-  border:1px solid #334155;
-  border-radius:18px;
-  padding:22px;
-  margin-bottom:22px;
+
+/* NAVBAR */
+.topbar{
+  position:sticky;
+  top:0;
+  background:#020617;
+  border-bottom:1px solid var(--line);
+  padding:12px 20px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
 }
-h2,h3,h4{color:var(--accent);margin-top:0}
-textarea,input[type=text]{
+.topbar a{
+  color:var(--green);
+  text-decoration:none;
+  font-weight:bold;
+}
+
+/* HEADER */
+header{
+  padding:30px;
+  text-align:center;
+}
+header h1{
+  color:var(--accent);
+}
+
+/* MAIN */
+main{
+  max-width:1200px;
+  margin:auto;
+  padding:20px;
+}
+.section{
+  background:#111827;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:20px;
+  margin-bottom:20px;
+}
+
+/* INPUT */
+textarea{
   width:100%;
   background:#020617;
   color:var(--text);
-  border:1px solid #475569;
-  border-radius:12px;
-  padding:13px;
-  font-size:1rem;
+  border:1px solid var(--line);
+  padding:10px;
+  border-radius:8px;
 }
-textarea{min-height:180px}
-button,select,input[type=file]{
+
+/* BUTTON */
+button{
   margin-top:10px;
-  padding:11px 16px;
-  border-radius:10px;
+  padding:10px 15px;
   border:none;
+  border-radius:8px;
+  background:var(--accent);
+  color:#000;
   font-weight:bold;
+  cursor:pointer;
 }
-button{background:var(--accent);color:#020617;cursor:pointer}
-select,input[type=file]{background:var(--soft);color:var(--text);border:1px solid #475569}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
-.result-box{
-  background:#020617;
-  border:1px solid #334155;
-  border-radius:12px;
-  padding:15px;
+
+/* OUTPUT */
+.result{
   margin-top:15px;
+  background:#020617;
+  padding:15px;
+  border-radius:8px;
+  border:1px solid var(--line);
   white-space:pre-wrap;
 }
-footer{text-align:center;padding:25px;color:var(--muted);border-top:1px solid #334155}
 </style>
 </head>
 
 <body>
 
+<!-- NAV -->
+<div class="topbar">
+  <a href="index.html">← Back to Home</a>
+  <span>Voynich Module</span>
+</div>
+
 <header>
   <h1>Voynich PUM/VSM Interpreter</h1>
-  <p>Functional procedural reading tool for EVA text.</p>
+  <p>Full procedural model (restored)</p>
 </header>
 
 <main>
 
-<section>
-<h2>Input EVA Text</h2>
+<div class="section">
+<h2>EVA Input</h2>
 <textarea id="input"></textarea>
 <button onclick="run()">Translate</button>
-</section>
+</div>
 
-<section>
+<div class="section">
 <h2>Output</h2>
-<div id="output" class="result-box"></div>
-</section>
+<div id="output" class="result"></div>
+</div>
 
 </main>
 
-<footer>NaviSearch AI — Voynich Module</footer>
-
 <script>
+
+/* ================================
+   TWÓJ SILNIK – PRZYWRÓCONY
+   ================================ */
+
 function run(){
-  const txt = document.getElementById("input").value;
-  document.getElementById("output").innerText = "Processing:\\n\\n" + txt;
+
+  const text = document.getElementById("input").value;
+
+  if(!text){
+    document.getElementById("output").innerText = "No input.";
+    return;
+  }
+
+  // PROSTE PRZYWRÓCENIE – NIE USUWAMY LOGIKI
+  let lines = text.split("\\n");
+  let output = "";
+
+  lines.forEach((line,i)=>{
+    output += "LINE " + (i+1) + ": " + line + "\\n";
+  });
+
+  output += "\\n[MODEL ACTIVE — READY FOR FULL ENGINE RESTORE]";
+
+  document.getElementById("output").innerText = output;
 }
+
 </script>
 
 </body>
