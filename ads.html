@@ -8,7 +8,7 @@
 <style>
 body{
   margin:0;
-  font-family:Arial;
+  font-family:Arial,Helvetica,sans-serif;
   background:#07111f;
   color:#e5e7eb;
 }
@@ -40,15 +40,22 @@ button{
   border:none;
   border-radius:8px;
   cursor:pointer;
+  font-weight:bold;
 }
 #imagePreview{
   max-width:100%;
   margin-top:10px;
+  border-radius:8px;
 }
 .protocol{
   white-space:pre-wrap;
   color:#00ffaa;
   font-size:0.9rem;
+}
+.status{
+  color:#facc15;
+  margin-top:10px;
+  font-weight:bold;
 }
 </style>
 </head>
@@ -144,14 +151,15 @@ Experimental output must remain PROPOSED until verified.
 
 <div class="box">
 <h3>1. Upload Tablet Image</h3>
-<input type="file" id="upload">
-<img id="imagePreview">
+<input type="file" id="upload" accept="image/*">
+<img id="imagePreview" alt="Tablet preview">
 </div>
 
 <div class="box">
 <h3>2. Detected Signs (AI Layer)</h3>
 <textarea id="detected"></textarea>
 <button onclick="simulateDetection()">Analyze Tablet</button>
+<div id="connectionStatus" class="status"></div>
 </div>
 
 <div class="box">
@@ -183,39 +191,76 @@ document.getElementById("upload").addEventListener("change", function(e){
   reader.readAsDataURL(file);
 });
 
-function simulateDetection(){
-  const fake = `
-SIGN_01 → wedge_cluster_A
-SIGN_02 → wedge_cluster_B
-SIGN_03 → unknown_pattern
-  `;
+async function simulateDetection(){
+  const statusBox = document.getElementById("connectionStatus");
+  const fileInput = document.getElementById("upload");
+  const file = fileInput.files[0];
 
-  document.getElementById("detected").value = fake;
+  if(!file){
+    alert("Upload image first");
+    return;
+  }
 
-  const ads = `
-RECORD 1:
-quantity → unknown
-object → grain?
-context → storage
+  try{
+    statusBox.innerText = "Connecting to local backend...";
 
-RECORD 2:
-quantity → 3
-object → container
-  `;
+    const formData = new FormData();
+    formData.append("file", file);
 
-  document.getElementById("ads").value = ads;
+    const uploadRes = await fetch("http://127.0.0.1:8000/api/v1/tablet/upload", {
+      method: "POST",
+      body: formData
+    });
 
-  const translation = `
-PROPOSED READING:
-Storage record of goods.
-Possible grain distribution log.
+    if(!uploadRes.ok){
+      throw new Error("Upload failed");
+    }
+
+    const uploadData = await uploadRes.json();
+
+    statusBox.innerText = "Image uploaded. Running ADS analysis...";
+
+    const analyzeRes = await fetch("http://127.0.0.1:8000/api/v1/tablet/analyze", {
+      method: "POST"
+    });
+
+    if(!analyzeRes.ok){
+      throw new Error("Analysis failed");
+    }
+
+    const analyzeData = await analyzeRes.json();
+
+    document.getElementById("detected").value =
+      JSON.stringify(analyzeData.detections, null, 2);
+
+    document.getElementById("ads").value =
+      JSON.stringify(analyzeData.ads_structure, null, 2);
+
+    document.getElementById("translation").value =
+`PROPOSED READING:
+${analyzeData.ads_structure.reading}
 
 STATUS:
-Automated analysis — verification required.
-Confidence: LOW
-  `;
+${analyzeData.warning}
 
-  document.getElementById("translation").value = translation;
+Confidence: LOW
+
+Tablet ID:
+${uploadData.tablet_id}`;
+
+    statusBox.innerText = "Backend connected. Analysis complete.";
+  }
+  catch(error){
+    statusBox.innerText = "Backend connection failed. Make sure FastAPI is running on http://127.0.0.1:8000";
+    document.getElementById("translation").value =
+`ERROR:
+${error.message}
+
+Check:
+1. PowerShell backend window is still open.
+2. Uvicorn is running on port 8000.
+3. You opened this page in the same browser/computer.`;
+  }
 }
 </script>
 
