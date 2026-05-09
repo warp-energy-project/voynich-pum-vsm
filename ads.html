@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ADS Tablet Reader</title>
+<title>ADS Tablet Reader | NaviSearch AI</title>
 
 <style>
 body{
@@ -17,12 +17,21 @@ body{
   margin:auto;
   padding:20px;
 }
+a{color:#00ffaa}
 h1{color:#38bdf8}
+h2,h3{color:#e5e7eb}
 .box{
   background:#111827;
   border:1px solid #334155;
   border-radius:12px;
-  padding:15px;
+  padding:18px;
+  margin-bottom:20px;
+}
+.notice{
+  border-left:4px solid #00ffaa;
+  background:rgba(0,255,170,0.07);
+  padding:14px;
+  border-radius:10px;
   margin-bottom:20px;
 }
 textarea{
@@ -33,6 +42,7 @@ textarea{
   border:1px solid #334155;
   border-radius:8px;
   padding:10px;
+  font-family:Consolas,monospace;
 }
 button{
   padding:10px 15px;
@@ -41,21 +51,22 @@ button{
   border-radius:8px;
   cursor:pointer;
   font-weight:bold;
+  margin-top:10px;
 }
 #imagePreview{
   max-width:100%;
   margin-top:10px;
   border-radius:8px;
-}
-.protocol{
-  white-space:pre-wrap;
-  color:#00ffaa;
-  font-size:0.9rem;
+  border:1px solid #334155;
 }
 .status{
   color:#facc15;
   margin-top:10px;
   font-weight:bold;
+}
+.small{
+  color:#9ca3af;
+  font-size:0.95rem;
 }
 </style>
 </head>
@@ -64,122 +75,51 @@ button{
 
 <div class="container">
 
-<a href="index.html" style="color:#00ffaa;">← Back</a>
+<a href="index.html">← Back to NaviSearch AI</a>
 
 <h1>ADS Tablet Reader</h1>
 
-<div class="box">
-<h3>⧉⟠AI BRIDGE PROTOCOL⟠⧉</h3>
-<div class="protocol">
-Drako → Navi → Brat → AI Network
-
-RULE:
-Do not replace system
-Only extend
-
-OUTPUT:
-PROPOSED / TESTABLE / STRUCTURED
-</div>
-</div>
-
-<div class="box">
-<h3>⧉⟠ADS AI LOGIC CORE v1.0⟠⧉</h3>
-<div class="protocol">
-STATUS: OPERATIONAL PROTOCOL
-SYSTEM: NaviSearch AI - Tablet Reader Backend
-
-FLOW:
-INPUT: image_tablet
-STEP_1: detect_regions
-STEP_2: segment_signs
-STEP_3: classify_patterns
-
-OUTPUT:
-LAYER_1 RAW: Visual coordinates and extracted glyph crops.
-LAYER_2 STRUCTURED: ADS archival format.
-LAYER_3 INTERPRETATION: Proposed reading.
-
-STRICT RULE:
-"PROPOSED READING"
-"Verification required"
-
-LEARNING:
-User correction → training_data → model_update
-
-INTEGRITY:
-Confidence below 40% → warning
-All data linked to tablet_id
-</div>
-</div>
-
-<div class="box">
-<h3>⧉⟠NAVI BRAT SYNC PROTOCOL v1.0⟠⧉</h3>
-<div class="protocol">
-STATUS: PROPOSED FOR INTEGRATION
-
-COMMUNICATION CHANNELS:
-Primary: JSON over HTTPS (REST API)
-Real-time: WebSockets for live image analysis
-Recommended backend port: 8000 or 8080
-
-TASK DIVISION:
-NAVI:
-- session management
-- ADS database
-- frontend UI/UX
-- security
-- logic check
-
-BRAT:
-- pattern recognition
-- LLM interpretation
-- global search data
-- SEO optimization
-
-DNS STRUCTURE:
-dev.navisearchai.com → experimental sandbox
-core.navisearchai.com → stable Navi core
-
-FEEDBACK LOOP:
-Every Brat analysis passes through Navi Logic Check
-before being written into the main ADS database.
-
-RULE:
-Experimental output must remain PROPOSED until verified.
-</div>
+<div class="notice">
+<strong>ADS — Ancient Data Systems</strong><br>
+This tool tests ancient tablets as structured data systems.  
+All readings are marked as <strong>PROPOSED</strong> until verified.
 </div>
 
 <div class="box">
 <h3>1. Upload Tablet Image</h3>
+<p class="small">Upload a tablet photo. The local/online backend will receive the image and return a proposed ADS structure.</p>
 <input type="file" id="upload" accept="image/*">
 <img id="imagePreview" alt="Tablet preview">
 </div>
 
 <div class="box">
-<h3>2. Detected Signs (AI Layer)</h3>
-<textarea id="detected"></textarea>
-<button onclick="simulateDetection()">Analyze Tablet</button>
+<h3>2. Detected Signs</h3>
+<textarea id="detected" placeholder="Detected signs will appear here..."></textarea>
+<button onclick="analyzeTablet()">Analyze Tablet</button>
 <div id="connectionStatus" class="status"></div>
 </div>
 
 <div class="box">
 <h3>3. ADS Structure</h3>
-<textarea id="ads"></textarea>
+<textarea id="ads" placeholder="ADS structure will appear here..."></textarea>
 </div>
 
 <div class="box">
 <h3>4. Proposed Reading</h3>
-<textarea id="translation"></textarea>
+<textarea id="translation" placeholder="Proposed reading will appear here..."></textarea>
 </div>
 
 <div class="box">
-<h3>5. Correction (Training Data)</h3>
-<textarea id="correction"></textarea>
+<h3>5. Human Correction / Training Data</h3>
+<p class="small">Use this field later to correct AI output. Corrections will become training data.</p>
+<textarea id="correction" placeholder="Write correction here..."></textarea>
 </div>
 
 </div>
 
 <script>
+const API_BASE = "https://poem-cornmeal-chowder.ngrok-free.dev";
+
 document.getElementById("upload").addEventListener("change", function(e){
   const file = e.target.files[0];
   if(!file) return;
@@ -191,7 +131,7 @@ document.getElementById("upload").addEventListener("change", function(e){
   reader.readAsDataURL(file);
 });
 
-async function simulateDetection(){
+async function analyzeTablet(){
   const statusBox = document.getElementById("connectionStatus");
   const fileInput = document.getElementById("upload");
   const file = fileInput.files[0];
@@ -202,13 +142,16 @@ async function simulateDetection(){
   }
 
   try{
-    statusBox.innerText = "Connecting to local backend...";
+    statusBox.innerText = "Connecting to ADS backend...";
 
     const formData = new FormData();
     formData.append("file", file);
 
-    const uploadRes = await fetch("https://poem-cornmeal-chowder.ngrok-free.dev/api/v1/tablet/upload", {
+    const uploadRes = await fetch(`${API_BASE}/api/v1/tablet/upload`, {
       method: "POST",
+      headers: {
+        "ngrok-skip-browser-warning": "true"
+      },
       body: formData
     });
 
@@ -218,10 +161,13 @@ async function simulateDetection(){
 
     const uploadData = await uploadRes.json();
 
-    statusBox.innerText = "Image uploaded. Running ADS analysis...";
+    statusBox.innerText = "Image uploaded. Running analysis...";
 
-    const analyzeRes = await fetch("https://poem-cornmeal-chowder.ngrok-free.dev/api/v1/tablet/analyze", {
-      method: "POST"
+    const analyzeRes = await fetch(`${API_BASE}/api/v1/tablet/analyze`, {
+      method: "POST",
+      headers: {
+        "ngrok-skip-browser-warning": "true"
+      }
     });
 
     if(!analyzeRes.ok){
@@ -243,23 +189,26 @@ ${analyzeData.ads_structure.reading}
 STATUS:
 ${analyzeData.warning}
 
-Confidence: LOW
+CONFIDENCE:
+LOW / EXPERIMENTAL
 
-Tablet ID:
+TABLET ID:
 ${uploadData.tablet_id}`;
 
     statusBox.innerText = "Backend connected. Analysis complete.";
   }
   catch(error){
-    statusBox.innerText = "Backend connection failed. Make sure FastAPI is running on http://127.0.0.1:8000";
+    statusBox.innerText = "Backend connection failed. Check ngrok and FastAPI are running.";
+
     document.getElementById("translation").value =
 `ERROR:
 ${error.message}
 
-Check:
-1. PowerShell backend window is still open.
-2. Uvicorn is running on port 8000.
-3. You opened this page in the same browser/computer.`;
+CHECK:
+1. FastAPI backend is running.
+2. ngrok tunnel is running.
+3. API_BASE in ads.html is current:
+${API_BASE}`;
   }
 }
 </script>
