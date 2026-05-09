@@ -1,3 +1,104 @@
-<h1>Voynich Project</h1>
-<p>Test page</p>
-<a href="index.html">Back to Home</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Voynich Interpreter | NaviSearch AI</title>
+
+<style>
+:root{
+  --bg:#07111f;
+  --card:#111827;
+  --soft:#1f2937;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --accent:#38bdf8;
+  --green:#00ffaa;
+  --danger:#f87171;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:radial-gradient(circle at top,#12324d 0,#020617 45%,#07111f 100%);
+  color:var(--text);
+  line-height:1.6;
+}
+header{padding:40px 20px 24px;text-align:center}
+header h1{margin:0;font-size:2.3rem;color:var(--accent)}
+header p{max-width:900px;margin:12px auto;color:var(--muted)}
+main{max-width:1250px;margin:auto;padding:20px}
+section{
+  background:rgba(17,24,39,.94);
+  border:1px solid #334155;
+  border-radius:18px;
+  padding:22px;
+  margin-bottom:22px;
+}
+h2,h3,h4{color:var(--accent);margin-top:0}
+textarea,input[type=text]{
+  width:100%;
+  background:#020617;
+  color:var(--text);
+  border:1px solid #475569;
+  border-radius:12px;
+  padding:13px;
+  font-size:1rem;
+}
+textarea{min-height:180px}
+button,select,input[type=file]{
+  margin-top:10px;
+  padding:11px 16px;
+  border-radius:10px;
+  border:none;
+  font-weight:bold;
+}
+button{background:var(--accent);color:#020617;cursor:pointer}
+select,input[type=file]{background:var(--soft);color:var(--text);border:1px solid #475569}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+.result-box{
+  background:#020617;
+  border:1px solid #334155;
+  border-radius:12px;
+  padding:15px;
+  margin-top:15px;
+  white-space:pre-wrap;
+}
+footer{text-align:center;padding:25px;color:var(--muted);border-top:1px solid #334155}
+</style>
+</head>
+
+<body>
+
+<header>
+  <h1>Voynich PUM/VSM Interpreter</h1>
+  <p>Functional procedural reading tool for EVA text.</p>
+</header>
+
+<main>
+
+<section>
+<h2>Input EVA Text</h2>
+<textarea id="input"></textarea>
+<button onclick="run()">Translate</button>
+</section>
+
+<section>
+<h2>Output</h2>
+<div id="output" class="result-box"></div>
+</section>
+
+</main>
+
+<footer>NaviSearch AI — Voynich Module</footer>
+
+<script>
+function run(){
+  const txt = document.getElementById("input").value;
+  document.getElementById("output").innerText = "Processing:\\n\\n" + txt;
+}
+</script>
+
+</body>
+</html>
