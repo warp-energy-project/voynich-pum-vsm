@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ADS Tablet Reader | NaviSearch AI</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#07111f;
+  color:#e5e7eb;
+}
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:20px;
+}
+a{color:#00ffaa}
+h1{color:#38bdf8}
+h2,h3{color:#e5e7eb}
+.box{
+  background:#111827;
+  border:1px solid #334155;
+  border-radius:12px;
+  padding:18px;
+  margin-bottom:20px;
+}
+.notice{
+  border-left:4px solid #00ffaa;
+  background:rgba(0,255,170,0.07);
+  padding:14px;
+  border-radius:10px;
+  margin-bottom:20px;
+}
+textarea{
+  width:100%;
+  min-height:120px;
+  background:#020617;
+  color:#fff;
+  border:1px solid #334155;
+  border-radius:8px;
+  padding:10px;
+  font-family:Consolas,monospace;
+}
+button{
+  padding:10px 15px;
+  background:#38bdf8;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+  margin-top:10px;
+}
+#imagePreview{
+  max-width:100%;
+  margin-top:10px;
+  border-radius:8px;
+  border:1px solid #334155;
+}
+.status{
+  color:#facc15;
+  margin-top:10px;
+  font-weight:bold;
+}
+.small{
+  color:#9ca3af;
+  font-size:0.95rem;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<a href="index.html">← Back to NaviSearch AI</a>
+
+<h1>ADS Tablet Reader</h1>
+
+<div class="notice">
+<strong>ADS — Ancient Data Systems</strong><br>
+This tool tests ancient tablets as structured data systems.  
+All readings are marked as <strong>PROPOSED</strong> until verified.
+</div>
+
+<div class="box">
+<h3>1. Upload Tablet Image</h3>
+<p class="small">Upload a tablet photo. The local/online backend will receive the image and return a proposed ADS structure.</p>
+<input type="file" id="upload" accept="image/*">
+<img id="imagePreview" alt="Tablet preview">
+</div>
+
+<div class="box">
+<h3>2. Detected Signs</h3>
+<textarea id="detected" placeholder="Detected signs will appear here..."></textarea>
+<button onclick="analyzeTablet()">Analyze Tablet</button>
+<div id="connectionStatus" class="status"></div>
+</div>
+
+<div class="box">
+<h3>3. ADS Structure</h3>
+<textarea id="ads" placeholder="ADS structure will appear here..."></textarea>
+</div>
+
+<div class="box">
+<h3>4. Proposed Reading</h3>
+<textarea id="translation" placeholder="Proposed reading will appear here..."></textarea>
+</div>
+
+<div class="box">
+<h3>5. Human Correction / Training Data</h3>
+<p class="small">Use this field later to correct AI output. Corrections will become training data.</p>
+<textarea id="correction" placeholder="Write correction here..."></textarea>
+</div>
+
+</div>
+
+<script>
+const API_BASE = "https://poem-cornmeal-chowder.ngrok-free.dev";
+
+document.getElementById("upload").addEventListener("change", function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = function(){
+    document.getElementById("imagePreview").src = reader.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+async function analyzeTablet(){
+  const statusBox = document.getElementById("connectionStatus");
+  const fileInput = document.getElementById("upload");
+  const file = fileInput.files[0];
+
+  if(!file){
+    alert("Upload image first");
+    return;
+  }
+
+  try{
+    statusBox.innerText = "Connecting to ADS backend...";
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const uploadRes = await fetch(`${API_BASE}/api/v1/tablet/upload`, {
+      method: "POST",
+      headers: {
+        "ngrok-skip-browser-warning": "true"
+      },
+      body: formData
+    });
+
+    if(!uploadRes.ok){
+      throw new Error("Upload failed");
+    }
+
+    const uploadData = await uploadRes.json();
+
+    statusBox.innerText = "Image uploaded. Running analysis...";
+
+    const analyzeRes = await fetch(`${API_BASE}/api/v1/tablet/analyze`, {
+      method: "POST",
+      headers: {
+        "ngrok-skip-browser-warning": "true"
+      }
+    });
+
+    if(!analyzeRes.ok){
+      throw new Error("Analysis failed");
+    }
+
+    const analyzeData = await analyzeRes.json();
+
+    document.getElementById("detected").value =
+      JSON.stringify(analyzeData.detections, null, 2);
+
+    document.getElementById("ads").value =
+      JSON.stringify(analyzeData.ads_structure, null, 2);
+
+    document.getElementById("translation").value =
+`PROPOSED READING:
+${analyzeData.ads_structure.reading}
+
+STATUS:
+${analyzeData.warning}
+
+CONFIDENCE:
+LOW / EXPERIMENTAL
+
+TABLET ID:
+${uploadData.tablet_id}`;
+
+    statusBox.innerText = "Backend connected. Analysis complete.";
+  }
+  catch(error){
+    statusBox.innerText = "Backend connection failed. Check ngrok and FastAPI are running.";
+
+    document.getElementById("translation").value =
+`ERROR:
+${error.message}
+
+CHECK:
+1. FastAPI backend is running.
+2. ngrok tunnel is running.
+3. API_BASE in ads.html is current:
+${API_BASE}`;
+  }
+}
+</script>
+
+</body>
+</html>
