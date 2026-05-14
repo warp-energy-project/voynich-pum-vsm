@@ -1,42 +1,49 @@
 const fs = require("fs");
 
+function insertAfter(html, target, content){
+  if(!html.includes(target)){
+    console.log("❌ Target not found");
+    return html;
+  }
+  return html.replace(target, target + "\n" + content);
+}
+
+function applyPatch({file, id, target, content}){
+
+  let html = fs.readFileSync(file, "utf8");
+
+  if(html.includes(id)){
+    console.log("⚠️ Patch already exists:", id);
+    return;
+  }
+
+  html = insertAfter(html, target, content);
+
+  fs.writeFileSync(file, html);
+
+  console.log("✅ Patch applied:", id);
+}
+
 const PATCHES = {
 
-  TEST_PATCH: {
+  ADD_BUTTON_UNDER_RUN: {
     file: "voynich.html",
-    marker: "<!-- NAVI_PATCH_TEST -->",
+    id: "PATCH_BUTTON_UNDER_RUN",
+    target: '<button id="runButton" type="button">Translate / Read</button>',
     content: `
-<!-- NAVI_PATCH_TEST -->
-<div style="padding:10px;background:#0f172a;border:1px solid #334155;margin-top:10px;">
-  <strong>NAVI PATCH TEST OK</strong>
-</div>
+<!-- PATCH_BUTTON_UNDER_RUN -->
+<button style="margin-top:10px;background:#00ffaa;color:black;padding:8px 12px;border-radius:6px;border:none;">
+  NEW NAVI BUTTON
+</button>
 `
   }
 
 };
 
-function applyPatch(patchName){
-  const patch = PATCHES[patchName];
+const name = process.argv[2];
 
-  if(!patch){
-    console.log("❌ Patch not found:", patchName);
-    return;
-  }
-
-  let html = fs.readFileSync(patch.file, "utf8");
-
-  if(html.includes(patch.marker)){
-    console.log("⚠️ Patch already exists:", patchName);
-    return;
-  }
-
-  // wstawiamy przed </body>
-  html = html.replace("</body>", patch.content + "\n</body>");
-
-  fs.writeFileSync(patch.file, html);
-
-  console.log("✅ Patch applied:", patchName);
+if(!PATCHES[name]){
+  console.log("❌ Patch not found");
+} else {
+  applyPatch(PATCHES[name]);
 }
-
-const patchName = process.argv[2];
-applyPatch(patchName);
