@@ -923,3 +923,55 @@ document.addEventListener("DOMContentLoaded",()=>{
 
 </body>
 </html>
+
+<script>
+function prevFolio(){
+  const sel = document.getElementById("folioSelector");
+  if(sel.selectedIndex > 1){
+    sel.selectedIndex--;
+    loadSelectedFolio();
+  }
+}
+
+function nextFolio(){
+  const sel = document.getElementById("folioSelector");
+  if(sel.selectedIndex < sel.options.length - 1){
+    sel.selectedIndex++;
+    loadSelectedFolio();
+  }
+}
+
+function quickReading(){
+  const lang = getLang();
+  const input = document.getElementById("evaInput").value.trim();
+  if(!input) return "";
+
+  const lines = splitLines(input);
+  const allItems = lines.flatMap(line=>splitTokens(line));
+  const c = countRoles(allItems);
+
+  if(lang==="pl"){
+    return "SZYBKI ODCZYT:\nMaterial → operacja → stan → wynik\n\nProcesy: " + (c.PROCESS + c.HEAVY) +
+    "\nStan: " + c.STATE +
+    "\nPrzepływ: " + c.FLOW +
+    "\nWynik: " + c.RESULT +
+    "\nZamknięcia: " + c.END;
+  }
+
+  return "QUICK READING:\nMaterial → operation → state → result\n\nProcess: " + (c.PROCESS + c.HEAVY) +
+  "\nState: " + c.STATE +
+  "\nFlow: " + c.FLOW +
+  "\nResult: " + c.RESULT +
+  "\nClosures: " + c.END;
+}
+
+const originalInterpret = interpretText;
+
+interpretText = function(){
+  originalInterpret();
+  const quick = quickReading();
+  const el = document.getElementById("quickOutput");
+  if(el) el.innerText = quick;
+}
+</script>
+
