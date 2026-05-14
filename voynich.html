@@ -164,7 +164,16 @@ footer{text-align:center;padding:25px;color:var(--muted);border-top:1px solid #3
 <section>
   <h2 id="workspaceTitle">Folio Workspace</h2>
 
-  <div class="grid">
+
+
+
+<!-- PATCH_HEADER_BOX -->
+<div style="background:#00ffaa;padding:10px;border-radius:8px;color:black;margin:10px 0;">
+  NAVI SYSTEM ACTIVE 🔥
+</div>
+<!-- END_PATCH_HEADER_BOX -->
+
+<div class="grid">
     <div class="image-panel">
       <h3 id="folioSelectTitle">Voynich Folio Selector</h3>
 
@@ -936,6 +945,31 @@ document.addEventListener("DOMContentLoaded",()=>{
 <div style="padding:10px;background:#0f172a;border:1px solid #334155;margin-top:10px;">
   <strong>NAVI PATCH TEST OK</strong>
 </div>
+
+
+<!-- AUTO_NAVI_PANEL -->
+<div id="naviPanel" style="position:fixed;bottom:10px;right:10px;background:#020617;border:1px solid #00ffaa;padding:10px;border-radius:8px;font-size:12px;color:#00ffaa;z-index:9999;">
+  NAVI AUTO PATCH<br>
+  Status: active<br>
+  Mode: dev bridge
+</div>
+
+<script>
+window.navi = window.navi || {};
+window.navi.snapshot = function(){
+  return {
+    time: new Date().toISOString(),
+    url: location.href,
+    title: document.title,
+    buttons: document.querySelectorAll("button").length,
+    textareas: document.querySelectorAll("textarea").length,
+    sections: document.querySelectorAll("section").length,
+    links: document.querySelectorAll("a").length
+  };
+};
+console.log("NAVI AUTO PATCH ACTIVE", window.navi.snapshot());
+</script>
+<!-- END_AUTO_NAVI_PANEL -->
 
 </body>
 </html>
