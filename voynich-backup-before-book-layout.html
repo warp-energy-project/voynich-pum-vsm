@@ -224,10 +224,6 @@ footer{text-align:center;padding:25px;color:var(--muted);border-top:1px solid #3
       <h3 id="inputTitle">1. EVA Raw Input</h3>
       <textarea id="evaInput"></textarea>
       <button id="runButton" type="button">Translate / Read</button>
-<div class="result-box">
-  <h3>Quick Reading (Default)</h3>
-  <div id="quickOutput"></div>
-</div>
     </div>
   </div>
 </section>
@@ -925,63 +921,5 @@ document.addEventListener("DOMContentLoaded",()=>{
 });
 </script>
 
-
-<!-- NAVI_PATCH_TEST -->
-<div style="padding:10px;background:#0f172a;border:1px solid #334155;margin-top:10px;">
-  <strong>NAVI PATCH TEST OK</strong>
-</div>
-
 </body>
 </html>
-
-<script>
-function prevFolio(){
-  const sel = document.getElementById("folioSelector");
-  if(sel.selectedIndex > 1){
-    sel.selectedIndex--;
-    loadSelectedFolio();
-  }
-}
-
-function nextFolio(){
-  const sel = document.getElementById("folioSelector");
-  if(sel.selectedIndex < sel.options.length - 1){
-    sel.selectedIndex++;
-    loadSelectedFolio();
-  }
-}
-
-function quickReading(){
-  const lang = getLang();
-  const input = document.getElementById("evaInput").value.trim();
-  if(!input) return "";
-
-  const lines = splitLines(input);
-  const allItems = lines.flatMap(line=>splitTokens(line));
-  const c = countRoles(allItems);
-
-  if(lang==="pl"){
-    return "SZYBKI ODCZYT:\nMaterial → operacja → stan → wynik\n\nProcesy: " + (c.PROCESS + c.HEAVY) +
-    "\nStan: " + c.STATE +
-    "\nPrzepływ: " + c.FLOW +
-    "\nWynik: " + c.RESULT +
-    "\nZamknięcia: " + c.END;
-  }
-
-  return "QUICK READING:\nMaterial → operation → state → result\n\nProcess: " + (c.PROCESS + c.HEAVY) +
-  "\nState: " + c.STATE +
-  "\nFlow: " + c.FLOW +
-  "\nResult: " + c.RESULT +
-  "\nClosures: " + c.END;
-}
-
-const originalInterpret = interpretText;
-
-interpretText = function(){
-  originalInterpret();
-  const quick = quickReading();
-  const el = document.getElementById("quickOutput");
-  if(el) el.innerText = quick;
-}
-</script>
-
