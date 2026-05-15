@@ -1025,3 +1025,28 @@ interpretText = function(){
 }
 </script>
 
+
+<!-- NAVI PATCH_004 START -->
+<script>
+(function(){
+  const original = interpretText;
+
+  interpretText = function(){
+    original();
+
+    const input = document.getElementById("evaInput").value.trim();
+    if(!input) return;
+
+    const lines = input.split(/\n+/);
+    const quick = document.getElementById("quickOutput");
+
+    if(quick){
+      quick.innerText = "NAVI PATCH ACTIVE\n\nLines: " + lines.length;
+    }
+  };
+
+  console.log("PATCH_004 OK");
+})();
+</script>
+<!-- NAVI PATCH_004 END -->
+
