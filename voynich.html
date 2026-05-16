@@ -180,6 +180,7 @@ footer{text-align:center;padding:25px;color:var(--muted);border-top:1px solid #3
       <div class="controls">
         <select id="folioSelector"></select>
         <button type="button" id="loadFolioButton">Load selected folio</button>
+document.getElementById("folioSelector").addEventListener("change", loadSelectedFolio);
       </div>
 
       <p id="folioInfo" class="small-note"></p>
@@ -315,6 +316,7 @@ The aim is practical: paste EVA text from any page, select visual context, and r
     workspaceTitle:"Folio Workspace",
     folioSelectTitle:"Voynich Folio Selector",
     loadFolioButton:"Load selected folio",
+document.getElementById("folioSelector").addEventListener("change", loadSelectedFolio);
     imageTitle:"Folio Image",
     stableModeText:"Stable mode: use manual upload, screenshot paste, or direct image URL. The translator reads EVA text, not pixels.",
     pasteHint:"Click inside the black image area and press Ctrl+V to paste a screenshot.",
@@ -356,6 +358,7 @@ Cel jest praktyczny: wklejasz tekst EVA z dowolnej strony, wybierasz kontekst wi
     workspaceTitle:"Obszar pracy folio",
     folioSelectTitle:"Wybór folio Voynicha",
     loadFolioButton:"Załaduj wybrane folio",
+document.getElementById("folioSelector").addEventListener("change", loadSelectedFolio);
     imageTitle:"Obraz folio",
     stableModeText:"Tryb stabilny: upload ręczny, screenshot Ctrl+V albo bezpośredni URL obrazu. Translator czyta tekst EVA, nie piksele.",
     pasteHint:"Kliknij w czarne pole obrazu i naciśnij Ctrl+V, aby wkleić screenshot.",
@@ -670,6 +673,7 @@ function setLanguage(){
   document.getElementById("workspaceTitle").innerText=t.workspaceTitle;
   document.getElementById("folioSelectTitle").innerText=t.folioSelectTitle;
   document.getElementById("loadFolioButton").innerText=t.loadFolioButton;
+document.getElementById("folioSelector").addEventListener("change", loadSelectedFolio);
   document.getElementById("imageTitle").innerText=t.imageTitle;
   document.getElementById("stableModeText").innerText=t.stableModeText;
   document.getElementById("pasteHint").innerText=t.pasteHint;
@@ -741,7 +745,34 @@ function buildLineOutput(lines, lang, ctx){
   });
   return html || (lang==="pl" ? "Brak tekstu EVA." : "No EVA text.");
 }
+// ================= AUTO PAGE LINK =================
+function loadVoynichPage(pageId) {
+    console.log("[NAVI] Loading page:", pageId);
 
+    // MAPA przykładowa (na start)
+    const pageMap = {
+        "f1r": "qokedy qokedy chedy",
+        "f1v": "chedy chedy shol",
+        "f2r": "qokedy shol shol",
+        "f2v": "chedy qokedy dy"
+    };
+
+    if (!pageMap[pageId]) {
+        console.warn("[NAVI] No EVA for page:", pageId);
+        return;
+    }
+
+    const evaText = pageMap[pageId];
+
+    // wpisz EVA do inputa
+    const input = document.getElementById("inputText");
+    if (input) input.value = evaText;
+
+    // uruchom interpretację
+    if (typeof interpretText === "function") {
+        interpretText();
+    }
+}
 function interpretText(){
   const lang=getLang();
   const ctx=getContext();
@@ -916,6 +947,7 @@ document.addEventListener("DOMContentLoaded",()=>{
   });
 
   document.getElementById("loadFolioButton").addEventListener("click",loadSelectedFolio);
+document.getElementById("folioSelector").addEventListener("change", loadSelectedFolio);
   document.getElementById("loadImageUrlButton").addEventListener("click",loadImageFromUrl);
   document.getElementById("runButton").addEventListener("click",interpretText);
   document.getElementById("visualContext").addEventListener("change",interpretText);
@@ -1043,10 +1075,4 @@ interpretText = function(){
     if(quick){
       quick.innerText = "NAVI PATCH ACTIVE\n\nLines: " + lines.length;
     }
-  };
-
-  console.log("PATCH_004 OK");
-})();
-</script>
-<!-- NAVI PATCH_004 END -->
-
+ 
