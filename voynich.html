@@ -50,7 +50,37 @@ button{
 </head>
 
 <body>
+<div style="max-width:1000px;margin:30px auto;text-align:center;">
+<h2>Voynich Manuscript Viewer</h2>
 
+<img id="voynichImg"
+src="assets/voynich/pages/page-001.jpg"
+style="max-width:100%;max-height:80vh;background:white;border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,0.6);"/>
+
+<div style="margin-top:15px;">
+<button onclick="prevPage()">◀</button>
+<span id="pageNum"> 1 / 214 </span>
+<button onclick="nextPage()">▶</button>
+</div>
+</div>
+
+<script>
+let p=1;
+
+function show(){
+let n=String(p).padStart(3,'0');
+document.getElementById("voynichImg").src="assets/voynich/pages/page-"+n+".jpg";
+document.getElementById("pageNum").innerText=" "+p+" / 214 ";
+}
+
+function nextPage(){
+if(p<214){p++;show();}
+}
+
+function prevPage(){
+if(p>1){p--;show();}
+}
+</script>
 <h2 style="text-align:center;">Voynich Manuscript Viewer</h2>
 
 <div id="viewer" class="viewer"></div>
